@@ -1,0 +1,52 @@
+[
+    {
+        "caretX": 29,
+        "caretY": 86,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 1,
+        "topLine": 74
+    },
+    {
+        "caretX": 36,
+        "caretY": 259,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC.cxx",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 0,
+        "topLine": 250
+    },
+    {
+        "caretX": 9,
+        "caretY": 5,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Parse.cxx",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 4,
+        "topLine": 25
+    },
+    {
+        "caretX": 45,
+        "caretY": 93,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_IO.h",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 3,
+        "topLine": 80
+    },
+    {
+        "caretX": 36,
+        "caretY": 75,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Base.h",
+        "focused": true,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 2,
+        "topLine": 58
+    }
+]

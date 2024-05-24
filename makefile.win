@@ -1,0 +1,41 @@
+# Project: CPPJSON
+# Makefile created by Red Panda C++ 2.24
+
+CPP      = clang++.exe
+CC       = clang.exe
+WINDRES  = windres.exe
+RES      = CPPJSON_private.res
+OBJ      = main.o JSON_ACC.o JSON_Parse.o $(RES)
+LINKOBJ  = main.o JSON_ACC.o JSON_Parse.o CPPJSON_private.res
+CLEANOBJ  =  main.o JSON_ACC.o JSON_Parse.o  CPPJSON_private.res CPPJSON.exe
+LIBS     =  -L"D:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/lib" -L"D:/RedPanda-CPP/llvm-mingw-ucrt/lib" -L"D:/RedPanda-CPP/llvm-mingw-ucrt/lib/libscanbuild" -L"D:/RedPanda-CPP/llvm-mingw-ucrt/lib/libear" -L"D:/RedPanda-CPP/llvm-mingw-ucrt/lib" -fstack-protector-all -s -static
+INCS     =  -I"D:/RedPanda-CPP/llvm-mingw-ucrt/include" -I"D:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/include" 
+CXXINCS  =  -I"D:/RedPanda-CPP/llvm-mingw-ucrt/include" -I"D:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/include" 
+BIN      = CPPJSON.exe
+CXXFLAGS = $(CXXINCS)  -pedantic -msse4.2 -O2 -std=c++2b -pipe -Wall -Wextra
+CFLAGS   = $(INCS)  -std=c17 -pedantic -msse4.2 -O2 -pipe -Wall -Wextra
+RM       = del /q /f
+WINDRESFLAGS  = 
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	-$(RM) $(CLEANOBJ) > NUL 2>&1
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+main.o: main.cpp JSON_IO.h JSON_Base.h
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS) 
+
+JSON_ACC.o: JSON_ACC.cxx JSON_Base.h
+	$(CPP) -c JSON_ACC.cxx -o JSON_ACC.o $(CXXFLAGS) 
+
+JSON_Parse.o: JSON_Parse.cxx JSON_Base.h
+	$(CPP) -c JSON_Parse.cxx -o JSON_Parse.o $(CXXFLAGS) 
+
+CPPJSON_private.res: CPPJSON_private.rc 
+	$(WINDRES) -i CPPJSON_private.rc --input-format=rc -o CPPJSON_private.res -O coff $(WINDRESFLAGS) 
+
