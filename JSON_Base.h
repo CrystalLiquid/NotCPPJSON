@@ -14,6 +14,7 @@
 #include <thread>
 #include <cmath>
 #include <cstdlib>
+#include <deque>
 #pragma once
 enum data_type {
 	temp_digit = -2,
@@ -65,16 +66,16 @@ struct JSON_ACC {
 		Father = nullptr;
 		Child.clear();
 	}
-	JSON_ACC* Father;
-	std::vector<JSON_ACC*> Child;//24
+	JSON_ACC* Father{nullptr};//是的，你不设置就跳内存页，太喜欢兼容C语言啦！
+	std::vector<JSON_ACC*> Child{nullptr};//24
 };
-using JSON_POOL = std::vector<JSON_ACC>;
+using JSON_POOL =  std::vector<JSON_ACC>;
 
 int PairList_Expect_Pool(std::string& data, JSON_POOL&map, JSON_ACC& current_root, int beginpos);
 int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, JSON_ACC& current_root, int beginpos);
-int JSON_Parse_Pool(JSON_POOL & map, std::string& data);
-int initialize(std::vector<JSON_ACC> &map, std::string&data);
+int JSON_Parse_Pool(JSON_POOL & map, JSON_ACC& root, std::string& data);
 
+int JSON_Parse_Memcpy_Pool(JSON_POOL & map, JSON_ACC&root, std::string& data);
 
 #endif
 #define PR_SUCCESSFUL_RESULT 1

@@ -8,13 +8,19 @@
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-
-void IsValidMap_VectorP(JSON_ACC& map, int Counter) {
-	for (int i = 0; i != (int)map.Child.size(); i++) {
+void SeeChild(JSON_ACC& root) {
+	for (int i = 0; i < (int)root.Child.size(); i++) {
+		JSON_ACC& child = *(root.Child.at(i));
+		std::cout << child.title << " : " << child.Child.size() << std::endl;
+		SeeChild(child);
+	}
+}
+void IsValidMap_VectorP(JSON_ACC& root, int Counter) {
+	for (int i = 0; i != (int)root.Child.size(); i++) {
 		for (int t = 0; t <= Counter; t++) {
 			std::cout << "    ";
 		}
-		JSON_ACC& child = *(map.Child.at(i));
+		JSON_ACC& child = *(root.Child.at(i));
 		//map.Child.at(i).type << " | " <<
 		std::cout << child.title << " : " << child.content << "    " << Counter << "\n";
 		//if (map.Child.at(i).title.empty()) {
@@ -77,20 +83,31 @@ int main() {
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
 	JSON_POOL map;
-	JSON_ACC buff;
-	map.emplace_back(buff);
+	JSON_ACC rt;
+	map.emplace_back(rt);
 	FILE.READ(path, data);
 	//std::cout << data << "\n\n\n\n";
-	high_resolution_clock::time_point Stime = high_resolution_clock::now();
+	//high_resolution_clock::time_point Stime = high_resolution_clock::now();
 	//JSON_Parse(map, data);
-	JSON_Parse_Pool(map, data);
-	high_resolution_clock::time_point Etime = high_resolution_clock::now();
-	std::cout << "JSONParse Finish\n";
-	milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
-
-	//for (int i = 0; i < (int)map.size(); i++) {
-	//	std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content << "\n";
+	JSON_Parse_Pool(map, rt, data);
+	//try {
+	//} catch (std::bad_alloc) {
+	//	std::cout << "ERROR\n";
 	//}
+	//high_resolution_clock::time_point Etime = high_resolution_clock::now();
+	std::cout << "JSONParse Finish\n";
+	//milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
+
+	for (int i = 0; i < (int)map.size(); i++) {
+		//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
+		std::cout << map.at(i).title << ":" << map.at(i).content;
+		if (map.at(i).Father != nullptr) {
+			std::cout << "       father: " << map.at(i).Father->title << "\n";
+		}
+
+	}
+	//SeeChild(rt);
+	//IsValidMap_VectorP(rt, 0);
 	/*
 	  json_acc::JSON_MAP_POOL mapp;
 
@@ -104,7 +121,7 @@ int main() {
 
 	std::cout << "DataSize:" << data.size() << "\n";
 	std::cout << "MapSize:" << map.size() << "\n";
-	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << "\n";
+	//std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << "\n";
 	return 0;
 }
 #endif

@@ -16,18 +16,18 @@ int PairList_Expect(std::string& data, JSON& currentm, int beginpos = 0) {
 	int layer = 0;
 	if (data[beginpos] == LayerS) {
 		//std::cout << "++\n";
-		layer++;
+		++layer;
 	}
 	for (i = beginpos + 1; layer != 0; i++) {
 		//std::cout << data[i];
 		if (data[i] == LayerS) {
 			//std::cout << "++\n";
-			layer++;
+			++layer;
 		}
 		//std::cout << layer << "\n";
 		if (data[i] == LayerE) {
 			//std::cout << "--\n";
-			layer--;
+			--layer;
 		}
 		if (data[i] == ConS) {
 			for (t = i; data[t] != ConE && data[t] != LayerS; t--);
