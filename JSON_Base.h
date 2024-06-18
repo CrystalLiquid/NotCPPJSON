@@ -32,7 +32,7 @@ enum data_type {
 };
 #ifndef __BASE_H_
 #define __BASE_H_
-
+#include <any>
 typedef struct JSON {
   public:
 	std::string title;//32
@@ -44,21 +44,124 @@ typedef struct JSON {
 		type = notype;
 		Child.clear();
 	}
+	template<typename T>
+	T get_val() {
+		switch (this->type) {
+			case notype:
+				return std::string("");
+				break;
+			case str:
+				return this->content;
+				break;
+			case digit_int:
+				return std::stoi(this->content);
+				break;
+			case digit_double:
+				return std::stod(this->content);
+				break;
+			case dimension_list:
+				return this->Child;
+				break;
+			case pair_list:
+				return this->Child;
+				break;
+			case dimension_void:
+				return std::string("[]");
+				break;
+			case pair_list_void:
+				return std::string("{}");
+				break;
+			case bool_t:
+				if (content == "true") {
+					return true;
+				}
+				if (content == "false") {
+					return false;
+				}
+				break;
+			case null:
+				return std::string("null");
+				break;
+			default:
+				//TODO
+				break;
+		}
+	}
 	std::vector<JSON> Child;//24
 }*pJSON;
 int PairList_Expect(std::string& data, JSON& currentm, int beginpos);
 int DimensionArray_Expect(std::string& data, JSON& currentm, int beginpos);
 int JSON_Parse(JSON & map, std::string& data);
 
-
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct JSON_ACC {
   public:
 	std::string title;//32
 	std::string content;//32
 	int type{notype};//4
+	JSON_ACC* Father;
+	std::vector<JSON_ACC*> Child;
+	JSON_ACC(std::string tle, std::string con, int tp, JSON_ACC* fa):
+		title(tle),
+		content(con),
+		type(tp),
+		Father(fa) {};
+	JSON_ACC(std::string& tle, std::string& con, int tp, JSON_ACC* fa):
+		title(std::move(tle)),
+		content(std::move(con)),
+		type(tp),
+		Father(fa) {};
+	explicit JSON_ACC(): type(notype), Father(nullptr) {};
+	JSON_ACC(JSON_ACC && v) noexcept:
+		title(std::move(v.title)),
+		content(std::move(v.content)),
+		type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+		Father(v.Father),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+		Child(std::move(v.Child)) {};
+	template<typename T>
+	T get_val() {
+		switch (this->type) {
+			case notype:
+				return std::string("");
+				break;
+			case str:
+				return this->content;
+				break;
+			case digit_int:
+				return std::stoi(this->content);
+				break;
+			case digit_double:
+				return std::stod(this->content);
+				break;
+			case dimension_list:
+				return this->Child;
+				break;
+			case pair_list:
+				return this->Child;
+				break;
+			case dimension_void:
+				return std::string("[]");
+				break;
+			case pair_list_void:
+				return std::string("{}");
+				break;
+			case bool_t:
+				if (content == "true") {
+					return true;
+				}
+				if (content == "false") {
+					return false;
+				}
+				break;
+			case null:
+				return std::string("null");
+				break;
+			default:
+				//TODO
+				break;
+		}
+	}
 	void clear() {
 		title.clear();
 		content.clear();
@@ -66,10 +169,55 @@ struct JSON_ACC {
 		Father = nullptr;
 		Child.clear();
 	}
-	JSON_ACC* Father{nullptr};//是的，你不设置就跳内存页，太喜欢兼容C语言啦！
-	std::vector<JSON_ACC*> Child{nullptr};//24
+
 };
-using JSON_POOL =  std::vector<JSON_ACC>;
+#include <memory>
+struct JSON_POOL {
+	using  plJSON_ACC = std::unique_ptr<JSON_ACC[]>;
+	plJSON_ACC raw_ptr	;
+	int pool_size{0};
+//	JSON_POOL() {
+//		raw_ptr = std::make_unique<JSON_ACC[]>(1);
+//		pool_size += 1;
+//	}
+	explicit JSON_POOL(int initial_num) {
+		raw_ptr = std::make_unique<JSON_ACC[]>(initial_num);
+		pool_size += initial_num;
+	}
+	int size() {
+		return pool_size;
+	}
+	JSON_ACC& operator[](int idx) {
+		return raw_ptr[idx];
+	}
+	JSON_ACC& at(int idx) {
+		if (idx >= this->pool_size) {
+			return raw_ptr[idx];
+		}
+		return raw_ptr[0];
+	}
+	void clear_pool() {
+		raw_ptr.reset();
+		raw_ptr.release();
+	}
+	~JSON_POOL() {
+		raw_ptr.reset();
+		raw_ptr.release();
+	}
+	void emplace_back(JSON_ACC& to_emplace) {
+		raw_ptr = std::make_unique<JSON_ACC[]>(this->pool_size + 1);
+		++pool_size;
+		(raw_ptr[this->pool_size - 1]).title = to_emplace.title;
+		(raw_ptr[this->pool_size - 1]).content = to_emplace.content;
+		(raw_ptr[this->pool_size - 1]).type = to_emplace.type;
+		(raw_ptr[this->pool_size - 1]).Father = to_emplace.Father;
+		(raw_ptr[this->pool_size - 1]).Child.swap(to_emplace.Child);
+	}
+	JSON_ACC& back() {
+		return (raw_ptr[this->pool_size - 1]);
+	}
+};
+//using JSON_POOL =  std::vector<JSON_ACC>;
 
 int PairList_Expect_Pool(std::string& data, JSON_POOL&map, JSON_ACC& current_root, int beginpos);
 int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, JSON_ACC& current_root, int beginpos);

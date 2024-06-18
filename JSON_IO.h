@@ -80,10 +80,11 @@ namespace HP_IO {
 			if (!fp.is_open()) {
 				return;
 			}
-			data.assign(std::istreambuf_iterator<char>(fp), std::istreambuf_iterator<char>());
+			data.assign(std::istreambuf_iterator<char>(fp), std::istreambuf_iterator<char>());//构造了一个流迭代器
+			// 分配器由流迭代器管理
 			data.erase(std::remove_if(data.begin(), data.end(), [](char &c) {//UCRT Clang
 				return std::isspace<char>(c, std::locale::classic());
-			}), data.end());
+			}), data.end());//后处理的
 			//data.erase(std::remove(data.begin(), data.end(), ' '), data.end());
 			//data.erase(std::remove(data.begin(), data.end(), '	'), data.end());
 			//	data.erase(std::remove_if(data.begin(), data.end(), [](char &c) {//UCRT Clang

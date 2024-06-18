@@ -1,44 +1,46 @@
 # Project: CPPJSON
-# Makefile created by Red Panda C++ 2.24
+# Makefile created by Red Panda C++ 3.0.2815
 
-CPP      = g++.exe
-CC       = gcc.exe
-WINDRES  = windres.exe
-RES      = CPPJSON_private.res
-OBJ      = JSON_ACC_Memcpy.o JSON_ACC_Pool.o main.o JSON_Parse.o $(RES)
-LINKOBJ  = JSON_ACC_Memcpy.o JSON_ACC_Pool.o main.o JSON_Parse.o CPPJSON_private.res
-CLEANOBJ  =  JSON_ACC_Memcpy.o JSON_ACC_Pool.o main.o JSON_Parse.o  CPPJSON_private.res CPPJSON.exe
-LIBS     =  -fstack-protector-all -s -static
-INCS     =  
-CXXINCS  =  
-BIN      = CPPJSON.exe
-CXXFLAGS = $(CXXINCS)  -O3 -std=c++2b -pipe
-CFLAGS   = $(INCS)  -std=c17 -O3 -pipe
+CXX      = "g++.exe"
+CC       = "gcc.exe"
+WINDRES  = "windres.exe"
 RM       = del /q /f
-WINDRESFLAGS  = 
+CD       = cd /d
+LIBS     = "-fstack--all" "-s" "-static"
+INCS     = 
+CXXINCS  = 
+CXXFLAGS = $(CXXINCS) "-O3" "-std=c++2b" "-pipe"
+CFLAGS   = $(INCS) "-std=c17" "-O3" "-pipe"
+WINDRESFLAGS = 
+RES      = CPPJSON_private.res
+OBJ      = JSON_ACC_Memcpy.o main.o JSON_ACC_Pool.o JSON_Parse.o $(RES)
+BIN      = CPPJSON.exe
+LINKOBJ  = "JSON_ACC_Memcpy.o" "main.o" "JSON_ACC_Pool.o" "JSON_Parse.o" "CPPJSON_private.res"
+CLEANOBJ = "JSON_ACC_Memcpy.o" "main.o" "JSON_ACC_Pool.o" "JSON_Parse.o" "CPPJSON_private.res" "CPPJSON.exe"
 
 .PHONY: all all-before all-after clean clean-custom
 
 all: all-before $(BIN) all-after
 
 clean: clean-custom
-	-$(RM) $(CLEANOBJ) > NUL 2>&1
+	-$(RM) $(CLEANOBJ) >NUL 2>&1
 
-$(BIN): $(OBJ)
-	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+CPPJSON.exe: $(OBJ)
 
-JSON_ACC_Memcpy.o: JSON_ACC_Memcpy.cxx JSON_Base.h
-	$(CPP) -c JSON_ACC_Memcpy.cxx -o JSON_ACC_Memcpy.o $(CXXFLAGS)  -finput-charset=UTF-8 -fexec-charset=gbk
+	$(CXX) $(LINKOBJ) -o "CPPJSON.exe" $(LIBS)
 
-JSON_ACC_Pool.o: JSON_ACC_Pool.cxx JSON_Base.h
-	$(CPP) -c JSON_ACC_Pool.cxx -o JSON_ACC_Pool.o $(CXXFLAGS)  -finput-charset=UTF-8 -fexec-charset=gbk
+JSON_ACC_Memcpy.o: JSON_ACC_Memcpy.cxx JSON_IO.h JSON_Base.h
+	$(CXX) -c "JSON_ACC_Memcpy.cxx" -o "JSON_ACC_Memcpy.o" $(CXXFLAGS) 
 
 main.o: main.cpp JSON_IO.h JSON_Base.h
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS) 
+	$(CXX) -c "main.cpp" -o "main.o" $(CXXFLAGS) 
 
-JSON_Parse.o: JSON_Parse.cxx JSON_Base.h
-	$(CPP) -c JSON_Parse.cxx -o JSON_Parse.o $(CXXFLAGS)  -finput-charset=UTF-8 -fexec-charset=gbk
+JSON_ACC_Pool.o: JSON_ACC_Pool.cxx JSON_IO.h JSON_Base.h
+	$(CXX) -c "JSON_ACC_Pool.cxx" -o "JSON_ACC_Pool.o" $(CXXFLAGS) 
+
+JSON_Parse.o: JSON_Parse.cxx JSON_IO.h JSON_Base.h
+	$(CXX) -c "JSON_Parse.cxx" -o "JSON_Parse.o" $(CXXFLAGS) 
 
 CPPJSON_private.res: CPPJSON_private.rc 
-	$(WINDRES) -i CPPJSON_private.rc --input-format=rc -o CPPJSON_private.res -O coff $(WINDRESFLAGS) 
+	$(WINDRES) -i "CPPJSON_private.rc" --input-format=rc -o "CPPJSON_private.res" -O coff $(WINDRESFLAGS) 
 

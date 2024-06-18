@@ -398,7 +398,6 @@ int JSON_Parse_Pool(JSON_POOL & map, JSON_ACC& root, std::string& data) {
 				i = j;
 				j = 0;
 			}
-
 		}
 	}
 	return 1;

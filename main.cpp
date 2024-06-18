@@ -82,14 +82,20 @@ int main() {
 	const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
-	JSON_POOL map;
-	JSON_ACC rt;
-	map.emplace_back(rt);
+	JSON_POOL map(1);
+	/*
+	map.back().title = "Hello World";
+	JSON_ACC hh("CCC", "SSSZ", notype, nullptr);
+	std::cout << map.back().title << "\n";
+	map.emplace_back(hh);
+	std::cout << map.back().title << map.back().content << "\n";
+	*/
+
 	FILE.READ(path, data);
 	//std::cout << data << "\n\n\n\n";
 	//high_resolution_clock::time_point Stime = high_resolution_clock::now();
 	//JSON_Parse(map, data);
-	JSON_Parse_Pool(map, rt, data);
+	JSON_Parse_Pool(map, map.back(), data);
 	//try {
 	//} catch (std::bad_alloc) {
 	//	std::cout << "ERROR\n";
@@ -98,14 +104,16 @@ int main() {
 	std::cout << "JSONParse Finish\n";
 	//milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
 
+	/*
 	for (int i = 0; i < (int)map.size(); i++) {
-		//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
-		std::cout << map.at(i).title << ":" << map.at(i).content;
-		if (map.at(i).Father != nullptr) {
-			std::cout << "       father: " << map.at(i).Father->title << "\n";
-		}
-
+	//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
+	std::cout << map.at(i).title << ":" << map.at(i).content;
+	if (map.at(i).Father != nullptr) {
+	std::cout << "       father: " << map.at(i).Father->title << "\n";
 	}
+	}
+	*/
+
 	//SeeChild(rt);
 	//IsValidMap_VectorP(rt, 0);
 	/*

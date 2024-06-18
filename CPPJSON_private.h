@@ -1,8 +1,8 @@
 /* THIS FILE WILL BE OVERWRITTEN BY Red Panda C++ */
 /* DO NOT EDIT ! */
 
-#ifndef CPPJSON_private_rc
-#define CPPJSON_private_rc
+#ifndef CPPJSON_PRIVATE_H
+#define CPPJSON_PRIVATE_H
 
 /* VERSION DEFINITIONS */
 #define VER_STRING	"1.0.0.0"
@@ -20,4 +20,4 @@
 #define PRODUCT_NAME	"CPPJSON"
 #define PRODUCT_VERSION	"0.1.1.1"
 
-#endif /*CPPJSON_private_rc*/
+#endif /*CPPJSON_PRIVATE_H*/
