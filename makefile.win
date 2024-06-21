@@ -13,10 +13,10 @@ CXXFLAGS = $(CXXINCS) "-O3" "-std=c++2b" "-pipe"
 CFLAGS   = $(INCS) "-std=c17" "-O3" "-pipe"
 WINDRESFLAGS = 
 RES      = CPPJSON_private.res
-OBJ      = JSON_ACC_Pool.o main.o JSON_Parse.o JSON_ACC_MT.o $(RES)
+OBJ      = JSON_Parse.o JSON_ACC_Pool.o main.o JSON_ACC_MT.o $(RES)
 BIN      = CPPJSON.exe
-LINKOBJ  = "JSON_ACC_Pool.o" "main.o" "JSON_Parse.o" "JSON_ACC_MT.o" "CPPJSON_private.res"
-CLEANOBJ = "JSON_ACC_Pool.o" "main.o" "JSON_Parse.o" "JSON_ACC_MT.o" "CPPJSON_private.res" "CPPJSON.exe"
+LINKOBJ  = "JSON_Parse.o" "JSON_ACC_Pool.o" "main.o" "JSON_ACC_MT.o" "CPPJSON_private.res"
+CLEANOBJ = "JSON_Parse.o" "JSON_ACC_Pool.o" "main.o" "JSON_ACC_MT.o" "CPPJSON_private.res" "CPPJSON.exe"
 
 .PHONY: all all-before all-after clean clean-custom
 
@@ -29,16 +29,16 @@ CPPJSON.exe: $(OBJ)
 
 	$(CXX) $(LINKOBJ) -o "CPPJSON.exe" $(LIBS)
 
-JSON_ACC_Pool.o: JSON_ACC_Pool.cxx JSON_Base.h
-	$(CXX) -c "JSON_ACC_Pool.cxx" -o "JSON_ACC_Pool.o" $(CXXFLAGS) 
-
-main.o: main.cpp JSON_Base.h JSON_IO.h
-	$(CXX) -c "main.cpp" -o "main.o" $(CXXFLAGS) 
-
-JSON_Parse.o: JSON_Parse.cxx JSON_Base.h
+JSON_Parse.o: JSON_Parse.cxx JSON_IO.h JSON_Base.h
 	$(CXX) -c "JSON_Parse.cxx" -o "JSON_Parse.o" $(CXXFLAGS) 
 
-JSON_ACC_MT.o: JSON_ACC_MT.cxx JSON_Base.h
+JSON_ACC_Pool.o: JSON_ACC_Pool.cxx JSON_IO.h JSON_Base.h
+	$(CXX) -c "JSON_ACC_Pool.cxx" -o "JSON_ACC_Pool.o" $(CXXFLAGS) 
+
+main.o: main.cpp JSON_IO.h JSON_Base.h
+	$(CXX) -c "main.cpp" -o "main.o" $(CXXFLAGS) 
+
+JSON_ACC_MT.o: JSON_ACC_MT.cxx JSON_IO.h JSON_Base.h
 	$(CXX) -c "JSON_ACC_MT.cxx" -o "JSON_ACC_MT.o" $(CXXFLAGS) 
 
 CPPJSON_private.res: CPPJSON_private.rc 

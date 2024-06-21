@@ -102,18 +102,18 @@ struct JSON_ACC {
 	int type{notype};//4
 	int Father_idx;
 	std::vector<int> Child_idx;
-
-	JSON_ACC(std::string tle, std::string con, int tp, int fa):
-		title(tle),
-		content(con),
-		type(tp),
-		Father_idx(fa) {};
 	JSON_ACC(std::string& tle, std::string& con, int tp, int fa):
 		title(std::move(tle)),
 		content(std::move(con)),
 		type(tp),
 		Father_idx(fa) {};
 	explicit JSON_ACC(): type(notype), Father_idx(0) {};
+	JSON_ACC(const JSON_ACC& v):
+		title(v.title),
+		content(v.content),
+		type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+		Father_idx(v.Father_idx),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+		Child_idx(v.Child_idx) {};
 	JSON_ACC(JSON_ACC && v) noexcept:
 		title(std::move(v.title)),
 		content(std::move(v.content)),

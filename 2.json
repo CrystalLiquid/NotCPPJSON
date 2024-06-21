@@ -1,5 +1,5 @@
 {
-    "2test_num_list": [-1, -2, 3, -4],
+    "2test_num_list": [-1, [] , -2, 3, -4],
     "age": "28",
     "city": "suzhou",
     "dict": {
