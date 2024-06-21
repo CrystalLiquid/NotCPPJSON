@@ -39,16 +39,19 @@ int PairList_Expect(std::string& data, JSON& currentm, int beginpos = 0) {
 			}
 			if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
 				buf.content = "null";
+				buf.type = null;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
 				buf.content = "true";
+				buf.type = bool_t;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
 				buf.content = "false";
+				buf.type = bool_t;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
@@ -146,16 +149,19 @@ int DimensionArray_Expect(std::string& data, JSON& currentm, int beginpos = 0) {
 
 			if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
 				buf.content = "null";
+				buf.type = null;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
 				buf.content = "true";
+				buf.type = bool_t;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
 				buf.content = "false";
+				buf.type = bool_t;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 			}
@@ -262,16 +268,19 @@ int JSON_Parse(JSON & map, std::string& data) {
 			//std::cout << t << "," << i << "\n";
 			if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
 				buf.content = "null";
+				buf.type = null;
 				map.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
 				buf.content = "true";
+				buf.type = bool_t;
 				map.Child.emplace_back(buf);
 				buf.clear();
 			}
 			if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
 				buf.content = "false";
+				buf.type = bool_t;
 				map.Child.emplace_back(buf);
 				buf.clear();
 			}

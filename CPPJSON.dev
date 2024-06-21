@@ -44,7 +44,7 @@ UseUTF8 = 1
 
 
 [Unit1]
-FileName = JSON_ACC_Memcpy.cxx
+FileName = JSON_ACC_Pool.cxx
 CompileCpp = 1
 Folder = 源文件
 Compile = 1
@@ -53,7 +53,7 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = ASCII
 
 
 [VersionInfo]
@@ -77,9 +77,9 @@ SyncProduct = 1
 
 
 [Unit2]
-FileName = JSON_ACC_Pool.cxx
+FileName = JSON_IO.h
 CompileCpp = 1
-Folder = 源文件
+Folder = 头文件
 Compile = 1
 Link = 1
 Priority = 1000
@@ -103,19 +103,6 @@ RealEncoding = UTF-8
 
 
 [Unit4]
-FileName = JSON_Base.h
-CompileCpp = 1
-Folder = 头文件
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = UTF-8
-
-
-[Unit5]
 FileName = main.cpp
 CompileCpp = 1
 Folder = 源文件
@@ -128,10 +115,23 @@ FileEncoding = PROJECT
 RealEncoding = UTF-8
 
 
-[Unit6]
-FileName = JSON_IO.h
+[Unit5]
+FileName = JSON_Base.h
 CompileCpp = 1
 Folder = 头文件
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = UTF-8
+
+
+[Unit6]
+FileName = JSON_ACC_MT.cxx
+CompileCpp = 1
+Folder = 源文件
 Compile = 1
 Link = 1
 Priority = 1000
