@@ -85,6 +85,7 @@ int PairList_Expect(std::string& data, JSON& currentm, int beginpos = 0) {
 			}
 			//////////////////////////////////////////////////////////////////
 			if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
+				buf.type = dimension_void;
 				currentm.Child.emplace_back(buf);
 				buf.clear();
 				i = i + 2;

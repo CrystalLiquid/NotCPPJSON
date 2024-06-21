@@ -7,30 +7,31 @@
 #define __MAIN_
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
-
+/*
 void SeeChild(JSON_ACC& root) {
-	for (int i = 0; i < (int)root.Child.size(); i++) {
-		JSON_ACC& child = *(root.Child.at(i));
-		std::cout << child.title << " : " << child.Child.size() << std::endl;
-		SeeChild(child);
-	}
+for (int i = 0; i < (int)root.Child.size(); i++) {
+JSON_ACC& child = *(root.Child.at(i));
+std::cout << child.title << " : " << child.Child.size() << std::endl;
+SeeChild(child);
+}
 }
 void IsValidMap_VectorP(JSON_ACC& root, int Counter) {
-	for (int i = 0; i != (int)root.Child.size(); i++) {
-		for (int t = 0; t <= Counter; t++) {
-			std::cout << "    ";
-		}
-		JSON_ACC& child = *(root.Child.at(i));
-		//map.Child.at(i).type << " | " <<
-		std::cout << child.title << " : " << child.content << "    " << Counter << "\n";
-		//if (map.Child.at(i).title.empty()) {
-		//	std::cerr << "ERROR 1 Size:";
-		//	std::cerr << (int)map.Child.size() << "\n";
-		//}
-		IsValidMap_VectorP(child, Counter + 1);
-	}
+for (int i = 0; i != (int)root.Child.size(); i++) {
+for (int t = 0; t <= Counter; t++) {
+std::cout << "    ";
+}
+JSON_ACC& child = *(root.Child.at(i));
+//map.Child.at(i).type << " | " <<
+std::cout << child.title << " : " << child.content << "    " << Counter << "\n";
+//if (map.Child.at(i).title.empty()) {
+//	std::cerr << "ERROR 1 Size:";
+//	std::cerr << (int)map.Child.size() << "\n";
+//}
+IsValidMap_VectorP(child, Counter + 1);
+}
 
 }
+*/
 
 void IsValidMap_Vector(JSON& map, int Counter) {
 	for (int i = 0; i != (int)map.Child.size(); i++) {
@@ -95,8 +96,8 @@ int main() {
 	//std::cout << data << "\n\n\n\n";
 	//high_resolution_clock::time_point Stime = high_resolution_clock::now();
 	//JSON_Parse(map, data);
-	JSON_Parse_Pool(map, map.back(), data);
-	std::cout << (map[2]).title << "\n";
+	JSON_Parse_Pool(map, data);
+	std::cout << map.back().title;
 	//try {
 	//} catch (std::bad_alloc) {
 	//	std::cout << "ERROR\n";

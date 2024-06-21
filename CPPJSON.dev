@@ -31,7 +31,7 @@ CommandLine =
 Folders = 
 IncludeVersionInfo = 0
 SupportXPThemes = 0
-CompilerSet = 2
+CompilerSet = 0
 StaticLink = 1
 AddCharset = 1
 ExecEncoding = UTF-8
@@ -44,16 +44,16 @@ UseUTF8 = 1
 
 
 [Unit1]
-FileName = JSON_ACC_Pool.cxx
+FileName = JSON_Base.h
 CompileCpp = 1
-Folder = 源文件
+Folder = 头文件
 Compile = 1
 Link = 1
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = ASCII
+RealEncoding = UTF-8
 
 
 [VersionInfo]
@@ -77,20 +77,7 @@ SyncProduct = 1
 
 
 [Unit2]
-FileName = JSON_IO.h
-CompileCpp = 1
-Folder = 头文件
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = UTF-8
-
-
-[Unit3]
-FileName = JSON_Parse.cxx
+FileName = JSON_ACC_Pool.cxx
 CompileCpp = 1
 Folder = 源文件
 Compile = 1
@@ -99,10 +86,10 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = ASCII
 
 
-[Unit4]
+[Unit3]
 FileName = main.cpp
 CompileCpp = 1
 Folder = 源文件
@@ -115,10 +102,23 @@ FileEncoding = PROJECT
 RealEncoding = UTF-8
 
 
-[Unit5]
-FileName = JSON_Base.h
+[Unit4]
+FileName = JSON_Parse.cxx
 CompileCpp = 1
-Folder = 头文件
+Folder = 源文件
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = UTF-8
+
+
+[Unit5]
+FileName = JSON_ACC_MT.cxx
+CompileCpp = 1
+Folder = 源文件
 Compile = 1
 Link = 1
 Priority = 1000
@@ -129,9 +129,9 @@ RealEncoding = UTF-8
 
 
 [Unit6]
-FileName = JSON_ACC_MT.cxx
+FileName = JSON_IO.h
 CompileCpp = 1
-Folder = 源文件
+Folder = 头文件
 Compile = 1
 Link = 1
 Priority = 1000
@@ -156,10 +156,8 @@ RealEncoding = ASCII
 
 [CompilerSettings]
 c_cmd_opt_std = c17
-cc_cmd_opt_check_iso_conformance = on
 cc_cmd_opt_optimize = 3
 cc_cmd_opt_std = c++2b
 cc_cmd_opt_use_pipe = on
-cc_cmd_opt_warning_all = on
 link_cmd_opt_stack_size = 20
 link_cmd_opt_strip_exe = on

@@ -102,6 +102,7 @@ struct JSON_ACC {
 	int type{notype};//4
 	int Father_idx;
 	std::vector<int> Child_idx;
+
 	JSON_ACC(std::string tle, std::string con, int tp, int fa):
 		title(tle),
 		content(con),
