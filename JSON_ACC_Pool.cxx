@@ -115,9 +115,10 @@ int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx,
 				j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
 				buf.clear();
 				i = j;
-				//std::cout << "RealPair:" << data[i] << "\n";
-				j = 0;
+#pragma test
+				std::cout << "LaJump:" << data[i];
 			}
+
 		}
 	}
 	return i;
@@ -132,22 +133,28 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 	//	++dimension;
 	//}
 	for (i = beginpos; data[i] != FieldE/*dimension != 0*/; i++) {
+#pragma test
+		std::cout << data[i];
+
+
 		//	if (data[i] == FieldS) {
 		//		++dimension;
 		//	}
 		//	if (data[i] == FieldE) {
 		//		--dimension;
 		//	}
+
+
 		if (data[i] == FieldS || data[i] == ConE) {
 			buf.Father_idx = current_root_idx;
-			if (data[i + 1] == FieldS) {
+			if (data[i + 1] == FieldS && data[i + 2] != FieldE) {
 				buf.type = dimension_list;
 				map.emplace_back(buf);
 				buf.clear();
 				j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1);
 				i = j;
 			}
-			if (data[i + 1] == LayerS) {
+			if (data[i + 1] == LayerS && data[i + 2] != LayerE) {
 				buf.type = pair_list;
 				map.emplace_back(buf);
 				buf.clear();
@@ -203,21 +210,29 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 			}
 			/////////////////////////////////////////////////////////////////////////////////
 			if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
+//#pragma test
+				//std::cout << data[i];
 				buf.type = dimension_void;
 				map.emplace_back(buf);
 				buf.clear();
 				i = i + 2;
+//#pragma test
+				std::cout << "DiJump:" << data[i];
 			}
 			if (data[i + 1] == LayerS && data[i + 2] == LayerE) {//void list
+//#pragma test
+				//std::cout << data[i];
 				buf.type = pair_list_void;
 				map.emplace_back(buf);
 				buf.clear();
 				i = i + 2;
+
 			}
 		}
-//#pragma test
-		//std::cout << data[i];
+
 	}
+#pragma test
+	std::cout << "|ToDiEnd|:" << data[i];
 	return i;
 }
 
@@ -309,6 +324,8 @@ int JSON_Parse_Pool(JSON_POOL & map, std::string& data) {
 				j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
 				buf.clear();
 				i = j;
+#pragma test
+				std::cout << "LaJump:" << data[i];
 			}
 
 		}

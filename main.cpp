@@ -97,7 +97,7 @@ int main() {
 	//high_resolution_clock::time_point Stime = high_resolution_clock::now();
 	//JSON_Parse(map, data);
 	JSON_Parse_Pool(map, data);
-	std::cout << map.back().title;
+	//std::cout << "Result" << map.back().title;
 	//try {
 	//} catch (std::bad_alloc) {
 	//	std::cout << "ERROR\n";
