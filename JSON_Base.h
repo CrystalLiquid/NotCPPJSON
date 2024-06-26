@@ -113,8 +113,29 @@ enum search_t {
 	dfs = 2,
 	bfs = 3
 };
-
+struct JSON_POOL_SLICE {
+	int begin{-1};
+	int end{-1};
+};
 class JSON_POOL : public std::vector<JSON_ACC> {
+  public:
+	JSON_POOL_SLICE get_slice(std::string v) {
+		JSON_POOL_SLICE tmp;
+		std::string sk, sj;
+		for (int i = 0; i < v.length(); i++) {
+			if (v[i] == ':') {
+				for (int k = i + 1; k < v.length() - 1; k++) {
+					sk.push_back(v[k]);
+				}
+				for (int j = 1; j < i; j++) {
+					sj.push_back(v[j]);
+				}
+			}
+		}
+		tmp.begin = std::stoi(sj);
+		tmp.end = std::stoi(sk);
+		return tmp;
+	}
 	void set_val_pool(std::string& key, int search_type = search_t::directly) {
 		if (search_type == search_t::directly) {
 
@@ -143,13 +164,30 @@ struct JSON_ACC {
 	JSON_ACC():
 		type(notype),
 		Father_idx(0) {};
-	std::variant<int, double, std::string, bool, JSON_POOL> get_val() {
+	//std::variant<int, double, std::string, bool, JSON_POOL>
+	std::variant<int, double, std::string, bool, std::monostate, JSON_POOL_SLICE> get_val(JSON_POOL* ppool = nullptr) {
 		if (!std::get_if<int>(&content) || !std::get_if<std::string>(&content) || !std::get_if<bool>(&content) || !std::get_if<double>(&content)) {
 			//TODO 非空判断，get_if如果类型不对会返回空指针
-			if (type == str) {
+			if (type == str || type == dimension_void || type == pair_list_void || type == null) {
 				return std::get<std::string>(content);
 			}
+			if (type == bool_t) {
+				return std::get<bool>(content);
+			}
+			if (type == digit_int) {
+				return std::get<int>(content);
+			}
+			if (type == digit_double) {
+				return std::get<double>(content);
+			}
+			if (type == pair_list || type == dimension_list) {
+				return JSON_POOL_SLICE{Child_idx.front(), Child_idx.back()};
+			}
+			if (type == notype) {
+				return std::monostate{};
+			}
 		}
+		return std::monostate{};
 	}
 	void set_val(std::variant<int, double, std::string, bool, std::monostate, JSON_POOL> v, int list_type = notype, JSON_POOL* pool = nullptr) {
 
@@ -158,16 +196,16 @@ struct JSON_ACC {
 				return digit_int;
 			}
 			if (!std::get_if<std::string>(&v)) {
-				if ((*std::get_if<std::string>(&v))[0] == Quote) {
+				if ((std::get<std::string>(v))[0] == Quote) {
 					return str;
 				}
-				if ((*std::get_if<std::string>(&v))[0] == 'n') {
+				if ((std::get<std::string>(v))[0] == 'n') {
 					return null;
 				}
-				if ((*std::get_if<std::string>(&v))[0] == FieldS) {
+				if ((std::get<std::string>(v))[0] == FieldS) {
 					return dimension_void;
 				}
-				if ((*std::get_if<std::string>(&v))[0] == LayerS) {
+				if ((std::get<std::string>(v))[0] == LayerS) {
 					return pair_list_void;
 				}
 			}
@@ -197,15 +235,15 @@ struct JSON_ACC {
 				return;
 				break;
 			case str:
-				content = (*std::get_if<std::string>(&v));
+				content = (std::get<std::string>(v));
 				type = tmp_type;
 				break;
 			case digit_int:
-				content = (*std::get_if<int>(&v));
+				content = (std::get<int>(v));
 				type = tmp_type;
 				break;
 			case digit_double:
-				content = (*std::get_if<double>(&v));
+				content = (std::get<double>(v));
 				type = tmp_type;
 				break;
 			case dimension_list:
@@ -214,7 +252,7 @@ struct JSON_ACC {
 					std::cerr << "[On Processing Get Val-Switch]Invalid Poolptr!\n";
 					return;
 				}
-				pool->insert(pool->end(),
+				pool->insert(pool->end(),//need to search for proper key-val idx
 				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).begin()),
 				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).end())
 				            );
@@ -231,19 +269,19 @@ struct JSON_ACC {
 				            );
 				break;
 			case dimension_void:
-				content = (*std::get_if<std::string>(&v));
+				content = (std::get<std::string>(v));
 				type = tmp_type;
 				break;
 			case pair_list_void:
-				content = (*std::get_if<std::string>(&v));
+				content = (std::get<std::string>(v));
 				type = tmp_type;
 				break;
 			case bool_t:
-				content = (*std::get_if<bool>(&v));
+				content = (std::get<bool>(v));
 				type = tmp_type;
 				break;
 			case null:
-				content = (*std::get_if<std::string>(&v));
+				content = (std::get<std::string>(v));
 				type = tmp_type;
 				break;
 			case invalid_opttype:
@@ -254,7 +292,7 @@ struct JSON_ACC {
 				break;
 		}
 	}
-	void set_key(std::string& tle) {
+	void set_key(std::string & tle) {
 		title = tle;
 	}
 	unsafe_ptr get_pval() noexcept {
@@ -316,81 +354,3 @@ int JSON_Parse_Memcpy_Pool(JSON_POOL & map, JSON_ACC&root, std::string& data);
 #endif
 
 
-
-
-
-/*#include <memory>
-
-struct JSON_POOL {
-using  plJSON_ACC = std::unique_ptr<JSON_ACC[]>;
-plJSON_ACC raw_ptr	;
-int pool_size{0};
-//	JSON_POOL() {
-//		raw_ptr = std::make_unique<JSON_ACC[]>(1);
-//		pool_size += 1;
-//	}
-explicit JSON_POOL(int initial_num) {
-raw_ptr = std::make_unique<JSON_ACC[]>(initial_num);
-pool_size += initial_num;
-}
-int size() {
-return pool_size;
-}
-JSON_ACC& operator[](int idx) {
-return raw_ptr[idx];
-}
-JSON_ACC& at(int idx) {
-if (idx >= this->pool_size) {
-return raw_ptr[idx];
-}
-return raw_ptr[0];
-}
-void clear_pool() {
-raw_ptr.reset();
-raw_ptr.release();
-}
-~JSON_POOL() {
-raw_ptr.reset();
-raw_ptr.release();
-}
-void emplace_back(JSON_ACC& to_emplace) {
-raw_ptr = std::make_unique<JSON_ACC[]>(this->pool_size + 1);
-++pool_size;
-(raw_ptr[this->pool_size - 1]).title = to_emplace.title;
-(raw_ptr[this->pool_size - 1]).content = to_emplace.content;
-(raw_ptr[this->pool_size - 1]).type = to_emplace.type;
-(raw_ptr[this->pool_size - 1]).Father = to_emplace.Father;
-(raw_ptr[this->pool_size - 1]).Child.swap(to_emplace.Child);
-}
-JSON_ACC& back() {
-return (raw_ptr[this->pool_size - 1]);
-}
-};
-
-*/
-/*
-JSON_ACC() noexcept:
-type(notype),
-Father_idx(0) {};
-JSON_ACC(std::string& tle, std::string& con, int tp, int fa) noexcept:
-title(std::move(tle)),
-content(std::move(con)),
-type(tp),
-Father_idx(fa) {};
-*/
-
-
-/*
-JSON_ACC(const JSON_ACC& v):
-title(v.title),
-content(v.content),
-type(v.type),
-Father_idx(v.Father_idx),
-Child_idx(v.Child_idx) {};
-JSON_ACC(JSON_ACC && v) noexcept:
-title(std::move(v.title)),
-content(std::move(v.content)),
-type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-Father_idx(v.Father_idx),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-Child_idx(std::move(v.Child_idx)) {};
-*/
