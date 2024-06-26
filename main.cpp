@@ -83,10 +83,13 @@ int main() {
 	const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
-	JSON_POOL map(1);
+	JSON_POOL map;
+	std::string title = "ddd";
+	JSON_ACC root;
+	map.emplace_back(map);
 	/*
 	map.back().title = "Hello World";
-	JSON_ACC hh("CCC", "SSSZ", notype, nullptr);
+	JSON_ACC hh("CCC", "SSSZ", notype, nullptr);n
 	std::cout << map.back().title << "\n";
 	map.emplace_back(hh);
 	std::cout << map.back().title << map.back().content << "\n";
@@ -106,15 +109,12 @@ int main() {
 	std::cout << "JSONParse Finish\n";
 	//milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
 
-	/*
+
 	for (int i = 0; i < (int)map.size(); i++) {
-	//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
-	std::cout << map.at(i).title << ":" << map.at(i).content;
-	if (map.at(i).Father != nullptr) {
-	std::cout << "       father: " << map.at(i).Father->title << "\n";
+		//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
+		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" <<  << "\n";
 	}
-	}
-	*/
+
 
 	//SeeChild(rt);
 	//IsValidMap_VectorP(rt, 0);

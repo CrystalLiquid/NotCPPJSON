@@ -94,78 +94,71 @@ int DimensionArray_Expect(std::string& data, JSON& currentm, int beginpos);
 int JSON_Parse(JSON & map, std::string& data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#include <variant>
+struct JSON_ACC;
+using JSON_POOL =  std::vector<JSON_ACC>;
 struct JSON_ACC {
   public:
 	std::string title;//32
-	std::string content;//32
+	std::variant<int, double, std::string, bool> content;
+	//std::string content;//32
 	int type{notype};//4
-	int Father_idx;
+	int Father_idx{0};
 	std::vector<int> Child_idx;
-	JSON_ACC(std::string& tle, std::string& con, int tp, int fa):
-		title(std::move(tle)),
-		content(std::move(con)),
-		type(tp),
-		Father_idx(fa) {};
-	explicit JSON_ACC(): type(notype), Father_idx(0) {};
-	JSON_ACC(const JSON_ACC& v):
-		title(v.title),
-		content(v.content),
-		type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-		Father_idx(v.Father_idx),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-		Child_idx(v.Child_idx) {};
-	JSON_ACC(JSON_ACC && v) noexcept:
-		title(std::move(v.title)),
-		content(std::move(v.content)),
-		type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-		Father_idx(v.Father_idx),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
-		Child_idx(std::move(v.Child_idx)) {};
-	template<typename T>
-	T get_val() {
+//	JSON_ACC(std::string &&tle, std::string &&con, int tp, int fa):
+//		title(std::move(tle)),
+//		content(std::move(con)),
+//		type(tp),
+//		Father_idx(fa) {};
+	using unsafe_ptr = void*;
+	JSON_ACC(JSON_POOL& v) {
+
+	}
+	JSON_ACC():
+		type(notype),
+		Father_idx(0) {};
+	unsafe_ptr get_pval() {
 		switch (this->type) {
 			case notype:
-				return std::string("");
+				return nullptr;
 				break;
 			case str:
-				return this->content;
+				return (unsafe_ptr)std::get_if<std::string>(&this->content);
 				break;
 			case digit_int:
-				return std::stoi(this->content);
+				return (unsafe_ptr)std::get_if<int>(&this->content);
 				break;
 			case digit_double:
-				return std::stod(this->content);
+				return (unsafe_ptr)std::get_if<double>(&this->content);
 				break;
 			case dimension_list:
-				return this->Child_idx;
+				return &this->Child_idx;
 				break;
 			case pair_list:
-				return this->Child_idx;
+				return &this->Child_idx;
 				break;
 			case dimension_void:
-				return std::string("[]");
+				return (unsafe_ptr)std::get_if<std::string>(&this->content);
 				break;
 			case pair_list_void:
-				return std::string("{}");
+				return (unsafe_ptr)std::get_if<std::string>(&this->content);
 				break;
 			case bool_t:
-				if (content == "true") {
-					return true;
-				}
-				if (content == "false") {
-					return false;
-				}
+				return (unsafe_ptr)std::get_if<bool>(&this->content);
 				break;
 			case null:
-				return std::string("null");
+				return (unsafe_ptr)std::get_if<std::string>(&this->content);
 				break;
 			default:
 				//TODO
 				break;
 		}
+		return nullptr;
 	}
+
 	void clear() {
 		title.clear();
-		content.clear();
+
 		type = notype;
 		Father_idx = 0;
 		Child_idx.clear();
@@ -173,7 +166,7 @@ struct JSON_ACC {
 
 };
 
-using JSON_POOL =  std::vector<JSON_ACC>;
+
 int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx, int beginpos);
 int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_root_idx, int beginpos);
 int JSON_Parse_Pool(JSON_POOL & map, std::string& data);
@@ -245,4 +238,29 @@ return (raw_ptr[this->pool_size - 1]);
 };
 
 */
+/*
+JSON_ACC() noexcept:
+type(notype),
+Father_idx(0) {};
+JSON_ACC(std::string& tle, std::string& con, int tp, int fa) noexcept:
+title(std::move(tle)),
+content(std::move(con)),
+type(tp),
+Father_idx(fa) {};
+*/
 
+
+/*
+JSON_ACC(const JSON_ACC& v):
+title(v.title),
+content(v.content),
+type(v.type),
+Father_idx(v.Father_idx),
+Child_idx(v.Child_idx) {};
+JSON_ACC(JSON_ACC && v) noexcept:
+title(std::move(v.title)),
+content(std::move(v.content)),
+type(v.type),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+Father_idx(v.Father_idx),//虽然是移动构造，但是基本类型只能复制，STL才可能移动
+Child_idx(std::move(v.Child_idx)) {};
+*/
