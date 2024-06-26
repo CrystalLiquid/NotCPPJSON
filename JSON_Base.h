@@ -111,12 +111,13 @@ struct JSON_ACC {
 //		type(tp),
 //		Father_idx(fa) {};
 	using unsafe_ptr = void*;
-	JSON_ACC(JSON_POOL& v) {
-
-	}
+	JSON_ACC(JSON_POOL& v) {}
 	JSON_ACC():
 		type(notype),
 		Father_idx(0) {};
+	std::variant<int, double, std::string, bool, JSON_POOL> get_val() {
+
+	}
 	unsafe_ptr get_pval() {
 		switch (this->type) {
 			case notype:
