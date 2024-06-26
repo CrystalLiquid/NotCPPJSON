@@ -3,8 +3,8 @@
 #pragma once
 #ifndef __ACC_POOL_CXX_
 #define __ACC_POOL_CXX_
-int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx, int beginpos = 0) {
-	JSON_ACC buf;
+int PairList_Expect_Pool(std::string& data, json_pool&map, int current_root_idx, int beginpos = 0) {
+	json_acc buf;
 	int j = 0;
 	int k = 0;
 	int i = 0;
@@ -173,9 +173,9 @@ int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx,
 	return i;
 }
 
-int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_root_idx, int beginpos = 0) {
+int DimensionArray_Expect_Pool(std::string& data, json_pool& map, int current_root_idx, int beginpos = 0) {
 	//std::cout << "IN_FUNC\n";
-	JSON_ACC buf;
+	json_acc buf;
 	int j = 0;
 	int i = 0;
 	std::string fragment;
@@ -337,8 +337,8 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 	return i;
 }
 
-int JSON_Parse_Pool(JSON_POOL & map, std::string& data) {
-	JSON_ACC buf;
+int JSON_Parse_Pool(json_pool & map, std::string& data) {
+	json_acc buf;
 	int j = 0;
 	int k = 0;
 	int t = 0;

@@ -83,9 +83,9 @@ int main() {
 	const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
-	JSON_POOL map;
+	json_pool map;
 	std::string title = "ddd";
-	JSON_ACC root;
+	json_acc root;
 	map.emplace_back(map);
 	/*
 	map.back().title = "Hello World";

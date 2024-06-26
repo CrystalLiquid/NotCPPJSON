@@ -107,20 +107,20 @@ int JSON_Parse(JSON & map, std::string& data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <variant>
-struct JSON_ACC;
+struct json_acc;
 enum search_t {
 	directly = 1,
 	dfs = 2,
 	bfs = 3
 };
-struct JSON_POOL_SLICE {
+struct json_pool_slice {
 	int begin{-1};
 	int end{-1};
 };
-class JSON_POOL : public std::vector<JSON_ACC> {
+class json_pool : public std::vector<json_acc> {
   public:
-	JSON_POOL_SLICE get_slice(std::string v) {
-		JSON_POOL_SLICE tmp;
+	json_pool_slice get_slice(std::string v) {
+		json_pool_slice tmp;
 		std::string sk, sj;
 		for (int i = 0; i < v.length(); i++) {
 			if (v[i] == ':') {
@@ -149,7 +149,7 @@ class JSON_POOL : public std::vector<JSON_ACC> {
 	}
 };
 //using JSON_POOL =  std::vector<JSON_ACC>;
-struct JSON_ACC {
+struct json_acc {
 	using content_type = std::variant<int, double, std::string, bool, std::monostate>;
   public:
 	std::string title;//32
@@ -160,12 +160,12 @@ struct JSON_ACC {
 
   public:
 	using unsafe_ptr = void*;
-	JSON_ACC(JSON_POOL& v) {}
-	JSON_ACC():
+	json_acc(json_pool& v) {}
+	json_acc():
 		type(notype),
 		Father_idx(0) {};
 	//std::variant<int, double, std::string, bool, JSON_POOL>
-	std::variant<int, double, std::string, bool, std::monostate, JSON_POOL_SLICE> get_val(JSON_POOL* ppool = nullptr) {
+	std::variant<int, double, std::string, bool, std::monostate, json_pool_slice> get_val(json_pool* ppool = nullptr) {
 		if (!std::get_if<int>(&content) || !std::get_if<std::string>(&content) || !std::get_if<bool>(&content) || !std::get_if<double>(&content)) {
 			//TODO 非空判断，get_if如果类型不对会返回空指针
 			if (type == str || type == dimension_void || type == pair_list_void || type == null) {
@@ -181,7 +181,7 @@ struct JSON_ACC {
 				return std::get<double>(content);
 			}
 			if (type == pair_list || type == dimension_list) {
-				return JSON_POOL_SLICE{Child_idx.front(), Child_idx.back()};
+				return json_pool_slice{Child_idx.front(), Child_idx.back()};
 			}
 			if (type == notype) {
 				return std::monostate{};
@@ -189,7 +189,7 @@ struct JSON_ACC {
 		}
 		return std::monostate{};
 	}
-	void set_val(std::variant<int, double, std::string, bool, std::monostate, JSON_POOL> v, int list_type = notype, JSON_POOL* pool = nullptr) {
+	void set_val(std::variant<int, double, std::string, bool, std::monostate, json_pool> v, int list_type = notype, json_pool* pool = nullptr) {
 
 		auto check_type = [&v, &list_type]() {
 			if (!std::get_if<int>(&v) ) {
@@ -253,8 +253,8 @@ struct JSON_ACC {
 					return;
 				}
 				pool->insert(pool->end(),//need to search for proper key-val idx
-				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).begin()),
-				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).end())
+				             std::make_move_iterator((*std::get_if<json_pool>(&v)).begin()),
+				             std::make_move_iterator((*std::get_if<json_pool>(&v)).end())
 				            );
 				break;
 			case pair_list:
@@ -264,8 +264,8 @@ struct JSON_ACC {
 					return;
 				}
 				pool->insert(pool->end(),
-				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).begin()),
-				             std::make_move_iterator((*std::get_if<JSON_POOL>(&v)).end())
+				             std::make_move_iterator((*std::get_if<json_pool>(&v)).begin()),
+				             std::make_move_iterator((*std::get_if<json_pool>(&v)).end())
 				            );
 				break;
 			case dimension_void:
@@ -345,11 +345,11 @@ struct JSON_ACC {
 };
 
 
-int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx, int beginpos);
-int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_root_idx, int beginpos);
-int JSON_Parse_Pool(JSON_POOL & map, std::string& data);
+int PairList_Expect_Pool(std::string& data, json_pool&map, int current_root_idx, int beginpos);
+int DimensionArray_Expect_Pool(std::string& data, json_pool& map, int current_root_idx, int beginpos);
+int JSON_Parse_Pool(json_pool & map, std::string& data);
 
-int JSON_Parse_Memcpy_Pool(JSON_POOL & map, JSON_ACC&root, std::string& data);
+int JSON_Parse_Memcpy_Pool(json_pool & map, json_acc&root, std::string& data);
 
 #endif
 
