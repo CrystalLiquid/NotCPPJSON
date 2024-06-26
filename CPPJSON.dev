@@ -1,7 +1,7 @@
 [Project]
 filename = CPPJSON.dev
 name = CPPJSON
-UnitCount = 5
+UnitCount = 7
 Type = 1
 Ver = 3
 Includes = 
@@ -77,16 +77,16 @@ SyncProduct = 1
 
 
 [Unit2]
-FileName = JSON_ACC_Pool.cxx
-CompileCpp = 1
-Folder = 源文件
-Compile = 1
-Link = 1
+FileName = JSON_ACC_Serialize.hpp
+CompileCpp = 0
+Folder = 头文件
+Compile = 0
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = 
 
 
 [Unit3]
@@ -99,33 +99,33 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = ASCII
 
 
 [Unit4]
-FileName = JSON_Parse.cxx
-CompileCpp = 1
-Folder = 源文件
-Compile = 1
-Link = 1
+FileName = JSON_Parse.hpp
+CompileCpp = 0
+Folder = 头文件
+Compile = 0
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = 
 
 
 [Unit5]
-FileName = JSON_IO.h
-CompileCpp = 1
+FileName = JSON_ACC_Pool_Str.hpp
+CompileCpp = 0
 Folder = 头文件
-Compile = 1
-Link = 1
+Compile = 0
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = 
 
 
 [Unit6]
@@ -142,7 +142,7 @@ RealEncoding = UTF-8
 
 
 [Unit7]
-FileName = JSON_Parse.h
+FileName = JSON_ACC_Pool.hpp
 CompileCpp = 0
 Folder = 头文件
 Compile = 0
@@ -151,7 +151,7 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = ASCII
+RealEncoding = 
 
 
 [CompilerSettings]
