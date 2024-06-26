@@ -90,7 +90,7 @@ int PairList_Expect_Pool(std::string& data, json_pool&map, int current_root_idx,
 					buf.content = std::stod(fragment);
 				}
 				if (buf.type == digit_int) {
-					buf.content = std::stoi(fragment);
+					buf.content = std::stoll(fragment);
 				}
 				map.emplace_back(buf);
 				map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
@@ -257,7 +257,7 @@ int DimensionArray_Expect_Pool(std::string& data, json_pool& map, int current_ro
 				}
 				if (buf.type == digit_int) {
 
-					buf.content = std::stoi(fragment);
+					buf.content = std::stoll(fragment);
 				}
 
 				map.emplace_back(buf);
@@ -328,7 +328,7 @@ int DimensionArray_Expect_Pool(std::string& data, json_pool& map, int current_ro
 	}
 
 	//std::cout << "Outa!:" << i << "\n";
-	if (!std::get_if<int>(&buf.content) || !std::get_if<std::string>(&buf.content) || !std::get_if<bool>(&buf.content) || !std::get_if<double>(&buf.content)) {
+	if (!std::get_if<i64t>(&buf.content) || !std::get_if<std::string>(&buf.content) || !std::get_if<bool>(&buf.content) || !std::get_if<double>(&buf.content)) {
 		map.emplace_back(buf);
 		buf.clear();
 	}//本来是应对']'的，但是会多出来
@@ -405,7 +405,7 @@ int JSON_Parse_Pool(json_pool & map, std::string& data) {
 					buf.content = std::stod(fragment);
 				}
 				if (buf.type == digit_int) {
-					buf.content = std::stoi(fragment);
+					buf.content = std::stoll(fragment);
 				}
 
 

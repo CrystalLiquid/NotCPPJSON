@@ -77,10 +77,10 @@ int count_map(JSON& map, int&tmp) {
  */
 
 int main() {
-	//const char* path = "citm_catalog.json";
+	const char* path = "citm_catalog.json";
 	//const char* path = "canada.json";
 	//const char* path = "twitter.json";
-	const char* path = "2.json";
+	//const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
 	json_pool map;
@@ -97,7 +97,7 @@ int main() {
 
 	FILE.READ(path, data);
 	//std::cout << data << "\n\n\n\n";
-	//high_resolution_clock::time_point Stime = high_resolution_clock::now();
+	high_resolution_clock::time_point Stime = high_resolution_clock::now();
 	//JSON_Parse(map, data);
 	JSON_Parse_Pool(map, data);
 	//std::cout << "Result" << map.back().title;
@@ -105,16 +105,15 @@ int main() {
 	//} catch (std::bad_alloc) {
 	//	std::cout << "ERROR\n";
 	//}
-	//high_resolution_clock::time_point Etime = high_resolution_clock::now();
+	high_resolution_clock::time_point Etime = high_resolution_clock::now();
 	std::cout << "JSONParse Finish\n";
-	//milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
+	milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
 
 
 	for (int i = 0; i < (int)map.size(); i++) {
-		//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
-		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" << "\n";
+		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" << map.at(i).get_pval() << "\n";
 	}
-
+	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 
 	//SeeChild(rt);
 	//IsValidMap_VectorP(rt, 0);

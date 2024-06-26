@@ -148,9 +148,13 @@ class json_pool : public std::vector<json_acc> {
 		}
 	}
 };
-//using JSON_POOL =  std::vector<JSON_ACC>;
+using i64t = int64_t;
+using d64t = long double;
+//uing JSON_POOL =  std::vector<JSON_ACC>;
+
 struct json_acc {
-	using content_type = std::variant<int, double, std::string, bool, std::monostate>;
+
+	using content_type = std::variant<i64t, double, std::string, bool, std::monostate>;
   public:
 	std::string title;//32
 	content_type content;
@@ -165,8 +169,8 @@ struct json_acc {
 		type(notype),
 		Father_idx(0) {};
 	//std::variant<int, double, std::string, bool, JSON_POOL>
-	std::variant<int, double, std::string, bool, std::monostate, json_pool_slice> get_val(json_pool* ppool = nullptr) {
-		if (!std::get_if<int>(&content) || !std::get_if<std::string>(&content) || !std::get_if<bool>(&content) || !std::get_if<double>(&content)) {
+	std::variant<i64t, double, std::string, bool, std::monostate, json_pool_slice> get_val(json_pool* ppool = nullptr) {
+		if (!std::get_if<i64t>(&content) || !std::get_if<std::string>(&content) || !std::get_if<bool>(&content) || !std::get_if<double>(&content)) {
 			//TODO 非空判断，get_if如果类型不对会返回空指针
 			if (type == str || type == dimension_void || type == pair_list_void || type == null) {
 				return std::get<std::string>(content);
@@ -175,7 +179,7 @@ struct json_acc {
 				return std::get<bool>(content);
 			}
 			if (type == digit_int) {
-				return std::get<int>(content);
+				return std::get<i64t>(content);
 			}
 			if (type == digit_double) {
 				return std::get<double>(content);
@@ -189,10 +193,10 @@ struct json_acc {
 		}
 		return std::monostate{};
 	}
-	void set_val(std::variant<int, double, std::string, bool, std::monostate, json_pool> v, int list_type = notype, json_pool* pool = nullptr) {
+	void set_val(std::variant<i64t, double, std::string, bool, std::monostate, json_pool> v, int list_type = notype, json_pool* pool = nullptr) {
 
 		auto check_type = [&v, &list_type]() {
-			if (!std::get_if<int>(&v) ) {
+			if (!std::get_if<i64t>(&v) ) {
 				return digit_int;
 			}
 			if (!std::get_if<std::string>(&v)) {
@@ -239,7 +243,7 @@ struct json_acc {
 				type = tmp_type;
 				break;
 			case digit_int:
-				content = (std::get<int>(v));
+				content = (std::get<i64t>(v));
 				type = tmp_type;
 				break;
 			case digit_double:
@@ -304,7 +308,7 @@ struct json_acc {
 				return (unsafe_ptr)std::get_if<std::string>(&this->content);
 				break;
 			case digit_int:
-				return (unsafe_ptr)std::get_if<int>(&this->content);
+				return (unsafe_ptr)std::get_if<i64t>(&this->content);
 				break;
 			case digit_double:
 				return (unsafe_ptr)std::get_if<double>(&this->content);
