@@ -112,7 +112,7 @@ int main() {
 
 	for (int i = 0; i < (int)map.size(); i++) {
 		//std::cout << "title:" << map.at(i).title << "         content:" << map.at(i).content;
-		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" <<  << "\n";
+		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" << "\n";
 	}
 
 

@@ -122,7 +122,8 @@ int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx,
 			///////////////////////
 			if (data[i + 1] == FieldS) { //Dimension List
 				buf.type = dimension_list;
-
+#define Pair_Dimen
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 				j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1);
@@ -149,7 +150,8 @@ int PairList_Expect_Pool(std::string& data, JSON_POOL&map, int current_root_idx,
 
 			if (data[i + 1] == LayerS) {//pair_list {}   Object
 				buf.type = pair_list;
-
+#define Pair_Pair
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 				j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
@@ -281,7 +283,8 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 
 			if (data[i + 1] == FieldS) { //Dimension List
 				buf.type = dimension_list;
-
+#define Dimension_Dimen
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 				j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1);
@@ -307,7 +310,8 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 
 			if (data[i + 1] == LayerS) { //pair_list {}   Object///////////////////
 				buf.type = pair_list;
-
+#define Dimension_Pair
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 				j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
@@ -324,7 +328,7 @@ int DimensionArray_Expect_Pool(std::string& data, JSON_POOL& map, int current_ro
 	}
 
 	//std::cout << "Outa!:" << i << "\n";
-	if (std::get_if<int>(&buf.content) || std::get_if<std::string>(&buf.content) || std::get_if<bool>(&buf.content) || std::get_if<double>(&buf.content)) {
+	if (!std::get_if<int>(&buf.content) || !std::get_if<std::string>(&buf.content) || !std::get_if<bool>(&buf.content) || !std::get_if<double>(&buf.content)) {
 		map.emplace_back(buf);
 		buf.clear();
 	}//本来是应对']'的，但是会多出来
@@ -432,6 +436,7 @@ int JSON_Parse_Pool(JSON_POOL & map, std::string& data) {
 			if (data[i + 1] == FieldS) { //Dimension List
 				buf.type = dimension_list;
 #define Main_Dimension
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1);
 				//std::cout << "Dimen:" << data[i + 1] << "\n";
@@ -446,6 +451,7 @@ int JSON_Parse_Pool(JSON_POOL & map, std::string& data) {
 
 
 #define Main_Pair
+				buf.content = std::monostate {};
 				map.emplace_back(buf);
 				j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
 
