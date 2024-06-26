@@ -111,7 +111,12 @@ int main() {
 
 
 	for (int i = 0; i < (int)map.size(); i++) {
-		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" << map.at(i).get_pval() << "\n";
+
+
+
+
+
+		std::cout << "Father:" << map.at(i).Father_idx << "|" << map.at(i).title << ":" /*<< map.at(i).get_pval()*/ << "\n";
 	}
 	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 

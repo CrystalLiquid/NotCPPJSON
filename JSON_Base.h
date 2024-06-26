@@ -138,7 +138,9 @@ class json_pool : public std::vector<json_acc> {
 	}
 	void set_val_pool(std::string& key, int search_type = search_t::directly) {
 		if (search_type == search_t::directly) {
+			for (int i = 0; i < this->size(); i++) {
 
+			}
 		}
 		if (search_type == search_t::dfs) {
 
