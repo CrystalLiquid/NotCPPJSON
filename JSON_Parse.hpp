@@ -20,19 +20,22 @@
 #include <cmath>
 #include <cstdlib>
 #pragma once
+
 typedef struct JSON {
+	using i64t = long long;
+	using child_slice = std::vector<JSON>;
   public:
 	std::string title;//32
 	std::string content;//32
 	int type{notype};//4
+	std::vector<JSON> Child;//24
 	void clear() {
 		title.clear();
 		content.clear();
 		type = notype;
 		Child.clear();
 	}
-	template<typename T>
-	T get_val() {
+	std::variant<i64t, std::string, double, bool, child_slice> get_val() {
 		switch (this->type) {
 			case notype:
 				return std::string("");
@@ -41,7 +44,7 @@ typedef struct JSON {
 				return this->content;
 				break;
 			case digit_int:
-				return std::stoi(this->content);
+				return std::stoll(this->content);
 				break;
 			case digit_double:
 				return std::stod(this->content);
@@ -74,7 +77,7 @@ typedef struct JSON {
 				break;
 		}
 	}
-	std::vector<JSON> Child;//24
+
 }*pJSON;
 int PairList_Expect(std::string& data, JSON& currentm, int beginpos);
 int DimensionArray_Expect(std::string& data, JSON& currentm, int beginpos);

@@ -1,13 +1,13 @@
 [
     {
-        "caretX": 23,
-        "caretY": 2,
+        "caretX": 17,
+        "caretY": 50,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
         "focused": false,
         "isOpen": true,
         "left": 0,
         "order": 0,
-        "top": 0
+        "top": 690
     },
     {
         "caretX": 7,
@@ -30,14 +30,24 @@
         "top": 621
     },
     {
-        "caretX": 6,
-        "caretY": 518,
+        "caretX": 18,
+        "caretY": 13,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Parse.hpp",
+        "focused": false,
+        "isOpen": true,
+        "left": 0,
+        "order": 5,
+        "top": 0
+    },
+    {
+        "caretX": 14,
+        "caretY": 138,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool_Str.hpp",
         "focused": true,
         "isOpen": true,
         "left": 0,
         "order": 4,
-        "top": 11661
+        "top": 2783
     },
     {
         "caretX": 51,
@@ -49,13 +59,13 @@
         "top": 1610
     },
     {
-        "caretX": 25,
-        "caretY": 695,
+        "caretX": 2,
+        "caretY": 24,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool.hpp",
         "focused": false,
         "isOpen": true,
         "left": 0,
         "order": 1,
-        "top": 15617
+        "top": 276
     }
 ]

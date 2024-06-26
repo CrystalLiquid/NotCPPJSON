@@ -38,6 +38,11 @@ namespace json_acc_str_np {
 		invalid_opttype = -124
 	};
 
+	enum search_t {
+		directly = 1,
+		dfs = 2,
+		bfs = 3
+	};
 
 	struct json_acc_str {
 		using i64t = long long;
@@ -103,7 +108,70 @@ namespace json_acc_str_np {
 	};
 
 	struct json_pool_str : public std::vector<json_acc_str> {
+	  private:
+		int f_bfs_(int root_idx, const json_pool_str&pmap, std::string& key) {//广度 递归遍历 通过私有函数实现
+			int temp_child_idx = 0;
+			int target_idx = -200;
+			for (int i = 0; i < (pmap).at(root_idx).Child_idx.size(); i++) {
+				temp_child_idx = (pmap).at(root_idx).Child_idx.at(i);
+				if ((pmap).at(temp_child_idx).title == key) {
+					target_idx = temp_child_idx;
+					break;
+				}
+				target_idx = f_bfs_(temp_child_idx, pmap, key);
+				if (target_idx != -200) {
+					break;
+				}
+			}
+			return target_idx;
+		};
+		int f_dfs_c_(int current_idx, const json_pool_str&pmap, std::string& key) {
+			int current_opt_idx = current_idx;
+			int current_father = 0;
+			int target_idx = -200;
+			int child = 0;
+			while (target_idx == -200) {
+				//TODO forward to child
+				while (pmap.at(current_opt_idx).title != key && child < pmap.at(current_father).Child_idx.size()) {
+					current_father = current_opt_idx;
+					current_opt_idx = pmap.at(current_opt_idx).Child_idx.at(child);
+					child++;
+				}
 
+			}
+
+		}
+		int f_dfs_(int root_idx, const json_pool_str&pmap, std::string& key) {
+			int current_opt_idx = 0;
+			int target_idx = -200;
+
+
+
+
+			if (target_idx != -200) {
+
+			}
+		}
+	  public:
+		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly) {
+
+			int target_idx = 0;
+			if (search_type == search_t::directly) {
+				for (int i = 0; i < this->size(); i++) {
+					if (this->at(i).title == key) {
+						target_idx = i;
+						break;
+					}
+				}
+			}
+			if (search_type == search_t::bfs) {
+				target_idx = f_bfs_(0, *this, key);
+			}
+			if (search_type == search_t::dfs) {
+
+			}
+			return this->at(target_idx);
+		}
 	};
 
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos);
@@ -211,7 +279,7 @@ namespace json_acc_str_np {
 					buf.clear();
 					i = i + 2;
 				}
-				if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object
+				if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object accelerate parsing
 					buf.type = pair_list_void;
 
 					buf.content = "{}";
@@ -222,7 +290,7 @@ namespace json_acc_str_np {
 					i = i + 2;
 				}
 				///////////////////////
-				if (data[i + 1] == FieldS) { //Dimension List
+				if (data[i + 1] == FieldS) { //Dimension List array
 					buf.type = dimension_list;
 #define Pair_Dimen
 					map.emplace_back(buf);
@@ -233,21 +301,6 @@ namespace json_acc_str_np {
 					i = j;
 				}
 				/////////////////////////////////////////////////////////////////
-				/*
-				if (data[i + 1] == FieldS && data[i + 2] == LayerS) {//field [] Array
-				//std::cout << "FIELD" << "\n";
-				//for (j = i; data[j] != FieldE; ++j) {
-				//}
-				buf.type = dimension_list;
-
-				j = Field_Expect(data, buf, i + 1);
-				currentm.Child.emplace_back(buf);
-				buf.clear();
-				i = j;
-				j = 0;
-				//i = field_endpos + 1;
-				}
-				*/
 
 				if (data[i + 1] == LayerS) {//pair_list {}   Object
 					buf.type = pair_list;
@@ -258,16 +311,8 @@ namespace json_acc_str_np {
 
 					buf.clear();
 					i = j;
-					//std::cout << "RealPair:" << data[i] << "\n";
 					j = 0;
 				}
-				//if (data[i + 1] == LayerS && data[i + 2] == LayerE) {//pair_list {}   Object
-				///	buf.type = pair_list_void;
-				//	currentm.Child.emplace_back(buf);
-				//	buf.clear();
-				//	i = i + 2;
-				//}
-
 			}
 		}
 		return i;
@@ -409,10 +454,7 @@ namespace json_acc_str_np {
 					j = 0;
 				}
 			}
-
 		}
-
-		//std::cout << "Outa!:" << i << "\n";
 		if (!buf.content.empty()) {
 			map.emplace_back(buf);
 			buf.clear();
