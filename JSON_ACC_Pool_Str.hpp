@@ -367,7 +367,7 @@ namespace json_acc_str_np {
 					//std::cout << "STR" << "\n";
 					buf.type = str;
 					//std::cout << data[i];
-					for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
+					for (j = i + 1; data[j] not_eq ConE && data[j] not_eq LayerE; j++) {
 						buf.content.push_back(data[j]);
 
 					}
@@ -382,7 +382,7 @@ namespace json_acc_str_np {
 					i = j - 1;
 					j = 0;
 				}
-				if (std::isdigit(data[i + 1]) || (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
+				if (std::isdigit(data[i + 1]) or (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
 					//std::cout << "DIGIT" << "\n";
 					/////////////////////////////////////////////////////////////
 					buf.type = digit_int;
@@ -475,7 +475,7 @@ namespace json_acc_str_np {
 			//std::cout << data[i];
 			if (data[i] == ConS) {
 				///title
-				for (t = i; data[t] != ConE && data[t] != LayerS; t--) {
+				for (t = i; data[t] not_eq ConE && data[t] not_eq LayerS; t--) {
 				}
 				for (k = t + 1; data[k] != ConS; k++) {
 					buf.title.push_back(data[k]);
@@ -505,7 +505,7 @@ namespace json_acc_str_np {
 					//std::cout << "STR" << "\n";
 					buf.type = str;
 
-					for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
+					for (j = i + 1; data[j] not_eq ConE && data[j] not_eq LayerE; j++) {
 						buf.content.push_back(data[j]);
 					}
 
@@ -584,7 +584,8 @@ namespace json_acc_str_np {
 	//int JSON_Serialize_Child(json_acc_str_np::json_pool_str& map, std::string& result, int current_root = 0);
 
 	int JSON_Serialize_Child(json_acc_str_np::json_pool_str& map, std::string& result, int current_root = 0) {
-		if (map.at(current_root).type != notype && map.at(current_root).type != dimension_list && map.at(current_root).type != pair_list) {
+
+		if (map.at(current_root).type not_eq notype && map.at(current_root).type not_eq dimension_list && map.at(current_root).type not_eq pair_list) {
 			result.append(map.at(current_root).title);
 			result.push_back(':');
 			result.append(map.at(current_root).content);
@@ -593,33 +594,41 @@ namespace json_acc_str_np {
 		if (map.at(current_root).type == dimension_list) {
 			int tmp_idx_dm = 0;
 			result.append(map.at(current_root).title);
-			result.append("[");
+			result.append(":[");
 			for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
 				tmp_idx_dm = map.at(current_root).Child_idx.at(i);
-				if (map.at(tmp_idx_dm).type != dimension_list && map.at(tmp_idx_dm).type != pair_list && map.at(tmp_idx_dm).type != notype) {
+				if (map.at(tmp_idx_dm).type not_eq dimension_list && map.at(tmp_idx_dm).type not_eq pair_list && map.at(tmp_idx_dm).type not_eq notype) {
 					result.append(map.at(tmp_idx_dm).content);
 					if (i != map.at(current_root).Child_idx.size() - 1) {
 						result.push_back(',');
 					}
 				}
 				if (map.at(tmp_idx_dm).type == dimension_list) {
+					result.append("[");
 					JSON_Serialize_Child(map, result, tmp_idx_dm);
+					result.append("]");
+					if (i != map.at(current_root).Child_idx.size() - 1) {
+						result.push_back(',');
+					}
 				}
 				if (map.at(tmp_idx_dm).type == pair_list) {
 					result.append("{");
 					JSON_Serialize_Child(map, result, tmp_idx_dm);
-					result.append("},");
-
+					result.append("}");
+					if (i != map.at(current_root).Child_idx.size() - 1) {
+						result.push_back(',');
+					}
 				}
 			}
 			result.append("],");
 		}
 		if (map.at(current_root).type == pair_list) {
 			int tmp_idx_pl = 0;
-			result.append("{");
+			result.append(map.at(current_root).title);
+			result.append(":{");
 			for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
 				tmp_idx_pl = map.at(current_root).Child_idx.at(i);
-				if (map.at(tmp_idx_pl).type != dimension_list && map.at(tmp_idx_pl).type != pair_list && map.at(tmp_idx_pl).type != notype) {
+				if (map.at(tmp_idx_pl).type not_eq dimension_list && map.at(tmp_idx_pl).type not_eq pair_list && map.at(tmp_idx_pl).type not_eq notype) {
 					JSON_Serialize_Child(map, result, tmp_idx_pl);
 				}
 				if (map.at(tmp_idx_pl).type == pair_list) {

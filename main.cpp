@@ -1,7 +1,7 @@
 #include <iostream>
 #include "JSON_Base.h"
 #include "JSON_ACC_Pool_Str.hpp"
-#include "JSON_IO.h"
+#include "JSON_IO.hpp"
 #include <chrono>
 #pragma once
 #ifndef __MAIN_
@@ -34,7 +34,7 @@ int main() {
 
 
 //	for (int i = 0; i < (int)map.size(); i++) {
-///		std::cout << "Father:" << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "\n";
+//		std::cout << "Father:" << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "\n";
 //	}
 	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 
@@ -44,6 +44,7 @@ int main() {
 	std::string result;
 	json_acc_str_np::JSON_Serialize_Pool(map, result, 0);
 	std::cout << result;
+	LP_BASIC_IO::IO_Write(&result, "1.json");
 	//std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << "\n";
 	return 0;
 }
