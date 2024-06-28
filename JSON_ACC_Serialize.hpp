@@ -34,6 +34,7 @@ namespace json_acc_str_np {
 					result.append("{");
 					JSON_Serialize_Child(map, result, tmp_idx_dm);
 					result.append("},");
+
 				}
 			}
 			result.append("],");
