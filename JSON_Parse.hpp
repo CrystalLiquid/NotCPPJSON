@@ -20,7 +20,7 @@
 #include <cmath>
 #include <cstdlib>
 #pragma once
-
+//用string来类型擦除，返回variant还原类型，不使用池化技术
 typedef struct JSON {
 	using i64t = long long;
 	using child_slice = std::vector<JSON>;

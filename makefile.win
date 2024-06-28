@@ -12,11 +12,11 @@ CXXINCS  =
 CXXFLAGS = $(CXXINCS) "-O3" "-std=c++2b" "-pipe"
 CFLAGS   = $(INCS) "-std=c17" "-O3" "-pipe"
 WINDRESFLAGS = 
-RES      = ../FuckingObject/CPPJSON_private.res
-OBJ      = ../FuckingObject/main.o $(RES)
-BIN      = ../Release/CPPJSON.exe
-LINKOBJ  = "../FuckingObject/main.o" "../FuckingObject/CPPJSON_private.res"
-CLEANOBJ = "..\FuckingObject\main.o" "..\FuckingObject\CPPJSON_private.res" "..\Release\CPPJSON.exe"
+RES      = tmp_obj/CPPJSON_private.res
+OBJ      = tmp_obj/main.o $(RES)
+BIN      = release/CPPJSON.exe
+LINKOBJ  = "tmp_obj/main.o" "tmp_obj/CPPJSON_private.res"
+CLEANOBJ = "tmp_obj\main.o" "tmp_obj\CPPJSON_private.res" "release\CPPJSON.exe"
 
 .PHONY: all all-before all-after clean clean-custom
 
@@ -25,13 +25,13 @@ all: all-before $(BIN) all-after
 clean: clean-custom
 	-$(RM) $(CLEANOBJ) >NUL 2>&1
 
-../Release/CPPJSON.exe: $(OBJ)
+release/CPPJSON.exe: $(OBJ)
 
-	$(CXX) $(LINKOBJ) -o "../Release/CPPJSON.exe" $(LIBS)
+	$(CXX) $(LINKOBJ) -o "release/CPPJSON.exe" $(LIBS)
 
-../FuckingObject/main.o: main.cpp JSON_ACC_Pool.hpp JSON_ACC_Pool_Str.hpp JSON_ACC_Serialize.hpp JSON_Base.h JSON_IO.h JSON_Parse.hpp
-	$(CXX) -c "main.cpp" -o "../FuckingObject/main.o" $(CXXFLAGS) 
+tmp_obj/main.o: main.cpp JSON_ACC_Pool_Str.hpp JSON_Base.h JSON_IO.h
+	$(CXX) -c "main.cpp" -o "tmp_obj/main.o" $(CXXFLAGS) 
 
-../FuckingObject/CPPJSON_private.res: CPPJSON_private.rc 
-	$(WINDRES) -i "CPPJSON_private.rc" --input-format=rc -o "../FuckingObject/CPPJSON_private.res" -O coff $(WINDRESFLAGS) 
+tmp_obj/CPPJSON_private.res: CPPJSON_private.rc 
+	$(WINDRES) -i "CPPJSON_private.rc" --input-format=rc -o "tmp_obj/CPPJSON_private.res" -O coff $(WINDRESFLAGS) 
 

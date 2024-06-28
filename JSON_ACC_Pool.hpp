@@ -19,7 +19,7 @@
 #pragma once
 #include <variant>
 namespace json_acc_variant_maybe_deprecate {
-
+//variant擦除，难以序列化，可能会丢弃
 	struct json_acc;
 	enum search_t {
 		directly = 1,

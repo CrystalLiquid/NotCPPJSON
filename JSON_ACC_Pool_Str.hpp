@@ -21,7 +21,7 @@
 #include "JSON_Base.h"
 #pragma once
 namespace json_acc_str_np {
-
+//用string来类型擦除，返回variant还原类型
 	enum data_type {
 		temp_digit = -2,
 		str = 1,
