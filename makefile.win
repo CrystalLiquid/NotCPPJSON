@@ -14,9 +14,9 @@ CFLAGS   = $(INCS) "-std=c17" "-O3" "-pipe"
 WINDRESFLAGS = 
 RES      = ../FuckingObject/CPPJSON_private.res
 OBJ      = ../FuckingObject/main.o $(RES)
-BIN      = CPPJSON.exe
+BIN      = ../Release/CPPJSON.exe
 LINKOBJ  = "../FuckingObject/main.o" "../FuckingObject/CPPJSON_private.res"
-CLEANOBJ = "..\FuckingObject\main.o" "..\FuckingObject\CPPJSON_private.res" "CPPJSON.exe"
+CLEANOBJ = "..\FuckingObject\main.o" "..\FuckingObject\CPPJSON_private.res" "..\Release\CPPJSON.exe"
 
 .PHONY: all all-before all-after clean clean-custom
 
@@ -25,11 +25,11 @@ all: all-before $(BIN) all-after
 clean: clean-custom
 	-$(RM) $(CLEANOBJ) >NUL 2>&1
 
-CPPJSON.exe: $(OBJ)
+../Release/CPPJSON.exe: $(OBJ)
 
-	$(CXX) $(LINKOBJ) -o "CPPJSON.exe" $(LIBS)
+	$(CXX) $(LINKOBJ) -o "../Release/CPPJSON.exe" $(LIBS)
 
-../FuckingObject/main.o: main.cpp JSON_ACC_Pool_Str.hpp JSON_Base.h JSON_IO.h
+../FuckingObject/main.o: main.cpp JSON_ACC_Pool.hpp JSON_ACC_Pool_Str.hpp JSON_ACC_Serialize.hpp JSON_Base.h JSON_IO.h JSON_Parse.hpp
 	$(CXX) -c "main.cpp" -o "../FuckingObject/main.o" $(CXXFLAGS) 
 
 ../FuckingObject/CPPJSON_private.res: CPPJSON_private.rc 
