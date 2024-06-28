@@ -29,7 +29,7 @@ CPPJSON.exe: $(OBJ)
 
 	$(CXX) $(LINKOBJ) -o "CPPJSON.exe" $(LIBS)
 
-../FuckingObject/main.o: main.cpp JSON_ACC_Serialize.hpp JSON_Base.h JSON_Parse.hpp JSON_ACC_Pool_Str.hpp JSON_IO.h JSON_ACC_Pool.hpp
+../FuckingObject/main.o: main.cpp JSON_IO.h JSON_ACC_Pool_Str.hpp JSON_Base.h
 	$(CXX) -c "main.cpp" -o "../FuckingObject/main.o" $(CXXFLAGS) 
 
 ../FuckingObject/CPPJSON_private.res: CPPJSON_private.rc 

@@ -10,10 +10,10 @@ using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
 int main() {
-	//const char* path = "citm_catalog.json";
+	const char* path = "citm_catalog.json";
 	//const char* path = "canada.json";
 	//const char* path = "twitter.json";
-	const char* path = "2.json";
+	//const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
 	json_acc_str_np::json_pool_str map;
@@ -42,9 +42,9 @@ int main() {
 	milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
 
 
-	for (int i = 0; i < (int)map.size(); i++) {
-		std::cout << "Father:" << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "\n";
-	}
+//	for (int i = 0; i < (int)map.size(); i++) {
+///		std::cout << "Father:" << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "\n";
+//	}
 	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 
 	//SeeChild(rt);

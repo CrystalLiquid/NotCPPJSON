@@ -131,27 +131,28 @@ namespace json_acc_str_np {
 			int target_idx = -200;
 			int child = 0;
 			while (target_idx == -200) {
-				//TODO forward to child
-				while (pmap.at(current_opt_idx).title != key && child < pmap.at(current_father).Child_idx.size()) {
+
+				while (child < pmap.at(current_father).Child_idx.size()) {//TODO forward to child
 					current_father = current_opt_idx;
 					current_opt_idx = pmap.at(current_opt_idx).Child_idx.at(child);
-					child++;
+					if (pmap.at(current_opt_idx).title != key) {
+						target_idx = current_opt_idx;
+						break;
+					}
 				}
-
+				child++;
+				if (pmap.at(current_father).Child_idx.size() - 1 > child) {//back to father
+					current_opt_idx = current_father;
+					current_father = pmap.at(current_opt_idx).Father_idx;
+				}
+				while (pmap.at(current_father).Child_idx.size() - 1 < child) {
+					current_opt_idx = current_father;
+					current_father = pmap.at(current_opt_idx).Father_idx;
+				}
 			}
-
+			return target_idx;
 		}
-		int f_dfs_(int root_idx, const json_pool_str&pmap, std::string& key) {
-			int current_opt_idx = 0;
-			int target_idx = -200;
 
-
-
-
-			if (target_idx != -200) {
-
-			}
-		}
 	  public:
 		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly) {
 
@@ -168,7 +169,7 @@ namespace json_acc_str_np {
 				target_idx = f_bfs_(0, *this, key);
 			}
 			if (search_type == search_t::dfs) {
-
+				target_idx = f_dfs_c_(0, *this, key);
 			}
 			return this->at(target_idx);
 		}
