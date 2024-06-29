@@ -9,24 +9,13 @@
         "top": 0
     },
     {
-        "caretX": 25,
-        "caretY": 47,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
+        "caretX": 17,
+        "caretY": 212,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Parse.hpp",
         "focused": false,
-        "isOpen": true,
+        "isOpen": false,
         "left": 0,
-        "order": 1,
-        "top": 207
-    },
-    {
-        "caretX": 20,
-        "caretY": 628,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool_Str.hpp",
-        "focused": true,
-        "isOpen": true,
-        "left": 0,
-        "order": 0,
-        "top": 14237
+        "top": 8832
     },
     {
         "caretX": 39,
@@ -38,31 +27,39 @@
         "top": 2622
     },
     {
-        "caretX": 1,
-        "caretY": 1,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_IO.hpp",
-        "focused": false,
-        "isOpen": true,
-        "left": 0,
-        "order": 2,
-        "top": 690
-    },
-    {
         "caretX": 16,
         "caretY": 25,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Base.h",
         "focused": false,
         "isOpen": false,
         "left": 0,
-        "top": 552
+        "top": 0
     },
     {
-        "caretX": 17,
-        "caretY": 212,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Parse.hpp",
+        "caretX": 25,
+        "caretY": 47,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
         "focused": false,
         "isOpen": false,
         "left": 0,
-        "top": 4692
+        "top": 207
+    },
+    {
+        "caretX": 1,
+        "caretY": 1,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_IO.hpp",
+        "focused": false,
+        "isOpen": false,
+        "left": 0,
+        "top": 690
+    },
+    {
+        "caretX": 20,
+        "caretY": 628,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool_Str.hpp",
+        "focused": false,
+        "isOpen": false,
+        "left": 0,
+        "top": 14237
     }
 ]
