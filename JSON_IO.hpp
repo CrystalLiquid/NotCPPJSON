@@ -10,7 +10,6 @@
 namespace LP_BASIC_IO {
 	void IO_Read(std::string *Data, const char *PATH) { //可以读取换行的函数
 #define Tail " "
-
 		std::ifstream fp;
 		std::string TEMP;//因为>>符号会覆盖，先写入缓存再append追加
 		fp.open(PATH, std::ios::in);
@@ -38,6 +37,12 @@ namespace LP_BASIC_IO {
 		std::cout << "Start SingleThread Write" << std::endl;
 		std::ofstream of;
 		of.open(PATH, std::ios::out | std::ios::trunc);
+		of << (*Data);
+	}
+	void IO_Write_Append(std::string *Data, const char *PATH) {
+		std::cout << "Start SingleThread Write" << std::endl;
+		std::ofstream of;
+		of.open(PATH, std::ios::out | std::ios::app);
 		of << (*Data);
 	}
 }

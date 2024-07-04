@@ -1,16 +1,16 @@
 # Project: CPPJSON
 # Makefile created by Red Panda C++ 3.0.2815
 
-CXX      = "clang++.exe"
-CC       = "clang.exe"
+CXX      = "g++.exe"
+CC       = "gcc.exe"
 WINDRES  = "windres.exe"
 RM       = del /q /f
 CD       = cd /d
-LIBS     = "-LD:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/lib" "-LD:/RedPanda-CPP/llvm-mingw-ucrt/lib" "-LD:/RedPanda-CPP/llvm-mingw-ucrt/lib/libscanbuild" "-LD:/RedPanda-CPP/llvm-mingw-ucrt/lib/libear" "-LD:/RedPanda-CPP/llvm-mingw-ucrt/lib" "-Wl,--stack,12582912" "-s" "-static"
-INCS     = "-ID:/RedPanda-CPP/llvm-mingw-ucrt/include" "-ID:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/include"
-CXXINCS  = "-ID:/RedPanda-CPP/llvm-mingw-ucrt/include" "-ID:/RedPanda-CPP/llvm-mingw-ucrt/lib/clang/17/include" "-ID:/RedPanda-CPP/llvm-mingw-ucrt/include/c++/v1"
-CXXFLAGS = $(CXXINCS) "-pedantic" "-msse4.2" "-O2" "-std=c++2b" "-pipe" "-Wall" "-Wextra"
-CFLAGS   = $(INCS) "-std=c17" "-pedantic" "-msse4.2" "-O2" "-pipe" "-Wall" "-Wextra"
+LIBS     = "-LD:/RedPanda-CPP/MinGW64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++" "-LD:/RedPanda-CPP/MinGW64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits" "-fstack-protector-all" "-Wl,--stack,12582912" "-s" "-static"
+INCS     = 
+CXXINCS  = 
+CXXFLAGS = $(CXXINCS) "-Wfatal-errors" "-pedantic" "-O2" "-std=c++2b" "-pipe"
+CFLAGS   = $(INCS) "-std=c17" "-Wfatal-errors" "-pedantic" "-O2" "-pipe"
 WINDRESFLAGS = 
 RES      = tmp_obj/CPPJSON_private.res
 OBJ      = tmp_obj/main.o $(RES)
@@ -29,7 +29,7 @@ release/CPPJSON.exe: $(OBJ)
 
 	$(CXX) $(LINKOBJ) -o "release/CPPJSON.exe" $(LIBS)
 
-tmp_obj/main.o: main.cpp JSON_ACC_Pool_Str.hpp JSON_IO.hpp JSON_Base.h
+tmp_obj/main.o: main.cpp JSON_Base.h JSON_IO.hpp JSON_Parse.hpp JSON_Serialize.hpp JSON_ACC_Pool_Str.hpp
 	$(CXX) -c "main.cpp" -o "tmp_obj/main.o" $(CXXFLAGS) 
 
 tmp_obj/CPPJSON_private.res: CPPJSON_private.rc 
