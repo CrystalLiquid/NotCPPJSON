@@ -18,10 +18,17 @@
 #include <vector>
 #include <variant>
 #include <thread>
-#include "JSON_Base.h"
 #pragma once
+#define LayerS '{'
+#define LayerE '}'
+#define Quote '"'
+#define ConE ','
+#define FieldS '['
+#define FieldE ']'
+#define ConS ':'
 namespace json_acc_str_np {
 //用string来类型擦除，返回variant还原类型
+
 	enum data_type {
 		temp_digit = -2,
 		str = 1,
@@ -44,9 +51,11 @@ namespace json_acc_str_np {
 		bfs = 3
 	};
 
+	using i64t = long long;
+	using child_slice = std::vector<int>;
+
 	struct json_acc_str {
-		using i64t = long long;
-		using child_slice = std::vector<int>;
+
 	  public:
 		std::string title;//32
 		std::string content;//32
@@ -160,12 +169,18 @@ namespace json_acc_str_np {
 			int target_idx = 0;
 			if (search_type == search_t::directly) {
 				int i = 0;
-				for (; i < this->size(); ) {
+				for (; i < this->size() - 1; ) {
 					if (this->at(i).title != key) {
+//#pragma test
+						//std::cout << this->at(i).title << "\n";
 						++i;
 					}
+					if (this->at(i).title == key) {
+						target_idx = i;
+						break;
+					}
 				}
-				target_idx = i;
+
 			}
 			if (search_type == search_t::bfs) {
 				target_idx = f_bfs_(0, *this, key);
@@ -177,7 +192,34 @@ namespace json_acc_str_np {
 		}
 		json_acc_str& setval_by_name(std::string&& key, std::string&& val) {
 			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
+			if (ref.type != str) {
+				return ref;
+			}
 			ref.content = val;
+			return ref;
+		}
+		json_acc_str& setval_by_name(std::string&& key, i64t val) {
+			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
+			if (ref.type != digit_int) {
+				return ref;
+			}
+			ref.content = std::to_string(val);
+			return ref;
+		}
+		json_acc_str& setval_by_name(std::string&& key, double val) {
+			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
+			if (ref.type != digit_double) {
+				return ref;
+			}
+			ref.content = std::to_string(val);
+			return ref;
+		}
+		json_acc_str& setval_by_name(std::string&& key, bool val) {
+			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
+			if (ref.type != bool_t) {
+				return ref;
+			}
+			ref.content = std::to_string(val);
 			return ref;
 		}
 	};
@@ -185,6 +227,7 @@ namespace json_acc_str_np {
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos);
 	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos);
 	int JSON_Parse_Pool(json_pool_str & map, std::string& data);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef __ACC_POOL_STR_CXX_
 #define __ACC_POOL_STR_CXX_
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos = 0) {
@@ -215,7 +258,7 @@ namespace json_acc_str_np {
 				buf.Father_idx = current_root_idx;
 				for (t = i; data[t] != ConE && data[t] != LayerS; t--);
 				for (k = t; data[k] != ConS; k++) {
-					if (data[k] != LayerS && data[k] != FieldS && data[k] != ConE) {
+					if (data[k] != LayerS && data[k] != FieldS && data[k] != ConE && data[k] != Quote) {
 						buf.title.push_back(data[k]);
 					}
 				}
@@ -252,11 +295,11 @@ namespace json_acc_str_np {
 					//for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
 					//	buf.content.push_back(data[j]);
 					//}
-					buf.content.push_back(Quote);
+					//--------buf.content.push_back(Quote);
 					for (j = i + 2; data[j] not_eq Quote; j++) {
 						buf.content.push_back(data[j]);
 					}
-					buf.content.push_back(Quote);
+					//-------buf.content.push_back(Quote);
 
 
 					map.emplace_back(buf);
@@ -387,13 +430,13 @@ namespace json_acc_str_np {
 					buf.type = str;
 					//std::cout << data[i];
 
-					buf.content.push_back(Quote);
+					//-------buf.content.push_back(Quote);
 					for (j = i + 2; data[j] not_eq Quote; j++) {
 						buf.content.push_back(data[j]);
 //#pragma test
 						//std::cout << data[j];
 					}
-					buf.content.push_back(Quote);
+					//-------buf.content.push_back(Quote);
 
 
 					//std::cout << data[i];
@@ -506,7 +549,9 @@ namespace json_acc_str_np {
 				for (t = i; data[t] not_eq ConE && data[t] not_eq LayerS; t--) {
 				}
 				for (k = t + 1; data[k] != ConS; k++) {
-					buf.title.push_back(data[k]);
+					if (data[k] != Quote) {
+						buf.title.push_back(data[k]);
+					}
 				}
 				//std::cout << t << "," << i << "\n";
 				buf.Father_idx = 0;
@@ -537,11 +582,11 @@ namespace json_acc_str_np {
 					//	buf.content.push_back(data[j]);
 					//}
 
-					buf.content.push_back(Quote);
+					//-------buf.content.push_back(Quote);
 					for (j = i + 2; data[j] not_eq Quote; j++) {
 						buf.content.push_back(data[j]);
 					}
-					buf.content.push_back(Quote);
+					//-------buf.content.push_back(Quote);
 
 					map.emplace_back(buf);
 					buf.clear();
@@ -620,14 +665,39 @@ namespace json_acc_str_np {
 	int JSON_Serialize_Child(json_acc_str_np::json_pool_str& map, std::string& result, int current_root = 0) {
 
 		if (map.at(current_root).type not_eq notype && map.at(current_root).type not_eq dimension_list && map.at(current_root).type not_eq pair_list) {
-			result.append(map.at(current_root).title);
-			result.push_back(':');
-			result.append(map.at(current_root).content);
-			result.push_back(',');
+			if (map.at(current_root).type not_eq str) {
+				result.push_back('"');
+				result.append(map.at(current_root).title);
+				result.push_back('"');
+
+				result.push_back(':');
+
+				result.append(map.at(current_root).content);
+				result.push_back(',');
+			}
+			if (map.at(current_root).type == str) {
+				result.push_back('"');
+				result.append(map.at(current_root).title);
+				result.push_back('"');
+
+				result.push_back(':');
+
+				result.push_back('"');
+				result.append(map.at(current_root).content);
+				result.push_back('"');
+				result.push_back(',');
+			}
+
 		}
 		if (map.at(current_root).type == dimension_list) {
 			int tmp_idx_dm = 0;
-			result.append(map.at(current_root).title);
+			if (!map.at(current_root).title.empty()) {
+				result.push_back('"');
+				result.append(map.at(current_root).title);
+				result.push_back('"');
+			}
+
+
 			if (map.at(map.at(current_root).Father_idx).type == dimension_list) { //if its father type is dimension,it might broke json syntax
 				result.append("[");
 			}
@@ -637,9 +707,14 @@ namespace json_acc_str_np {
 			for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
 				tmp_idx_dm = map.at(current_root).Child_idx.at(i);
 				if (map.at(tmp_idx_dm).type not_eq dimension_list && map.at(tmp_idx_dm).type not_eq pair_list && map.at(tmp_idx_dm).type not_eq notype) {
-					result.append(map.at(tmp_idx_dm).content);
-					//std::cout << map.at(tmp_idx_dm).content << "\n\n";
-					//result.push_back(',');
+					if (map.at(tmp_idx_dm).type == str) {
+						result.push_back('"');
+						result.append(map.at(tmp_idx_dm).content);
+						result.push_back('"');
+					}
+					if (map.at(tmp_idx_dm).type not_eq str) {
+						result.append(map.at(tmp_idx_dm).content);
+					}
 					if (i != map.at(current_root).Child_idx.size() - 1) {
 						result.push_back(',');
 					}
@@ -668,7 +743,13 @@ namespace json_acc_str_np {
 		}
 		if (map.at(current_root).type == pair_list) {
 			int tmp_idx_pl = 0;
-			result.append(map.at(current_root).title);
+
+			if (!map.at(current_root).title.empty()) {
+				result.push_back('"');
+				result.append(map.at(current_root).title);
+				result.push_back('"');
+			}
+
 			if (!map.at(current_root).title.empty()) {
 				result.append(":");
 			}
@@ -678,15 +759,28 @@ namespace json_acc_str_np {
 				tmp_idx_pl = map.at(current_root).Child_idx.at(i);
 				if (map.at(tmp_idx_pl).type not_eq dimension_list && map.at(tmp_idx_pl).type not_eq pair_list && map.at(tmp_idx_pl).type not_eq notype) {
 					//result.pop_back();
-					result.append(map.at(tmp_idx_pl).title);
-					result.push_back(':');
-					result.append(map.at(tmp_idx_pl).content);
-					result.push_back(',');
-					//if (tmp_idx_pl != (int)map.at(current_root).Child_idx.size() - 1) {
-					//	result.push_back(',');
-					//}
-					//result.pop_back();
-					//result.append("StrList");
+					if (map.at(tmp_idx_pl).type not_eq str) {
+						result.push_back('"');
+						result.append(map.at(tmp_idx_pl).title);
+						result.push_back('"');
+
+						result.push_back(':');
+
+						result.append(map.at(tmp_idx_pl).content);
+						result.push_back(',');
+					}
+					if (map.at(tmp_idx_pl).type == str) {
+						result.push_back('"');
+						result.append(map.at(tmp_idx_pl).title);
+						result.push_back('"');
+
+						result.push_back(':');
+
+						result.push_back('"');
+						result.append(map.at(tmp_idx_pl).content);
+						result.push_back('"');
+						result.push_back(',');
+					}
 				}
 				if (map.at(tmp_idx_pl).type == pair_list) {
 					JSON_Serialize_Child(map, result, tmp_idx_pl);

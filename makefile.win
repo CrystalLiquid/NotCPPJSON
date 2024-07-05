@@ -29,7 +29,7 @@ release/CPPJSON.exe: $(OBJ)
 
 	$(CXX) $(LINKOBJ) -o "release/CPPJSON.exe" $(LIBS)
 
-tmp_obj/main.o: main.cpp JSON_Base.h JSON_IO.hpp JSON_Parse.hpp JSON_Serialize.hpp JSON_ACC_Pool_Str.hpp
+tmp_obj/main.o: main.cpp JSON_IO.hpp JSON_ACC_Pool_Str.hpp JSON_Base.h
 	$(CXX) -c "main.cpp" -o "tmp_obj/main.o" $(CXXFLAGS) 
 
 tmp_obj/CPPJSON_private.res: CPPJSON_private.rc 
