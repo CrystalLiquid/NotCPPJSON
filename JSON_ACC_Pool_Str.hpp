@@ -192,6 +192,8 @@ namespace json_acc_str_np {
 		}
 		json_acc_str& setval_by_name(std::string&& key, std::string&& val) {
 			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
+			std::cout << &ref << "\n";
+			std::cout << val << "\n";
 			if (ref.type != str) {
 				return ref;
 			}
