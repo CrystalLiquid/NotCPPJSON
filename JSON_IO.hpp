@@ -8,6 +8,7 @@
 #include "JSON_Base.h"
 #pragma once
 namespace LP_BASIC_IO {
+	using i64 = long long;
 	void IO_Read(std::string *Data, const char *PATH) { //可以读取换行的函数
 #define Tail " "
 		std::ifstream fp;
@@ -33,17 +34,27 @@ namespace LP_BASIC_IO {
 		std::cout << "Finish Reading" << std::endl;
 		fp.close();
 	}
-	void IO_Write(std::string *Data, const char *PATH) {
+	void IO_Write(std::string &&Data, const char *PATH) {
 		std::cout << "Start SingleThread Write" << std::endl;
 		std::ofstream of;
 		of.open(PATH, std::ios::out | std::ios::trunc);
-		of << (*Data);
+		of << Data;
+		of.close();
 	}
-	void IO_Write_Append(std::string *Data, const char *PATH) {
+	template<typename T>
+	void IO_BinWrite(T&& val, const char *PATH) {
+		std::cout << "Start Bin Write" << std::endl;
+		std::ofstream of;
+		of.open(PATH, std::ios::out | std::ios::trunc | std::ios::binary);
+		of.write(reinterpret_cast<char*>(&val), sizeof(val));
+		of.close();
+	}
+	void IO_Write_Append(std::string &&Data, const char *PATH) {
 		std::cout << "Start SingleThread Write" << std::endl;
 		std::ofstream of;
 		of.open(PATH, std::ios::out | std::ios::app);
-		of << (*Data);
+		of << (Data);
+		of.close();
 	}
 }
 

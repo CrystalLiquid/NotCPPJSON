@@ -18,6 +18,7 @@
 #include <vector>
 #include <variant>
 #include <thread>
+#include <initializer_list>
 #pragma once
 #define LayerS '{'
 #define LayerE '}'
@@ -162,8 +163,23 @@ namespace json_acc_str_np {
 			}
 			return target_idx;
 		}
-
 	  public:
+		int getidx_by_name(std::string key) {
+			int target_idx = 0;
+			int i = 0;
+			for (; i < this->size() - 1; ) {
+				if (this->at(i).title != key) {
+//#pragma test
+					//std::cout << this->at(i).title << "\n";
+					++i;
+				}
+				if (this->at(i).title == key) {
+					target_idx = i;
+					break;
+				}
+			}
+			return target_idx;
+		}
 		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly) {
 
 			int target_idx = 0;
@@ -190,49 +206,222 @@ namespace json_acc_str_np {
 			}
 			return this->at(target_idx);
 		}
-		json_acc_str& setval_by_name(std::string&& key, std::string&& val) {
-			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
-			std::cout << &ref << "\n";
-			std::cout << val << "\n";
-			if (ref.type != str) {
-				return ref;
-			}
-			ref.content = val;
-			return ref;
+	  private:
+		void setval_by_name_str(std::string&& key, std::string&& val) {
+			this->getval_by_name(key).content = val;
 		}
-		json_acc_str& setval_by_name(std::string&& key, i64t val) {
-			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
-			if (ref.type != digit_int) {
-				return ref;
-			}
-			ref.content = std::to_string(val);
-			return ref;
+		void setval_by_name_i64(std::string&& key, i64t val) {
+			this->getval_by_name(key).content = std::to_string(val);
 		}
-		json_acc_str& setval_by_name(std::string&& key, double val) {
-			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
-			if (ref.type != digit_double) {
-				return ref;
-			}
-			ref.content = std::to_string(val);
-			return ref;
+		void setval_by_name_double(std::string&& key, double val) {
+			this->getval_by_name(key).content = std::to_string(val);
 		}
-		json_acc_str& setval_by_name(std::string&& key, bool val) {
-			json_acc_str_np::json_acc_str& ref = getval_by_name(key);
-			if (ref.type != bool_t) {
-				return ref;
+		void setval_by_name_bool(std::string&& key, bool val) {
+			this->getval_by_name(key).content = std::to_string(val);
+		}
+	  private:
+		int variant_return_type(std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			switch (val.index()) {
+				case 0:
+					return digit_int;
+					break;
+				case 1:
+					return str;
+					break;
+				case 2:
+					return digit_double;
+					break;
+				case 3:
+					return bool_t;
+					break;
+				case 4:
+					return notype;
+					break;
+				default:
+					throw ("error idx!");
+					break;
 			}
-			ref.content = std::to_string(val);
-			return ref;
+		}
+	  public:
+		void setval_by_name(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			int idx = getidx_by_name(key);
+			int vtype = variant_return_type(val);
+			int begin_i = -1;
+			int end_i = -1;
+			switch (this->at(idx).type) {
+				case notype:
+					break;
+
+				case str:
+					this->at(idx).content.clear();
+					break;
+
+				case digit_int:
+					this->at(idx).content.clear();
+					break;
+
+				case digit_double:
+					this->at(idx).content.clear();
+					break;
+
+				case dimension_list:
+					begin_i = this->at(idx).Child_idx.front();
+					end_i = this->at(idx).Child_idx.back();
+					this->at(idx).Child_idx.clear();
+					this->erase(this->begin() + begin_i, this->begin() + end_i);
+					break;
+
+				case pair_list:
+					begin_i = this->at(idx).Child_idx.front();
+					end_i = this->at(idx).Child_idx.back();
+					this->at(idx).Child_idx.clear();
+					this->erase(this->begin() + begin_i, this->begin() + end_i);
+					break;
+
+				case dimension_void:
+					this->at(idx).content.clear();
+					break;
+
+				case pair_list_void:
+					this->at(idx).content.clear();
+					break;
+
+				case bool_t:
+					this->at(idx).content.clear();
+					break;
+
+				case null:
+					this->at(idx).content.clear();
+					break;
+
+				default:
+					//TODO
+					break;
+			}
+			this->at(idx).type = notype;
+			this->at(idx).type = vtype;
+			switch (vtype) {
+				case notype:
+					break;
+
+				case str:
+
+					this->at(idx).content = std::get<std::string>(val);
+					break;
+
+				case digit_int:
+					this->at(idx).content = std::to_string(std::get<i64t>(val));
+					break;
+
+				case digit_double:
+					this->at(idx).content = std::to_string(std::get<double>(val));
+					break;
+
+				case dimension_void:
+					this->at(idx).content = "[]";
+					break;
+
+				case pair_list_void:
+					this->at(idx).content = "{}";
+					break;
+
+				case bool_t:
+					this->at(idx).content = std::to_string(std::get<bool>(val));;
+					break;
+
+				case null:
+					this->at(idx).content = "null";
+					break;
+
+				default:
+					//TODO
+					break;
+			}
+		}
+	  public:
+		void push_single(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			int vtype = variant_return_type(val);
+			/*
+			switch (vtype) {
+			case notype:
+			break;
+
+			case str:
+			this->push_back({title, std::get<std::string>(val), vtype,});
+			break;
+
+			case digit_int:
+			this->at(idx).content = std::to_string(std::get<i64t>(val));
+			break;
+
+			case digit_double:
+			this->at(idx).content = std::to_string(std::get<double>(val));
+			break;
+
+			case dimension_void:
+			this->at(idx).content = "[]";
+			break;
+
+			case pair_list_void:
+			this->at(idx).content = "{}";
+			break;
+
+			case bool_t:
+			this->at(idx).content = std::to_string(std::get<bool>(val));;
+			break;
+
+			case null:
+			this->at(idx).content = "null";
+			break;
+
+			default:
+			//TODO
+			break;
+			}
+			*/
+
+
+		}
+		void add_as_child(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+
+		}
+		void add_dimension(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
+			int father_idx = getidx_by_name(key);
+			int i = 1;
+			for (json_acc_str_np::json_acc_str x : list) {
+				x.Father_idx = father_idx;
+				x.type = dimension_list;
+				this->insert(this->begin() + father_idx + i, x);
+				this->at(father_idx).Child_idx.push_back(father_idx + i);
+				++i;
+			}
+		}
+		void add_pairlist(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
+			int father_idx = getidx_by_name(key);
+			int i = 1;
+			for (json_acc_str_np::json_acc_str x : list) {
+				x.Father_idx = father_idx;
+				x.type = pair_list;
+				this->insert(this->begin() + father_idx + i, x);
+				this->at(father_idx).Child_idx.push_back(father_idx + i);
+				++i;
+			}
 		}
 	};
-
+#define function_define
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos);
 	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos);
 	int JSON_Parse_Pool(json_pool_str & map, std::string& data);
+	void Debug_Print(std::string& data, int begin_idx, int end_idx) {
+		for (int i = begin_idx; i <= end_idx; i++) {
+			std::cout << data[i];
+		}
+	}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef __ACC_POOL_STR_CXX_
 #define __ACC_POOL_STR_CXX_
-	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos = 0) {
+	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos = 0) {///////有问题，会跳读
+		//std::cout << "\n";
 		json_acc_str buf;
 		int j = 0;
 		int k = 0;
@@ -240,22 +429,9 @@ namespace json_acc_str_np {
 		int t = 0;
 		int layer = 0;
 
-		if (data[beginpos] == LayerS) {
-			//std::cout << "++\n";
-			++layer;
-		}
-		for (i = beginpos + 1; layer != 0; i++) {
-
-
-			if (data[i] == LayerS) {
-				//std::cout << "++\n";
-				++layer;
-			}
-			//std::cout << layer << "\n";
-			if (data[i] == LayerE) {
-				//std::cout << "--\n";
-				--layer;
-			}
+		for (i = beginpos + 1; data[i] != LayerE; i++) {
+//#pragma Debug
+			//std::cout << data[i];
 			if (data[i] == ConS) {
 				buf.Father_idx = current_root_idx;
 				for (t = i; data[t] != ConE && data[t] != LayerS; t--);
@@ -370,17 +546,23 @@ namespace json_acc_str_np {
 					j = json_acc_str_np::PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
 
 					buf.clear();
-					i = j;
+					i = j;//if it is j-1,it will result in catching last nesting "}",and idx will be wrong
 					j = 0;
 				}
 			}
 		}
 
-		while (data[i] != LayerE) {
-			++i;
-		}
-		return i;
+		/*
+		#pragma Debug
+		std::cout << "\n";
+		Debug_Print(data, i - 4, i + 1);
 
+
+		std::cout << "\n\n";
+		*/
+
+
+		return i;//letter Should Be LayerE,However,When There was a nest,It will change to next "}" or "]"
 	}
 
 	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos = 0) {
@@ -395,6 +577,8 @@ namespace json_acc_str_np {
 		//想法1 嵌套 跳过那些多余的]
 		//想法2 双vector，老老实实读
 		for (i = beginpos; data[i] != FieldE; ++i) {
+//#pragma Debug
+			//std::cout << data[i];
 			if (data[i] == FieldS || data[i] == ConE) {
 				buf.Father_idx = current_root_idx;
 				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
@@ -526,18 +710,27 @@ namespace json_acc_str_np {
 
 					buf.clear();
 
-					i = j - 1;
+					i = j - 1;//LayerE
 					//std::cout << "PAIR_LIST:" << data[i] << "\n";
 					j = 0;
 				}
 			}
 		}
+//#pragma Debug
+		//std::cout << "  ";
+		//	Debug_Print(data, i - 4, i + 1);
+		//	std::cout << "\n\n";
+//#pragma Debug
+		//Debug_Print(data, i - 4, i + 1);
+//Debug_Print(data, i, i + 3);
 		//map.pop_back();
 
-		//std::cout << field << "\n";
+		//std::cout << "\n";
 		return i;
 	}
 
+
+	//输入反斜杠无法读取，citmlog： LINE840 \"Paris Berlin\" ，解决办法是str类别里写多一个读取
 	int JSON_Parse_Pool(json_pool_str & map, std::string&& data) {
 		json_acc_str buf;
 		int j = 0;
@@ -545,6 +738,7 @@ namespace json_acc_str_np {
 		int t = 0;
 
 		for (int i = 0; i < (int)(data.length() - 1); ++i) {
+//#pragma Debug
 			//std::cout << data[i];
 			if (data[i] == ConS) {
 				///title
@@ -651,7 +845,8 @@ namespace json_acc_str_np {
 					j = json_acc_str_np::PairList_Expect_Pool(data, map, map.size() - 1, i + 1);
 
 					buf.clear();
-					i = j;
+					i = j - 1;
+					//std::cout << "                                       " << data[i] << "\n";
 					j = 0;
 				}
 			}
@@ -694,7 +889,7 @@ namespace json_acc_str_np {
 		if (map.at(current_root).type == dimension_list) {
 			int tmp_idx_dm = 0;
 			if (!map.at(current_root).title.empty()) {
-				result.push_back('"');
+				result.append("\"");
 				result.append(map.at(current_root).title);
 				result.push_back('"');
 			}
@@ -747,7 +942,8 @@ namespace json_acc_str_np {
 			int tmp_idx_pl = 0;
 
 			if (!map.at(current_root).title.empty()) {
-				result.push_back('"');
+				result.append("\"");
+				//result.push_back('"');
 				result.append(map.at(current_root).title);
 				result.push_back('"');
 			}
