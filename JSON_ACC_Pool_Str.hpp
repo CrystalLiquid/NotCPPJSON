@@ -169,8 +169,6 @@ namespace json_acc_str_np {
 			int i = 0;
 			for (; i < this->size() - 1; ) {
 				if (this->at(i).title != key) {
-//#pragma test
-					//std::cout << this->at(i).title << "\n";
 					++i;
 				}
 				if (this->at(i).title == key) {
@@ -186,8 +184,6 @@ namespace json_acc_str_np {
 			int rt = 0;
 			for (; i < this->size() - 1; ) {
 				if (this->at(i).title != key) {
-//#pragma test
-					//std::cout << this->at(i).title << "\n";
 					++i;
 				}
 				if (this->at(i).title == key) {
@@ -209,8 +205,6 @@ namespace json_acc_str_np {
 				int i = 0;
 				for (; i < this->size() - 1; ) {
 					if (this->at(i).title != key) {
-//#pragma test
-						//std::cout << this->at(i).title << "\n";
 						++i;
 					}
 					if (this->at(i).title == key) {
@@ -218,7 +212,6 @@ namespace json_acc_str_np {
 						break;
 					}
 				}
-
 			}
 			if (search_type == search_t::bfs) {
 				target_idx = f_bfs_(0, *this, key);
@@ -228,20 +221,23 @@ namespace json_acc_str_np {
 			}
 			return this->at(target_idx);
 		}
-	  private:
+		/*
+		private://basic_set
 		void setval_by_name_str(std::string&& key, std::string&& val) {
-			this->getval_by_name(key).content = val;
+		this->getval_by_name(key).content = val;
 		}
 		void setval_by_name_i64(std::string&& key, i64t val) {
-			this->getval_by_name(key).content = std::to_string(val);
+		this->getval_by_name(key).content = std::to_string(val);
 		}
 		void setval_by_name_double(std::string&& key, double val) {
-			this->getval_by_name(key).content = std::to_string(val);
+		this->getval_by_name(key).content = std::to_string(val);
 		}
 		void setval_by_name_bool(std::string&& key, bool val) {
-			this->getval_by_name(key).content = std::to_string(val);
+		this->getval_by_name(key).content = std::to_string(val);
 		}
-	  private:
+		*/
+
+	  private://return type
 		int variant_return_type(std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			switch (val.index()) {
 				case 0:
@@ -264,8 +260,41 @@ namespace json_acc_str_np {
 					break;
 			}
 		}
-	  public:
-		void setval_by_name_repeat(int repeat, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+
+	  public://add node:add_xx
+		void add_normal(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			int vtype = variant_return_type(val);
+
+		}
+		void add_as_child(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			int father_idx = getidx_by_name(key);
+		}
+	  public://change type:set_xx
+		void set_dimension(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
+			int father_idx = getidx_by_name(key);
+			this->at(father_idx).type = dimension_list;
+			this->at(father_idx).content.clear();
+			int i = 1;
+			for (json_acc_str_np::json_acc_str x : list) {
+				x.Father_idx = father_idx;
+				this->insert(this->begin() + father_idx + i, x);
+				this->at(father_idx).Child_idx.push_back(father_idx + i);
+				++i;
+			}
+		}
+		void set_pairlist(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
+			int father_idx = getidx_by_name(key);
+			this->at(father_idx).type = pair_list;
+			this->at(father_idx).content.clear();
+			int i = 1;
+			for (json_acc_str_np::json_acc_str x : list) {
+				x.Father_idx = father_idx;
+				this->insert(this->begin() + father_idx + i, x);
+				this->at(father_idx).Child_idx.push_back(father_idx + i);
+				++i;
+			}
+		}
+		void set_val_repeat(int repeat, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int idx = getidx_by_name_repeat(key, repeat);
 			int vtype = variant_return_type(val);
 			int begin_i = -1;
@@ -360,7 +389,7 @@ namespace json_acc_str_np {
 					break;
 			}
 		}
-		void setval_by_name_norepeat(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+		void set_val_norepeat(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int idx = getidx_by_name(key);
 			int vtype = variant_return_type(val);
 			int begin_i = -1;
@@ -455,75 +484,6 @@ namespace json_acc_str_np {
 					break;
 			}
 		}
-	  public:
-		void push_single(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
-			int vtype = variant_return_type(val);
-			/*
-			switch (vtype) {
-			case notype:
-			break;
-
-			case str:
-			this->push_back({title, std::get<std::string>(val), vtype,});
-			break;
-
-			case digit_int:
-			this->at(idx).content = std::to_string(std::get<i64t>(val));
-			break;
-
-			case digit_double:
-			this->at(idx).content = std::to_string(std::get<double>(val));
-			break;
-
-			case dimension_void:
-			this->at(idx).content = "[]";
-			break;
-
-			case pair_list_void:
-			this->at(idx).content = "{}";
-			break;
-
-			case bool_t:
-			this->at(idx).content = std::to_string(std::get<bool>(val));;
-			break;
-
-			case null:
-			this->at(idx).content = "null";
-			break;
-
-			default:
-			//TODO
-			break;
-			}
-			*/
-
-
-		}
-		void add_as_child(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
-
-		}
-		void add_dimension(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
-			int father_idx = getidx_by_name(key);
-			int i = 1;
-			for (json_acc_str_np::json_acc_str x : list) {
-				x.Father_idx = father_idx;
-				x.type = dimension_list;
-				this->insert(this->begin() + father_idx + i, x);
-				this->at(father_idx).Child_idx.push_back(father_idx + i);
-				++i;
-			}
-		}
-		void add_pairlist(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
-			int father_idx = getidx_by_name(key);
-			int i = 1;
-			for (json_acc_str_np::json_acc_str x : list) {
-				x.Father_idx = father_idx;
-				x.type = pair_list;
-				this->insert(this->begin() + father_idx + i, x);
-				this->at(father_idx).Child_idx.push_back(father_idx + i);
-				++i;
-			}
-		}
 	};
 #define function_define
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos);
@@ -547,8 +507,7 @@ namespace json_acc_str_np {
 		int layer = 0;
 
 		for (i = beginpos + 1; data[i] != LayerE; i++) {
-//#pragma Debug
-			//std::cout << data[i];
+
 			if (data[i] == ConS) {
 				buf.Father_idx = current_root_idx;
 				for (t = i; data[t] != ConE && data[t] != LayerS; t--);
@@ -669,14 +628,7 @@ namespace json_acc_str_np {
 			}
 		}
 
-		/*
-		#pragma Debug
-		std::cout << "\n";
-		Debug_Print(data, i - 4, i + 1);
 
-
-		std::cout << "\n\n";
-		*/
 
 
 		return i;//letter Should Be LayerE,However,When There was a nest,It will change to next "}" or "]"
@@ -688,14 +640,8 @@ namespace json_acc_str_np {
 		int j = 0;
 		int i = 0;
 
-		//if (data[beginpos] == FieldS) {
-		//	field++;
-		//}
-		//想法1 嵌套 跳过那些多余的]
-		//想法2 双vector，老老实实读
 		for (i = beginpos; data[i] != FieldE; ++i) {
-//#pragma Debug
-			//std::cout << data[i];
+
 			if (data[i] == FieldS || data[i] == ConE) {
 				buf.Father_idx = current_root_idx;
 				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
@@ -736,21 +682,15 @@ namespace json_acc_str_np {
 					//-------buf.content.push_back(Quote);
 					for (j = i + 2; data[j] not_eq Quote; j++) {
 						buf.content.push_back(data[j]);
-//#pragma test
-						//std::cout << data[j];
 					}
-					//-------buf.content.push_back(Quote);
 
-
-					//std::cout << data[i];
 					map.emplace_back(buf);
 					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-//#pragma test
-					//std::cout << "\n\n";
+
 
 					buf.clear();
-					//std::cout << data[j] << "  ssssssss\n";
+
 					i = j - 1;
 					j = 0;
 				}
@@ -763,16 +703,13 @@ namespace json_acc_str_np {
 							buf.type = digit_double;
 						}
 						buf.content.push_back(data[j]);
-//#pragma test
-						//std::cout << data[j];
+
 					}
-//#pragma test
-					//std::cout << fragment << std::stoi(fragment) << "\n";
+
 					map.emplace_back(buf);
 					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-//#pragma test
-					//std::cout << "\n\n";
+
 
 					buf.clear();
 					i = j - 1;
@@ -800,9 +737,9 @@ namespace json_acc_str_np {
 					j = json_acc_str_np::DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1);
 
 					buf.clear();
-					//i = j;
+
 					i = j;
-					//std::cout << data[i - 1] << "("  << data[i] << ")" << "   NonVoid\n";
+
 				}
 
 				/////////////////////////////////////////////////////////////////////////////
@@ -828,21 +765,11 @@ namespace json_acc_str_np {
 					buf.clear();
 
 					i = j - 1;//LayerE
-					//std::cout << "PAIR_LIST:" << data[i] << "\n";
 					j = 0;
 				}
 			}
 		}
-//#pragma Debug
-		//std::cout << "  ";
-		//	Debug_Print(data, i - 4, i + 1);
-		//	std::cout << "\n\n";
-//#pragma Debug
-		//Debug_Print(data, i - 4, i + 1);
-//Debug_Print(data, i, i + 3);
-		//map.pop_back();
 
-		//std::cout << "\n";
 		return i;
 	}
 

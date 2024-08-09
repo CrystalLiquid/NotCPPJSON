@@ -7,7 +7,7 @@
         "isOpen": true,
         "left": 0,
         "order": 2,
-        "top": 0
+        "top": 69
     },
     {
         "caretX": 14,
@@ -17,11 +17,11 @@
         "isOpen": true,
         "left": 0,
         "order": 1,
-        "top": 1173
+        "top": 2829
     },
     {
-        "caretX": 53,
-        "caretY": 67,
+        "caretX": 1,
+        "caretY": 72,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
         "focused": false,
         "isOpen": true,
@@ -30,13 +30,13 @@
         "top": 0
     },
     {
-        "caretX": 27,
-        "caretY": 910,
+        "caretX": 31,
+        "caretY": 470,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool_Str.hpp",
         "focused": true,
         "isOpen": true,
         "left": 0,
         "order": 3,
-        "top": 20378
+        "top": 10442
     }
 ]
