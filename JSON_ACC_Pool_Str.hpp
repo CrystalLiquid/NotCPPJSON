@@ -897,6 +897,17 @@ namespace json_acc_str_np {
 
 					//-------buf.content.push_back(Quote);
 					for (j = i + 2; data[j] not_eq Quote; j++) {
+#pragma support_back_slash
+						if (data[j] == '\\') {
+							int n = j + 1;
+							for (; data[i] not_eq Quote; n++) {
+								if (data[i] != '\\') {
+									buf.content.push_back(data[n]);
+								}
+							}
+							j = n + 1;
+						}
+#pragma support_back_slash
 						buf.content.push_back(data[j]);
 					}
 					//-------buf.content.push_back(Quote);
