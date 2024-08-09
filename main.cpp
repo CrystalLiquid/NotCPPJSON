@@ -31,8 +31,8 @@ std::string penum(int e) {
 }
 int main() {
 	//const char* paths[] = {"citm_catalog.json", "2.json", "3.json", "4.json"};
-	const char* path = "citm_catalog.json";
-	//const char* path = "3.json";
+	//const char* path = "citm_catalog.json";
+	const char* path = "3.json";
 	//const char* path = "4.json";
 	//const char* path = "twitter.json";
 	//const char* path = "2.json";
@@ -61,7 +61,6 @@ int main() {
 	std::cout << "DataSize:" << data.size() << "\n";
 	std::cout << "MapSize:" << map.size() << "\n";
 	std::string result;
-	//map.setval_by_name_str("site", "nomorejson");
 	//std::cout << map.getval_by_name("site").content << "\n";
 	json_acc_str_np::JSON_Serialize_Pool(map, result, 0);
 	//std::cout << result;

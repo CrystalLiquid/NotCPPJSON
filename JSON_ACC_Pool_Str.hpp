@@ -180,6 +180,28 @@ namespace json_acc_str_np {
 			}
 			return target_idx;
 		}
+		int getidx_by_name_repeat(std::string key, int repeat_times) {
+			int target_idx = 0;
+			int i = 0;
+			int rt = 0;
+			for (; i < this->size() - 1; ) {
+				if (this->at(i).title != key) {
+//#pragma test
+					//std::cout << this->at(i).title << "\n";
+					++i;
+				}
+				if (this->at(i).title == key) {
+					target_idx = i;
+					if (rt != repeat_times) {
+						++rt;
+					}
+					if (rt == repeat_times) {
+						break;
+					}
+				}
+			}
+			return target_idx;
+		}
 		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly) {
 
 			int target_idx = 0;
@@ -243,7 +265,102 @@ namespace json_acc_str_np {
 			}
 		}
 	  public:
-		void setval_by_name(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+		void setval_by_name_repeat(int repeat, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+			int idx = getidx_by_name_repeat(key, repeat);
+			int vtype = variant_return_type(val);
+			int begin_i = -1;
+			int end_i = -1;
+			switch (this->at(idx).type) {
+				case notype:
+					break;
+
+				case str:
+					this->at(idx).content.clear();
+					break;
+
+				case digit_int:
+					this->at(idx).content.clear();
+					break;
+
+				case digit_double:
+					this->at(idx).content.clear();
+					break;
+
+				case dimension_list:
+					begin_i = this->at(idx).Child_idx.front();
+					end_i = this->at(idx).Child_idx.back();
+					this->at(idx).Child_idx.clear();
+					this->erase(this->begin() + begin_i, this->begin() + end_i);
+					break;
+
+				case pair_list:
+					begin_i = this->at(idx).Child_idx.front();
+					end_i = this->at(idx).Child_idx.back();
+					this->at(idx).Child_idx.clear();
+					this->erase(this->begin() + begin_i, this->begin() + end_i);
+					break;
+
+				case dimension_void:
+					this->at(idx).content.clear();
+					break;
+
+				case pair_list_void:
+					this->at(idx).content.clear();
+					break;
+
+				case bool_t:
+					this->at(idx).content.clear();
+					break;
+
+				case null:
+					this->at(idx).content.clear();
+					break;
+
+				default:
+					//TODO
+					break;
+			}
+			this->at(idx).type = notype;
+			this->at(idx).type = vtype;
+			switch (vtype) {
+				case notype:
+					break;
+
+				case str:
+
+					this->at(idx).content = std::get<std::string>(val);
+					break;
+
+				case digit_int:
+					this->at(idx).content = std::to_string(std::get<i64t>(val));
+					break;
+
+				case digit_double:
+					this->at(idx).content = std::to_string(std::get<double>(val));
+					break;
+
+				case dimension_void:
+					this->at(idx).content = "[]";
+					break;
+
+				case pair_list_void:
+					this->at(idx).content = "{}";
+					break;
+
+				case bool_t:
+					this->at(idx).content = std::to_string(std::get<bool>(val));;
+					break;
+
+				case null:
+					this->at(idx).content = "null";
+					break;
+
+				default:
+					//TODO
+					break;
+			}
+		}
+		void setval_by_name_norepeat(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int idx = getidx_by_name(key);
 			int vtype = variant_return_type(val);
 			int begin_i = -1;
