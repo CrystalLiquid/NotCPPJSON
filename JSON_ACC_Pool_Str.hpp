@@ -266,6 +266,10 @@ namespace json_acc_str_np {
 		void delete_idx(int idx) {
 			delete_child(idx);
 		}
+		void delete_name(std::string key, int repeat_times = 0) {
+			int idx = getidx_by_name_repeat(key, repeat_times);
+			delete_child(idx);
+		}
 	  public://///////////////////////////////////add node:add_xx///////////////////////////////////////
 		void add_normal(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int vtype = variant_return_type(val);
@@ -559,7 +563,21 @@ namespace json_acc_str_np {
 					//	buf.content.push_back(data[j]);
 					//}
 					//--------buf.content.push_back(Quote);
-					for (j = i + 2; data[j] not_eq Quote; j++) {
+					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq LayerE; ++j) {
+						/*
+						#pragma support_back_slash
+						if (data[j] == '\\' && data[j + 1] == '"') {
+						int n = j + 1;
+						for (; data[n] not_eq Quote; ++n) {
+						if (data[n] != '\\') {
+						buf.content.push_back(data[n]);
+						}
+						}
+						j = n + 1;
+						}
+						#pragma support_back_slash
+						*/
+
 						buf.content.push_back(data[j]);
 					}
 					//-------buf.content.push_back(Quote);
@@ -689,7 +707,21 @@ namespace json_acc_str_np {
 					//std::cout << data[i];
 
 					//-------buf.content.push_back(Quote);
-					for (j = i + 2; data[j] not_eq Quote; j++) {
+					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq FieldE; ++j) {
+						/*
+						#pragma support_back_slash
+						if (data[j] == '\\' && data[j + 1] == '"') {
+						int n = j + 1;
+						for (; data[n] not_eq Quote; ++n) {
+						if (data[n] != '\\') {
+						buf.content.push_back(data[n]);
+						}
+						}
+						j = n + 1;
+						}
+						#pragma support_back_slash
+						*/
+
 						buf.content.push_back(data[j]);
 					}
 
@@ -832,18 +864,21 @@ namespace json_acc_str_np {
 					//}
 
 					//-------buf.content.push_back(Quote);
-					for (j = i + 2; data[j] not_eq Quote; j++) {
-#pragma support_back_slash
-						if (data[j] == '\\') {
-							int n = j + 1;
-							for (; data[i] not_eq Quote; n++) {
-								if (data[i] != '\\') {
-									buf.content.push_back(data[n]);
-								}
-							}
-							j = n + 1;
+					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq LayerE; j++) {
+						/*
+						#pragma support_back_slash
+						if (data[j] == '\\' && data[j + 1] == '"') {
+						int n = j + 1;
+						for (; data[n] not_eq Quote; ++n) {
+						if (data[n] != '\\') {
+						buf.content.push_back(data[n]);
 						}
-#pragma support_back_slash
+						}
+						j = n + 1;
+						}
+						#pragma support_back_slash
+						*/
+
 						buf.content.push_back(data[j]);
 					}
 					//-------buf.content.push_back(Quote);

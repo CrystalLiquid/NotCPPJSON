@@ -30,11 +30,12 @@ std::string penum(int e) {
 	return "------------------";
 }
 int main() {
-	//const char* paths[] = {"citm_catalog.json", "2.json", "3.json", "4.json"};
+	//const char* path = "5.json";
 	//const char* path = "citm_catalog.json";
-	const char* path = "3.json";
+	//const char* path = "3.json";
 	//const char* path = "4.json";
-	//const char* path = "twitter.json";
+	//const char* path = "canada.json";
+	const char* path = "twitter.json";
 	//const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
@@ -52,9 +53,9 @@ int main() {
 	milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
 
 
-	//for (int i = (int)map.size() - 1; i > 0; i--) {
-	//	std::cout << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "       " << penum(map.at(i).type) << "\n";
-	//}
+	for (int i = (int)map.size() - 1; i > 0; i--) {
+		std::cout << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title << ":" << map.at(i).content << "       " << penum(map.at(i).type) << "\n";
+	}
 	std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 
 
