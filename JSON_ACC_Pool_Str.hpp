@@ -119,7 +119,7 @@ namespace json_acc_str_np {
 	};
 
 	struct json_pool_str : public std::vector<json_acc_str> {
-	  private:
+	  private:///////////////////////////////////////////searching algorithm/////////////////////////////////////
 		int f_bfs_(int root_idx, const json_pool_str&pmap, std::string& key) {//广度 递归遍历 通过私有函数实现
 			int temp_child_idx = 0;
 			int target_idx = -200;
@@ -163,7 +163,7 @@ namespace json_acc_str_np {
 			}
 			return target_idx;
 		}
-	  public:
+	  public:///////////////////////////////////////////get value////////////////////////////////////
 		int getidx_by_name(std::string key) {
 			int target_idx = 0;
 			int i = 0;
@@ -221,23 +221,7 @@ namespace json_acc_str_np {
 			}
 			return this->at(target_idx);
 		}
-		/*
-		private://basic_set
-		void setval_by_name_str(std::string&& key, std::string&& val) {
-		this->getval_by_name(key).content = val;
-		}
-		void setval_by_name_i64(std::string&& key, i64t val) {
-		this->getval_by_name(key).content = std::to_string(val);
-		}
-		void setval_by_name_double(std::string&& key, double val) {
-		this->getval_by_name(key).content = std::to_string(val);
-		}
-		void setval_by_name_bool(std::string&& key, bool val) {
-		this->getval_by_name(key).content = std::to_string(val);
-		}
-		*/
-
-	  private://return type
+	  private:///////////////////////////////////////////return type/////////////////////////////////////
 		int variant_return_type(std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			switch (val.index()) {
 				case 0:
@@ -260,8 +244,29 @@ namespace json_acc_str_np {
 					break;
 			}
 		}
-
-	  public://add node:add_xx
+	  private:////////////////////////////////////////delete private////////////////////////////////////
+		void delete_child(int current_idx) {
+			for (int i = 0; i < (int)this->at(this->at(current_idx).Father_idx).Child_idx.size(); ++i) {
+				if (this->at(this->at(current_idx).Father_idx).Child_idx.at(i) == current_idx) {
+					this->at(this->at(current_idx).Father_idx).Child_idx.erase(this->at(this->at(current_idx).Father_idx).Child_idx.begin() + i);
+				}
+			}
+			if (!this->at(current_idx).Child_idx.empty()) {
+				for (int i; i < this->at(current_idx).Child_idx.size(); ++i) {
+					delete_child(this->at(current_idx).Child_idx.at(i));
+				}
+				this->erase(this->begin() + this->at(current_idx).Child_idx.front(), this->begin() + this->at(current_idx).Child_idx.back());
+				this->erase(this->begin() + current_idx);
+			}
+			if (this->at(current_idx).Child_idx.empty()) {
+				this->erase(this->begin() + current_idx);
+			}
+		};
+	  public://delete func//
+		void delete_idx(int idx) {
+			delete_child(idx);
+		}
+	  public://///////////////////////////////////add node:add_xx///////////////////////////////////////
 		void add_normal(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int vtype = variant_return_type(val);
 
@@ -269,7 +274,7 @@ namespace json_acc_str_np {
 		void add_as_child(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int father_idx = getidx_by_name(key);
 		}
-	  public://change type:set_xx
+	  public://///////////////////////////////////change type:set_xx//////////////////////////////////
 		void set_dimension(std::string&& key, std::initializer_list<json_acc_str_np::json_acc_str> list) {
 			int father_idx = getidx_by_name(key);
 			this->at(father_idx).type = dimension_list;
@@ -346,7 +351,8 @@ namespace json_acc_str_np {
 					break;
 
 				default:
-					//TODO
+					std::cerr << "Fatal Type To Clean!\n";
+					return;
 					break;
 			}
 			this->at(idx).type = notype;
@@ -385,7 +391,8 @@ namespace json_acc_str_np {
 					break;
 
 				default:
-					//TODO
+					std::cerr << "Fatal Type To Change!\n";
+					return;
 					break;
 			}
 		}
@@ -441,7 +448,8 @@ namespace json_acc_str_np {
 					break;
 
 				default:
-					//TODO
+					std::cerr << "Fatal Type To Clean!\n";
+					return;
 					break;
 			}
 			this->at(idx).type = notype;
@@ -480,7 +488,8 @@ namespace json_acc_str_np {
 					break;
 
 				default:
-					//TODO
+					std::cerr << "Fatal Type To Change!\n";
+					return;
 					break;
 			}
 		}

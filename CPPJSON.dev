@@ -1,7 +1,7 @@
 [Project]
 filename = CPPJSON.dev
 name = CPPJSON
-UnitCount = 4
+UnitCount = 5
 Type = 1
 Ver = 3
 Includes = 
@@ -77,6 +77,19 @@ SyncProduct = 1
 
 
 [Unit2]
+FileName = BSON.hpp
+CompileCpp = 0
+Folder = 头文件
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
+
+[Unit3]
 FileName = JSON_IO.hpp
 CompileCpp = 0
 Folder = 头文件
@@ -87,19 +100,6 @@ OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
 RealEncoding = UTF-8
-
-
-[Unit3]
-FileName = main.cpp
-CompileCpp = 1
-Folder = 源文件
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = ASCII
 
 
 [Unit4]
@@ -116,11 +116,11 @@ RealEncoding = UTF-8
 
 
 [Unit5]
-FileName = JSON_IO.hpp
-CompileCpp = 0
-Folder = 头文件
-Compile = 0
-Link = 0
+FileName = main.cpp
+CompileCpp = 1
+Folder = 源文件
+Compile = 1
+Link = 1
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
