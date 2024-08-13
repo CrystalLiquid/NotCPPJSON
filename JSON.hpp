@@ -360,11 +360,45 @@ namespace json_acc_layer_np {
 			}
 			this->emplace_back(buf);
 		}
-		void add_dimension_aschild() {
-
+		void add_dimension_aschild(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+			int grandfather_idx = getidx_by_name_layer(key, layer - 1);
+			json_acc_str buf = {
+				key,
+				"",
+				dimension_list,
+				layer,
+				grandfather_idx,
+				{}
+			};
+			this->emplace_back(buf);
+			int father_idx = this->size() - 1;
+			int tmp_child_idx = 0;
+			for (json_acc_str x : list) {
+				this->emplace_back(x);
+				this->back().Father_idx = father_idx;
+				tmp_child_idx = (int)this->size() - 1;
+				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+			}
 		}
-		void add_pairlist_aschild() {
-
+		void add_pairlist_aschild(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+			int grandfather_idx = getidx_by_name_layer(key, layer - 1);
+			json_acc_str buf = {
+				key,
+				"",
+				pair_list,
+				layer,
+				grandfather_idx,
+				{}
+			};
+			this->emplace_back(buf);
+			int father_idx = this->size() - 1;
+			int tmp_child_idx = 0;
+			for (json_acc_str x : list) {
+				this->emplace_back(x);
+				this->back().Father_idx = father_idx;
+				tmp_child_idx = (int)this->size() - 1;
+				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+			}
 		}
 		void add_dimension_atback(std::string&& key, std::initializer_list<json_acc_str> list) {
 			json_acc_str buf = {
