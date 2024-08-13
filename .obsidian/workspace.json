@@ -148,6 +148,9 @@
   },
   "active": "b2d97373bf9d928d",
   "lastOpenFiles": [
-    "release/CPPJSON.exe"
+    "JSON_Deprecate.hpp",
+    "release/1.json.swp",
+    "release/CPPJSON.exe",
+    "tmp_obj/main.o"
   ]
 }

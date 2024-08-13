@@ -593,20 +593,8 @@ namespace json_acc_layer_np {
 					//	buf.content.push_back(data[j]);
 					//}
 					//--------buf.content.push_back(Quote);
-					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq LayerE; ++j) {
-						/*
-						#pragma support_back_slash
-						if (data[j] == '\\' && data[j + 1] == '"') {
-						int n = j + 1;
-						for (; data[n] not_eq Quote; ++n) {
-						if (data[n] != '\\') {
-						buf.content.push_back(data[n]);
-						}
-						}
-						j = n + 1;
-						}
-						#pragma support_back_slash
-						*/
+					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); ++j) {
+
 
 						buf.content.push_back(data[j]);
 					}
@@ -738,20 +726,8 @@ namespace json_acc_layer_np {
 					//std::cout << data[i];
 
 					//-------buf.content.push_back(Quote);
-					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq FieldE; ++j) {
-						/*
-						#pragma support_back_slash
-						if (data[j] == '\\' && data[j + 1] == '"') {
-						int n = j + 1;
-						for (; data[n] not_eq Quote; ++n) {
-						if (data[n] != '\\') {
-						buf.content.push_back(data[n]);
-						}
-						}
-						j = n + 1;
-						}
-						#pragma support_back_slash
-						*/
+					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq FieldE || data[j] not_eq Quote) ; ++j) {
+
 
 						buf.content.push_back(data[j]);
 					}
@@ -846,7 +822,6 @@ namespace json_acc_layer_np {
 	}
 
 
-	//输入反斜杠无法读取，citmlog： LINE840 \"Paris Berlin\" ，解决办法是str类别里写多一个读取
 	int JSON_Parse_Pool(json_pool_str & map, std::string&& data) {
 		json_acc_str buf;
 		int j = 0;
@@ -896,20 +871,8 @@ namespace json_acc_layer_np {
 					//}
 
 					//-------buf.content.push_back(Quote);
-					for (j = i + 2; data[j + 1] not_eq ConE && data[j + 1] not_eq LayerE; j++) {
-						/*
-						#pragma support_back_slash
-						if (data[j] == '\\' && data[j + 1] == '"') {
-						int n = j + 1;
-						for (; data[n] not_eq Quote; ++n) {
-						if (data[n] != '\\') {
-						buf.content.push_back(data[n]);
-						}
-						}
-						j = n + 1;
-						}
-						#pragma support_back_slash
-						*/
+					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); j++) {
+						//", or "}
 
 						buf.content.push_back(data[j]);
 					}
