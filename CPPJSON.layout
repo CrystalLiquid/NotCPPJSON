@@ -16,27 +16,27 @@
         "isOpen": true,
         "left": 0,
         "order": 1,
-        "top": 2829
+        "top": 1840
     },
     {
-        "caretX": 43,
-        "caretY": 66,
+        "caretX": 2,
+        "caretY": 34,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
         "focused": false,
         "isOpen": true,
         "left": 0,
         "order": 0,
-        "top": 644
+        "top": 1242
     },
     {
-        "caretX": 5,
-        "caretY": 430,
+        "caretX": 61,
+        "caretY": 384,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON.hpp",
         "focused": true,
         "isOpen": true,
-        "left": 926,
+        "left": 0,
         "order": 3,
-        "top": 9660
+        "top": 11500
     },
     {
         "caretX": 20,
@@ -46,6 +46,6 @@
         "isOpen": true,
         "left": 0,
         "order": 2,
-        "top": 0
+        "top": 138
     }
 ]

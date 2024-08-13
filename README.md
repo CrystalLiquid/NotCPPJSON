@@ -1,6 +1,6 @@
 ## NotJSON库
 ### 介绍
-NotJSON是一个以解析速度为最高导向的JSON解析库，并且使用tag + string类型擦除达到效率最大化
+NotJSON是一个HeaderOnly的以解析速度为最高导向的JSON解析库，并且使用tag + string类型擦除达到效率最大化
 后续有新思路还会更新更多解析函数
 ### 用法
 #### 添加
