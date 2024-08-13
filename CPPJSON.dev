@@ -112,7 +112,7 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = 
+RealEncoding = UTF-8
 
 
 [Unit5]
@@ -129,16 +129,16 @@ RealEncoding = UTF-8
 
 
 [Unit6]
-FileName = main.cpp
+FileName = document.md
 CompileCpp = 1
-Folder = 源文件
-Compile = 1
-Link = 1
+Folder = 其他文件
+Compile = 0
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = UTF-8
+RealEncoding = 
 
 
 [Unit7]

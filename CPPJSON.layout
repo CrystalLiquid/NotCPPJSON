@@ -3,10 +3,9 @@
         "caretX": 17,
         "caretY": 17,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Base.h",
-        "focused": true,
-        "isOpen": true,
+        "focused": false,
+        "isOpen": false,
         "left": 0,
-        "order": 2,
         "top": 0
     },
     {
@@ -27,17 +26,17 @@
         "isOpen": true,
         "left": 0,
         "order": 0,
-        "top": 1058
+        "top": 644
     },
     {
-        "caretX": 1,
-        "caretY": 961,
+        "caretX": 5,
+        "caretY": 430,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON.hpp",
-        "focused": false,
+        "focused": true,
         "isOpen": true,
-        "left": 0,
-        "order": 4,
-        "top": 21436
+        "left": 926,
+        "order": 3,
+        "top": 9660
     },
     {
         "caretX": 20,
@@ -46,7 +45,7 @@
         "focused": false,
         "isOpen": true,
         "left": 0,
-        "order": 3,
+        "order": 2,
         "top": 0
     }
 ]

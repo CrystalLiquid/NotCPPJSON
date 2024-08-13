@@ -261,7 +261,7 @@ namespace json_acc_layer_np {
 			delete_child(idx);
 		}
 	  public://///////////////////////////////////add node:add_xx///////////////////////////////////////
-		void add_val_atBack(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+		void add_val_atback(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int vtype = variant_return_type(val);
 			json_acc_str buf = {
 				key,
@@ -310,8 +310,8 @@ namespace json_acc_layer_np {
 			}
 			this->emplace_back(buf);
 		}
-		void add_val_asChild(std::string&& father_key, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}, int layer = -1) {
-			int father_idx = getidx_by_name_layer(father_key, layer);
+		void add_val_aschild(std::string&& father_key, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}, int layer = -1) {
+			int father_idx = getidx_by_name_layer(father_key, layer - 1);
 			int vtype = variant_return_type(val);
 			json_acc_str buf = {
 				key,
@@ -359,6 +359,50 @@ namespace json_acc_layer_np {
 					break;
 			}
 			this->emplace_back(buf);
+		}
+		void add_dimension_aschild() {
+
+		}
+		void add_pairlist_aschild() {
+
+		}
+		void add_dimension_atback(std::string&& key, std::initializer_list<json_acc_str> list) {
+			json_acc_str buf = {
+				key,
+				"",
+				dimension_list,
+				0,
+				0,
+				{}
+			};
+			this->emplace_back(buf);
+			int father_idx = this->size() - 1;
+			int tmp_child_idx = 0;
+			for (json_acc_str x : list) {
+				this->emplace_back(x);
+				this->back().Father_idx = father_idx;
+				tmp_child_idx = (int)this->size() - 1;
+				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+			}
+		}
+		void add_pairlist_atback(std::string&& key, std::initializer_list<json_acc_str> list) {
+			json_acc_str buf = {
+				key,
+				"",
+				pair_list,
+				0,
+				0,
+				{}
+			};
+			this->emplace_back(buf);
+			int father_idx = this->size() - 1;
+			int tmp_child_idx = 0;
+			for (json_acc_str x : list) {
+				this->emplace_back(x);
+				this->back().Father_idx = father_idx;
+				tmp_child_idx = (int)this->size() - 1;
+				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+			}
 		}
 	  public://///////////////////////////////////change type:set_xx//////////////////////////////////
 		void set_dimension(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
@@ -823,7 +867,7 @@ namespace json_acc_layer_np {
 				}
 				//std::cout << t << "," << i << "\n";
 				buf.Father_idx = 0;
-				buf.layer = 0;
+				buf.layer = 1;
 				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
 					buf.content = "null";
 					buf.type = null;
