@@ -61,9 +61,9 @@ namespace json_acc_layer_np {
 		std::string title;//32
 		std::string content;//32
 		int type{notype};//4
-		int layer{-1};
-		int Father_idx{0};
-		std::vector<int> Child_idx;//24
+		int layer{-1};//4
+		int Father_idx{0};//4
+		std::vector<int> Child_idx;//24//total:64+8+24=96
 		void clear() {
 			title.clear();
 			content.clear();
@@ -121,23 +121,23 @@ namespace json_acc_layer_np {
 
 	struct json_pool_str : public std::vector<json_acc_str> {
 	  private:///////////////////////////////////////////searching algorithm/////////////////////////////////////
-		int f_bfs_(int root_idx, const json_pool_str&pmap, std::string& key) {//广度 递归遍历 通过私有函数实现
+		int f_bfs_(int root_idx, const json_pool_str&pmap, std::string& key, int layer) { //广度 递归遍历 通过私有函数实现
 			int temp_child_idx = 0;
 			int target_idx = -200;
 			for (int i = 0; i < (int)(pmap).at(root_idx).Child_idx.size(); i++) {
 				temp_child_idx = (pmap).at(root_idx).Child_idx.at(i);
-				if ((pmap).at(temp_child_idx).title == key) {
+				if ((pmap).at(temp_child_idx).title == key && (pmap).at(temp_child_idx).layer == layer) {
 					target_idx = temp_child_idx;
 					break;
 				}
-				target_idx = f_bfs_(temp_child_idx, pmap, key);
+				target_idx = f_bfs_(temp_child_idx, pmap, key, layer);
 				if (target_idx != -200) {
 					break;
 				}
 			}
 			return target_idx;
 		};
-		int f_dfs_c_(int current_idx, const json_pool_str&pmap, std::string& key) {
+		int f_dfs_c_(int current_idx, const json_pool_str&pmap, std::string& key, int layer) {
 			int current_opt_idx = current_idx;
 			int current_father = 0;
 			int target_idx = -200;
@@ -165,21 +165,7 @@ namespace json_acc_layer_np {
 			return target_idx;
 		}
 	  public:///////////////////////////////////////////get value////////////////////////////////////
-		int getidx_by_name(std::string key) {
-			int target_idx = 0;
-			int i = 0;
-			for (; i < this->size() - 1; ) {
-				if (this->at(i).title != key) {
-					++i;
-				}
-				if (this->at(i).title == key) {
-					target_idx = i;
-					break;
-				}
-			}
-			return target_idx;
-		}
-		int getidx_by_name_repeat(std::string key, int repeat_times) {
+		int getidx_by_name_layer(std::string key, int layer) {
 			int target_idx = 0;
 			int i = 0;
 			int rt = 0;
@@ -187,19 +173,14 @@ namespace json_acc_layer_np {
 				if (this->at(i).title != key) {
 					++i;
 				}
-				if (this->at(i).title == key) {
+				if (this->at(i).title == key && this->at(i).layer == layer) {
 					target_idx = i;
-					if (rt != repeat_times) {
-						++rt;
-					}
-					if (rt == repeat_times) {
-						break;
-					}
+					break;
 				}
 			}
 			return target_idx;
 		}
-		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly) {
+		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly, int layer = -1) {
 
 			int target_idx = 0;
 			if (search_type == search_t::directly) {
@@ -208,17 +189,17 @@ namespace json_acc_layer_np {
 					if (this->at(i).title != key) {
 						++i;
 					}
-					if (this->at(i).title == key) {
+					if (this->at(i).title == key && this->at(i).layer == layer) {
 						target_idx = i;
 						break;
 					}
 				}
 			}
 			if (search_type == search_t::bfs) {
-				target_idx = f_bfs_(0, *this, key);
+				target_idx = f_bfs_(0, *this, key, layer);
 			}
 			if (search_type == search_t::dfs) {
-				target_idx = f_dfs_c_(0, *this, key);
+				target_idx = f_dfs_c_(0, *this, key, layer);
 			}
 			return this->at(target_idx);
 		}
@@ -229,7 +210,15 @@ namespace json_acc_layer_np {
 					return digit_int;
 					break;
 				case 1:
-					return str;
+					if (std::get<std::string>(val) != "[]" && std::get<std::string>(val) != "{}") {
+						return str;
+					}
+					if (std::get<std::string>(val) == "[]") {
+						return dimension_void;
+					}
+					if (std::get<std::string>(val) == "{}") {
+						return pair_list_void;
+					}
 					break;
 				case 2:
 					return digit_double;
@@ -267,21 +256,113 @@ namespace json_acc_layer_np {
 		void delete_idx(int idx) {
 			delete_child(idx);
 		}
-		void delete_name(std::string key, int repeat_times = 0) {
-			int idx = getidx_by_name_repeat(key, repeat_times);
+		void delete_name(std::string key, int layer = -1) {
+			int idx = getidx_by_name_layer(key, layer);
 			delete_child(idx);
 		}
 	  public://///////////////////////////////////add node:add_xx///////////////////////////////////////
-		void add_normal(std::string&& title, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
+		void add_val_atBack(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int vtype = variant_return_type(val);
+			json_acc_str buf = {
+				key,
+				"",
+				vtype,
+				0,
+				0,
+				{}
+			};
+			switch (vtype) {
+				case notype:
 
+					break;
+				case str:
+					buf.content = std::get<std::string>(val);
+					break;
+
+				case digit_int:
+					buf.content = std::to_string(std::get<i64t>(val));
+					break;
+
+				case digit_double:
+					buf.content = std::to_string(std::get<double>(val));
+					break;
+
+				case dimension_void:
+					buf.content = "[]";
+					break;
+
+				case pair_list_void:
+					buf.content = "{}";
+					break;
+
+				case bool_t:
+					buf.content = std::to_string(std::get<bool>(val));;
+					break;
+
+				case null:
+					buf.content = "null";
+					break;
+
+				default:
+					std::cerr << "Fatal Type To Change!\n";
+					return;
+					break;
+			}
+			this->emplace_back(buf);
 		}
-		void add_as_child(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
-			int father_idx = getidx_by_name(key);
+		void add_val_asChild(std::string&& father_key, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}, int layer = -1) {
+			int father_idx = getidx_by_name_layer(father_key, layer);
+			int vtype = variant_return_type(val);
+			json_acc_str buf = {
+				key,
+				"",
+				vtype,
+				layer,
+				father_idx,
+				{}
+			};
+			switch (vtype) {
+				case notype:
+
+					break;
+				case str:
+					buf.content = std::get<std::string>(val);
+					break;
+
+				case digit_int:
+					buf.content = std::to_string(std::get<i64t>(val));
+					break;
+
+				case digit_double:
+					buf.content = std::to_string(std::get<double>(val));
+					break;
+
+				case dimension_void:
+					buf.content = "[]";
+					break;
+
+				case pair_list_void:
+					buf.content = "{}";
+					break;
+
+				case bool_t:
+					buf.content = std::to_string(std::get<bool>(val));;
+					break;
+
+				case null:
+					buf.content = "null";
+					break;
+
+				default:
+					std::cerr << "Fatal Type To Change!\n";
+					return;
+					break;
+			}
+			this->emplace_back(buf);
 		}
 	  public://///////////////////////////////////change type:set_xx//////////////////////////////////
-		void set_dimension(std::string&& key, std::initializer_list<json_acc_str> list) {
-			int father_idx = getidx_by_name(key);
+		void set_dimension(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+			int father_idx = getidx_by_name_layer(key, layer);
 			this->at(father_idx).type = dimension_list;
 			this->at(father_idx).content.clear();
 			int i = 1;
@@ -292,8 +373,8 @@ namespace json_acc_layer_np {
 				++i;
 			}
 		}
-		void set_pairlist(std::string&& key, std::initializer_list<json_acc_str> list) {
-			int father_idx = getidx_by_name(key);
+		void set_pairlist(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+			int father_idx = getidx_by_name_layer(key, layer);
 			this->at(father_idx).type = pair_list;
 			this->at(father_idx).content.clear();
 			int i = 1;
@@ -304,8 +385,8 @@ namespace json_acc_layer_np {
 				++i;
 			}
 		}
-		void set_val_repeat(int repeat, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
-			int idx = getidx_by_name_repeat(key, repeat);
+		void set_val( std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}, int layer = -1) {
+			int idx = getidx_by_name_layer(key, layer);
 			int vtype = variant_return_type(val);
 			int begin_i = -1;
 			int end_i = -1;
@@ -401,104 +482,9 @@ namespace json_acc_layer_np {
 					break;
 			}
 		}
-		void set_val_norepeat(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
-			int idx = getidx_by_name(key);
-			int vtype = variant_return_type(val);
-			int begin_i = -1;
-			int end_i = -1;
-			switch (this->at(idx).type) {
-				case notype:
-					break;
 
-				case str:
-					this->at(idx).content.clear();
-					break;
-
-				case digit_int:
-					this->at(idx).content.clear();
-					break;
-
-				case digit_double:
-					this->at(idx).content.clear();
-					break;
-
-				case dimension_list:
-					begin_i = this->at(idx).Child_idx.front();
-					end_i = this->at(idx).Child_idx.back();
-					this->at(idx).Child_idx.clear();
-					this->erase(this->begin() + begin_i, this->begin() + end_i);
-					break;
-
-				case pair_list:
-					begin_i = this->at(idx).Child_idx.front();
-					end_i = this->at(idx).Child_idx.back();
-					this->at(idx).Child_idx.clear();
-					this->erase(this->begin() + begin_i, this->begin() + end_i);
-					break;
-
-				case dimension_void:
-					this->at(idx).content.clear();
-					break;
-
-				case pair_list_void:
-					this->at(idx).content.clear();
-					break;
-
-				case bool_t:
-					this->at(idx).content.clear();
-					break;
-
-				case null:
-					this->at(idx).content.clear();
-					break;
-
-				default:
-					std::cerr << "Fatal Type To Clean!\n";
-					return;
-					break;
-			}
-			this->at(idx).type = notype;
-			this->at(idx).type = vtype;
-			switch (vtype) {
-				case notype:
-					break;
-
-				case str:
-
-					this->at(idx).content = std::get<std::string>(val);
-					break;
-
-				case digit_int:
-					this->at(idx).content = std::to_string(std::get<i64t>(val));
-					break;
-
-				case digit_double:
-					this->at(idx).content = std::to_string(std::get<double>(val));
-					break;
-
-				case dimension_void:
-					this->at(idx).content = "[]";
-					break;
-
-				case pair_list_void:
-					this->at(idx).content = "{}";
-					break;
-
-				case bool_t:
-					this->at(idx).content = std::to_string(std::get<bool>(val));;
-					break;
-
-				case null:
-					this->at(idx).content = "null";
-					break;
-
-				default:
-					std::cerr << "Fatal Type To Change!\n";
-					return;
-					break;
-			}
-		}
 	};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define function_define
 	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos, int current_layer);
 	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos, int current_layer);

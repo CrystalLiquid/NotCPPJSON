@@ -1,53 +1,13 @@
 [
     {
-        "caretX": 26,
-        "caretY": 30,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_ACC_Pool_Str.hpp",
-        "focused": false,
-        "isOpen": true,
-        "left": 0,
-        "order": 3,
-        "top": 207
-    },
-    {
-        "caretX": 29,
-        "caretY": 961,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Layer.hpp",
-        "focused": true,
-        "isOpen": true,
-        "left": 0,
-        "order": 5,
-        "top": 23253
-    },
-    {
-        "caretX": 20,
-        "caretY": 14,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/BSON.hpp",
-        "focused": false,
-        "isOpen": true,
-        "left": 0,
-        "order": 4,
-        "top": 0
-    },
-    {
-        "caretX": 1,
-        "caretY": 72,
-        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
-        "focused": false,
-        "isOpen": true,
-        "left": 0,
-        "order": 0,
-        "top": 0
-    },
-    {
         "caretX": 17,
         "caretY": 17,
         "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON_Base.h",
-        "focused": false,
+        "focused": true,
         "isOpen": true,
         "left": 0,
         "order": 2,
-        "top": 69
+        "top": 0
     },
     {
         "caretX": 14,
@@ -58,5 +18,35 @@
         "left": 0,
         "order": 1,
         "top": 2829
+    },
+    {
+        "caretX": 43,
+        "caretY": 66,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/main.cpp",
+        "focused": false,
+        "isOpen": true,
+        "left": 0,
+        "order": 0,
+        "top": 1058
+    },
+    {
+        "caretX": 1,
+        "caretY": 961,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/JSON.hpp",
+        "focused": false,
+        "isOpen": true,
+        "left": 0,
+        "order": 4,
+        "top": 21436
+    },
+    {
+        "caretX": 20,
+        "caretY": 14,
+        "filename": "D:/RedPanda-CPP/projects/CC/CPPJSON/BSON.hpp",
+        "focused": false,
+        "isOpen": true,
+        "left": 0,
+        "order": 3,
+        "top": 0
     }
 ]
