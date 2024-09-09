@@ -1,6 +1,7 @@
 #include <iostream>
-#include "JSON.hpp"
-#include "JSON_IO.hpp"
+#include "json.hpp"
+#include "json_io.hpp"
+#include "bson.hpp"
 #include <chrono>
 #pragma once
 #ifndef __MAIN_
@@ -10,19 +11,19 @@ using std::chrono::milliseconds;
 #define STR(x) case x: return #x; break;
 std::string penum(int e) {
 	switch (e) {
-			STR(temp_digit)
-			STR(str)
-			STR(digit_int)
-			STR(null)
-			STR(digit_double)
-			STR(pair_list)
-			STR(pair_list_void)
-			STR(bool_t)
-			STR(dimension_void)
-			STR(dimension_list)
-			STR(error)
-			STR(notype)
-			STR(invalid_opttype)
+			STR(json_acc_layer_np::temp_digit)
+			STR(json_acc_layer_np::str)
+			STR(json_acc_layer_np::digit_int)
+			STR(json_acc_layer_np::null)
+			STR(json_acc_layer_np::digit_double)
+			STR(json_acc_layer_np::pair_list)
+			STR(json_acc_layer_np::pair_list_void)
+			STR(json_acc_layer_np::bool_t)
+			STR(json_acc_layer_np::dimension_void)
+			STR(json_acc_layer_np::dimension_list)
+			STR(json_acc_layer_np::error)
+			STR(json_acc_layer_np::notype)
+			STR(json_acc_layer_np::invalid_opttype)
 		default:
 			//TODO
 			break;
@@ -39,15 +40,15 @@ int main() {
 	//const char* path = "2.json";
 	std::string data;
 	HP_IO::JSON_IO_FILE FILE;
-	json_acc_layer_np::json_pool_str map;
-	json_acc_layer_np::json_acc_str root;
+	json_map map;
+	json root;
 	map.emplace_back(root);
 	int path_idx = 0;
 
 	FILE.READ(path, data);
 	//std::cout << data << "\n\n\n\n";
 	high_resolution_clock::time_point Stime = high_resolution_clock::now();
-	json_acc_layer_np::JSON_Parse_Pool(map, std::move(data));
+	map.parse(data);
 	high_resolution_clock::time_point Etime = high_resolution_clock::now();
 	std::cout << "JSONParse Finish\n";
 	milliseconds Parse_Interval = std::chrono::duration_cast<milliseconds>(Etime - Stime);
@@ -62,11 +63,7 @@ int main() {
 
 	std::cout << "DataSize:" << data.size() << "\n";
 	std::cout << "MapSize:" << map.size() << "\n";
-	std::string result;
-	//std::cout << map.getval_by_name("site").content << "\n";
-	json_acc_layer_np::JSON_Serialize_Pool(map, result, 0);
-	//std::cout << result;
-	LP_BASIC_IO::IO_Write(std::move(result), "1.json");
+	LP_BASIC_IO::IO_Write(map.serialize(), "1.json");
 
 	//std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << "\n";
 	return 0;

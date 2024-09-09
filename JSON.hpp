@@ -30,7 +30,14 @@
 
 namespace json_acc_layer_np {
 //用string来类型擦除，返回variant还原类型
-
+	struct json_map;
+	struct json;
+#define function_define
+	int PairList_Expect_Pool(std::string& data, json_map&map, int current_root_idx, int beginpos, int current_layer);
+	int DimensionArray_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
+	int JSON_Parse_Pool(json_map & map, std::string& data);
+	int JSON_Serialize_Pool(json_map& map, std::string& result, int current_root);
+#define over_defining
 	enum data_type {
 		temp_digit = -2,
 		str = 1,
@@ -56,7 +63,7 @@ namespace json_acc_layer_np {
 	using i64t = long long;
 	using child_slice = std::vector<int>;
 
-	struct json_acc_str {
+	struct json {
 
 	  public:
 		std::string title;//32
@@ -120,9 +127,9 @@ namespace json_acc_layer_np {
 
 	};
 
-	struct json_pool_str : public std::vector<json_acc_str> {
+	struct json_map : public std::vector<json> {
 	  private:///////////////////////////////////////////searching algorithm/////////////////////////////////////
-		int f_bfs_(int root_idx, const json_pool_str&pmap, std::string& key, int layer) { //广度 递归遍历 通过私有函数实现
+		int f_bfs_(int root_idx, const json_map&pmap, std::string& key, int layer) { //广度 递归遍历 通过私有函数实现
 			int temp_child_idx = 0;
 			int target_idx = -200;
 			for (int i = 0; i < (int)(pmap).at(root_idx).Child_idx.size(); i++) {
@@ -138,7 +145,7 @@ namespace json_acc_layer_np {
 			}
 			return target_idx;
 		};
-		int f_dfs_c_(int current_idx, const json_pool_str&pmap, std::string& key, int layer) {
+		int f_dfs_c_(int current_idx, const json_map&pmap, std::string& key, int layer) {
 			int current_opt_idx = current_idx;
 			int current_father = 0;
 			int target_idx = -200;
@@ -181,7 +188,7 @@ namespace json_acc_layer_np {
 			}
 			return target_idx;
 		}
-		json_acc_str& getval_by_name(std::string key, int search_type = search_t::directly, int layer = -1) {
+		json& getval_by_name(std::string key, int search_type = search_t::directly, int layer = -1) {
 
 			int target_idx = 0;
 			if (search_type == search_t::directly) {
@@ -264,7 +271,7 @@ namespace json_acc_layer_np {
 	  public://///////////////////////////////////add node:add_xx///////////////////////////////////////
 		void add_val_atback(std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}) {
 			int vtype = variant_return_type(val);
-			json_acc_str buf = {
+			json buf = {
 				key,
 				"",
 				vtype,
@@ -314,7 +321,7 @@ namespace json_acc_layer_np {
 		void add_val_aschild(std::string&& father_key, std::string&& key, std::variant < i64t, std::string, double, bool, std::monostate > val = std::monostate{}, int layer = -1) {
 			int father_idx = getidx_by_name_layer(father_key, layer - 1);
 			int vtype = variant_return_type(val);
-			json_acc_str buf = {
+			json buf = {
 				key,
 				"",
 				vtype,
@@ -361,9 +368,9 @@ namespace json_acc_layer_np {
 			}
 			this->emplace_back(buf);
 		}
-		void add_dimension_aschild(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+		void add_dimension_aschild(std::string&& key, std::initializer_list<json> list, int layer = -1) {
 			int grandfather_idx = getidx_by_name_layer(key, layer - 1);
-			json_acc_str buf = {
+			json buf = {
 				key,
 				"",
 				dimension_list,
@@ -374,16 +381,16 @@ namespace json_acc_layer_np {
 			this->emplace_back(buf);
 			int father_idx = this->size() - 1;
 			int tmp_child_idx = 0;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				this->emplace_back(x);
 				this->back().Father_idx = father_idx;
 				tmp_child_idx = (int)this->size() - 1;
 				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
 			}
 		}
-		void add_pairlist_aschild(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+		void add_pairlist_aschild(std::string&& key, std::initializer_list<json> list, int layer = -1) {
 			int grandfather_idx = getidx_by_name_layer(key, layer - 1);
-			json_acc_str buf = {
+			json buf = {
 				key,
 				"",
 				pair_list,
@@ -394,15 +401,15 @@ namespace json_acc_layer_np {
 			this->emplace_back(buf);
 			int father_idx = this->size() - 1;
 			int tmp_child_idx = 0;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				this->emplace_back(x);
 				this->back().Father_idx = father_idx;
 				tmp_child_idx = (int)this->size() - 1;
 				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
 			}
 		}
-		void add_dimension_atback(std::string&& key, std::initializer_list<json_acc_str> list) {
-			json_acc_str buf = {
+		void add_dimension_atback(std::string&& key, std::initializer_list<json> list) {
+			json buf = {
 				key,
 				"",
 				dimension_list,
@@ -413,15 +420,15 @@ namespace json_acc_layer_np {
 			this->emplace_back(buf);
 			int father_idx = this->size() - 1;
 			int tmp_child_idx = 0;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				this->emplace_back(x);
 				this->back().Father_idx = father_idx;
 				tmp_child_idx = (int)this->size() - 1;
 				this->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
 			}
 		}
-		void add_pairlist_atback(std::string&& key, std::initializer_list<json_acc_str> list) {
-			json_acc_str buf = {
+		void add_pairlist_atback(std::string&& key, std::initializer_list<json> list) {
+			json buf = {
 				key,
 				"",
 				pair_list,
@@ -432,7 +439,7 @@ namespace json_acc_layer_np {
 			this->emplace_back(buf);
 			int father_idx = this->size() - 1;
 			int tmp_child_idx = 0;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				this->emplace_back(x);
 				this->back().Father_idx = father_idx;
 				tmp_child_idx = (int)this->size() - 1;
@@ -440,24 +447,24 @@ namespace json_acc_layer_np {
 			}
 		}
 	  public://///////////////////////////////////change type:set_xx//////////////////////////////////
-		void set_dimension(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+		void set_dimension(std::string&& key, std::initializer_list<json> list, int layer = -1) {
 			int father_idx = getidx_by_name_layer(key, layer);
 			this->at(father_idx).type = dimension_list;
 			this->at(father_idx).content.clear();
 			int i = 1;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				x.Father_idx = father_idx;
 				this->insert(this->begin() + father_idx + i, x);
 				this->at(father_idx).Child_idx.push_back(father_idx + i);
 				++i;
 			}
 		}
-		void set_pairlist(std::string&& key, std::initializer_list<json_acc_str> list, int layer = -1) {
+		void set_pairlist(std::string&& key, std::initializer_list<json> list, int layer = -1) {
 			int father_idx = getidx_by_name_layer(key, layer);
 			this->at(father_idx).type = pair_list;
 			this->at(father_idx).content.clear();
 			int i = 1;
-			for (json_acc_str x : list) {
+			for (json x : list) {
 				x.Father_idx = father_idx;
 				this->insert(this->begin() + father_idx + i, x);
 				this->at(father_idx).Child_idx.push_back(father_idx + i);
@@ -561,597 +568,604 @@ namespace json_acc_layer_np {
 					break;
 			}
 		}
+	  private:
+		int PairList_Expect_Pool(std::string& data, json_map&map, int current_root_idx, int beginpos = 0, int current_layer = -1) { ///////有问题，会跳读
+			//std::cout << "\n";
+			json buf;
+			int j = 0;
+			int k = 0;
+			int i = 0;
+			int t = 0;
+			int layer = 0;
 
-	};
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define function_define
-	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos, int current_layer);
-	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos, int current_layer);
-	int JSON_Parse_Pool(json_pool_str & map, std::string& data);
-	void Debug_Print(std::string& data, int begin_idx, int end_idx) {
-		for (int i = begin_idx; i <= end_idx; i++) {
-			std::cout << data[i];
-		}
-	}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	int PairList_Expect_Pool(std::string& data, json_pool_str&map, int current_root_idx, int beginpos = 0, int current_layer = -1) { ///////有问题，会跳读
-		//std::cout << "\n";
-		json_acc_str buf;
-		int j = 0;
-		int k = 0;
-		int i = 0;
-		int t = 0;
-		int layer = 0;
+			for (i = beginpos + 1; data[i] != LayerE; i++) {
 
-		for (i = beginpos + 1; data[i] != LayerE; i++) {
-
-			if (data[i] == ConS) {
-				buf.Father_idx = current_root_idx;
-				buf.layer = current_layer;
-				for (t = i; data[t] != ConE && data[t] != LayerS; t--);
-				for (k = t; data[k] != ConS; k++) {
-					if (data[k] != LayerS && data[k] != FieldS && data[k] != ConE && data[k] != Quote) {
-						buf.title.push_back(data[k]);
-					}
-				}
-				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
-					buf.content = "null";
-					buf.type = null;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-				}
-				if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
-					buf.content = "true";
-					buf.type = bool_t;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-				}
-				if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
-					buf.content = "false";
-					buf.type = bool_t;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-				}
-				if (data[i + 1] == Quote) {//str
-					//std::cout << "STR" << "\n";
-					buf.type = str;
-					//for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
-					//	buf.content.push_back(data[j]);
-					//}
-					//--------buf.content.push_back(Quote);
-					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); ++j) {
-
-
-						buf.content.push_back(data[j]);
-					}
-					//-------buf.content.push_back(Quote);
-
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-					//std::cout << data[j] << "  ssssssss\n";
-					i = j - 1;
-					j = 0;
-				}
-				if (std::isdigit(data[i + 1]) || (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
-					//std::cout << "DIGIT" << "\n";
-					buf.type = digit_int;
-					for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
-						if (data[j] == '.') {
-							buf.type = digit_double;
+				if (data[i] == ConS) {
+					buf.Father_idx = current_root_idx;
+					buf.layer = current_layer;
+					for (t = i; data[t] != ConE && data[t] != LayerS; t--);
+					for (k = t; data[k] != ConS; k++) {
+						if (data[k] != LayerS && data[k] != FieldS && data[k] != ConE && data[k] != Quote) {
+							buf.title.push_back(data[k]);
 						}
-						buf.content.push_back(data[j]);
 					}
+					if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
+						buf.content = "null";
+						buf.type = null;
 
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-					buf.clear();
-					i = j - 1;
-					j = 0;
-				}
-				//////////////////////////////////////////////////////////////////
-				if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
-					buf.type = dimension_void;
-					buf.content = "[]";
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						buf.clear();
+					}
+					if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
+						buf.content = "true";
+						buf.type = bool_t;
 
-					buf.clear();
-					i = i + 2;
-				}
-				if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object accelerate parsing
-					buf.type = pair_list_void;
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-					buf.content = "{}";
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						buf.clear();
+					}
+					if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
+						buf.content = "false";
+						buf.type = bool_t;
 
-					buf.clear();
-					i = i + 2;
-				}
-				///////////////////////
-				if (data[i + 1] == FieldS) { //Dimension List array
-					buf.type = dimension_list;
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+					}
+					if (data[i + 1] == Quote) {//str
+						//std::cout << "STR" << "\n";
+						buf.type = str;
+						//for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
+						//	buf.content.push_back(data[j]);
+						//}
+						//--------buf.content.push_back(Quote);
+						for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); ++j) {
+
+
+							buf.content.push_back(data[j]);
+						}
+						//-------buf.content.push_back(Quote);
+
+
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						//std::cout << data[j] << "  ssssssss\n";
+						i = j - 1;
+						j = 0;
+					}
+					if (std::isdigit(data[i + 1]) || (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
+						//std::cout << "DIGIT" << "\n";
+						buf.type = digit_int;
+						for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
+							if (data[j] == '.') {
+								buf.type = digit_double;
+							}
+							buf.content.push_back(data[j]);
+						}
+
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						i = j - 1;
+						j = 0;
+					}
+					//////////////////////////////////////////////////////////////////
+					if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
+						buf.type = dimension_void;
+						buf.content = "[]";
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						i = i + 2;
+					}
+					if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object accelerate parsing
+						buf.type = pair_list_void;
+
+						buf.content = "{}";
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						i = i + 2;
+					}
+					///////////////////////
+					if (data[i + 1] == FieldS) { //Dimension List array
+						buf.type = dimension_list;
 #define Pair_Dimen
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-					j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
 
-					buf.clear();
-					i = j;
-				}
-				/////////////////////////////////////////////////////////////////
+						buf.clear();
+						i = j;
+					}
+					/////////////////////////////////////////////////////////////////
 
-				if (data[i + 1] == LayerS) {//pair_list {}   Object
-					buf.type = pair_list;
+					if (data[i + 1] == LayerS) {//pair_list {}   Object
+						buf.type = pair_list;
 #define Pair_Pair
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-					j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
 
-					buf.clear();
-					i = j;//if it is j-1,it will result in catching last nesting "}",and idx will be wrong
-					j = 0;
+						buf.clear();
+						i = j;//if it is j-1,it will result in catching last nesting "}",and idx will be wrong
+						j = 0;
+					}
 				}
 			}
+
+
+
+
+			return i;//letter Should Be LayerE,However,When There was a nest,It will change to next "}" or "]"
 		}
 
+		int DimensionArray_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos = 0, int current_layer = -1) {
+			//std::cout << "IN_FUNC\n";
+			json buf;
+			int j = 0;
+			int i = 0;
 
+			for (i = beginpos; data[i] != FieldE; ++i) {
 
+				if (data[i] == FieldS || data[i] == ConE) {
+					buf.Father_idx = current_root_idx;
+					buf.layer = current_layer;
+					if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
+						buf.content = "null";
+						buf.type = null;
 
-		return i;//letter Should Be LayerE,However,When There was a nest,It will change to next "}" or "]"
-	}
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-	int DimensionArray_Expect_Pool(std::string& data, json_pool_str& map, int current_root_idx, int beginpos = 0, int current_layer = -1) {
-		//std::cout << "IN_FUNC\n";
-		json_acc_str buf;
-		int j = 0;
-		int i = 0;
-
-		for (i = beginpos; data[i] != FieldE; ++i) {
-
-			if (data[i] == FieldS || data[i] == ConE) {
-				buf.Father_idx = current_root_idx;
-				buf.layer = current_layer;
-				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
-					buf.content = "null";
-					buf.type = null;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-					i + 4;
-				}
-				if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
-					buf.content = "true";
-					buf.type = bool_t;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-					i + 4;
-				}
-				if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
-					buf.content = "false";
-					buf.type = bool_t;
-
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-					i + 5;
-				}
-				if (data[i + 1] == Quote) {//str
-					//std::cout << "STR" << "\n";
-					buf.type = str;
-					//std::cout << data[i];
-
-					//-------buf.content.push_back(Quote);
-					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq FieldE || data[j] not_eq Quote) ; ++j) {
-
-
-						buf.content.push_back(data[j]);
+						buf.clear();
+						i + 4;
 					}
+					if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
+						buf.content = "true";
+						buf.type = bool_t;
 
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						i + 4;
+					}
+					if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
+						buf.content = "false";
+						buf.type = bool_t;
+
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+						buf.clear();
+						i + 5;
+					}
+					if (data[i + 1] == Quote) {//str
+						//std::cout << "STR" << "\n";
+						buf.type = str;
+						//std::cout << data[i];
+
+						//-------buf.content.push_back(Quote);
+						for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq FieldE || data[j] not_eq Quote) ; ++j) {
 
 
-
-					buf.clear();
-
-					i = j - 1;
-					j = 0;
-				}
-				if (std::isdigit(data[i + 1]) or (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
-					//std::cout << "DIGIT" << "\n";
-					/////////////////////////////////////////////////////////////
-					buf.type = digit_int;
-					for (j = i + 1; data[j] != ConE && data[j] != FieldE; j++) {
-						if (data[j] == '.') {
-							buf.type = digit_double;
+							buf.content.push_back(data[j]);
 						}
-						buf.content.push_back(data[j]);
 
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+
+
+						buf.clear();
+
+						i = j - 1;
+						j = 0;
+					}
+					if (std::isdigit(data[i + 1]) or (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
+						//std::cout << "DIGIT" << "\n";
+						/////////////////////////////////////////////////////////////
+						buf.type = digit_int;
+						for (j = i + 1; data[j] != ConE && data[j] != FieldE; j++) {
+							if (data[j] == '.') {
+								buf.type = digit_double;
+							}
+							buf.content.push_back(data[j]);
+
+						}
+
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+
+
+
+						buf.clear();
+						i = j - 1;
+						j = 0;
 					}
 
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+					/////////////////////////////////////////////////////////////////////////////////
+					if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
+						buf.type = dimension_void;
+						buf.content = "[]";
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
+						buf.clear();
+						//i = i + 2;
+						i = i + 2;
+						//std::cout << data[i - 1] << "("  << data[i] << ")" << "   Void\n";
+					}
 
-
-					buf.clear();
-					i = j - 1;
-					j = 0;
-				}
-
-				/////////////////////////////////////////////////////////////////////////////////
-				if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
-					buf.type = dimension_void;
-					buf.content = "[]";
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-
-					buf.clear();
-					//i = i + 2;
-					i = i + 2;
-					//std::cout << data[i - 1] << "("  << data[i] << ")" << "   Void\n";
-				}
-
-				if (data[i + 1] == FieldS) { //Dimension List
-					buf.type = dimension_list;
+					if (data[i + 1] == FieldS) { //Dimension List
+						buf.type = dimension_list;
 #define Dimension_Dimen
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-					j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
 
-					buf.clear();
+						buf.clear();
 
-					i = j;
+						i = j;
 
-				}
+					}
 
-				/////////////////////////////////////////////////////////////////////////////
+					/////////////////////////////////////////////////////////////////////////////
 
-				if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object
-					buf.type = pair_list_void;
+					if (data[i + 1] == LayerS && data[i + 2] == LayerE) { //pair_list_VOID {}   Object
+						buf.type = pair_list_void;
 
-					buf.content = "{}";
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						buf.content = "{}";
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
 
-					buf.clear();
-					i = i + 2;
-				}
+						buf.clear();
+						i = i + 2;
+					}
 
-				if (data[i + 1] == LayerS) { //pair_list {}   Object///////////////////
-					buf.type = pair_list;
+					if (data[i + 1] == LayerS) { //pair_list {}   Object///////////////////
+						buf.type = pair_list;
 #define Dimension_Pair
-					map.emplace_back(buf);
-					map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
-					j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
+						map.emplace_back(buf);
+						map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
+						j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, current_layer + 1);
 
-					buf.clear();
+						buf.clear();
 
-					i = j - 1;//LayerE
-					j = 0;
+						i = j - 1;//LayerE
+						j = 0;
+					}
 				}
 			}
+
+			return i;
 		}
 
-		return i;
-	}
 
+		int JSON_Parse_Pool(json_map & map, std::string&& data) {
+			json buf;
+			int j = 0;
+			int k = 0;
+			int t = 0;
 
-	int JSON_Parse_Pool(json_pool_str & map, std::string&& data) {
-		json_acc_str buf;
-		int j = 0;
-		int k = 0;
-		int t = 0;
-
-		for (int i = 0; i < (int)(data.length() - 1); ++i) {
+			for (int i = 0; i < (int)(data.length() - 1); ++i) {
 //#pragma Debug
-			//std::cout << data[i];
-			if (data[i] == ConS) {
-				///title
-				for (t = i; data[t] not_eq ConE && data[t] not_eq LayerS; t--) {
-				}
-				for (k = t + 1; data[k] != ConS; k++) {
-					if (data[k] != Quote) {
-						buf.title.push_back(data[k]);
+				//std::cout << data[i];
+				if (data[i] == ConS) {
+					///title
+					for (t = i; data[t] not_eq ConE && data[t] not_eq LayerS; t--) {
 					}
-				}
-				//std::cout << t << "," << i << "\n";
-				buf.Father_idx = 0;
-				buf.layer = 1;
-				if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
-					buf.content = "null";
-					buf.type = null;
-
-					map.emplace_back(buf);
-					buf.clear();
-				}
-				if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
-					buf.content = "true";
-					buf.type = bool_t;
-					map.emplace_back(buf);
-					buf.clear();
-				}
-				if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
-					buf.content = "false";
-					buf.type = bool_t;
-					map.emplace_back(buf);
-					buf.clear();
-				}
-				if (data[i + 1] == Quote) {//str
-					//std::cout << "STR" << "\n";
-					buf.type = str;
-
-					//for (j = i + 1; data[j] not_eq ConE && data[j] not_eq LayerE; j++) {
-					//	buf.content.push_back(data[j]);
-					//}
-
-					//-------buf.content.push_back(Quote);
-					for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); j++) {
-						//", or "}
-
-						buf.content.push_back(data[j]);
-					}
-					//-------buf.content.push_back(Quote);
-
-					map.emplace_back(buf);
-					buf.clear();
-					//std::cout << data[j] << "  ssssssss\n";
-					i = j - 1;
-					j = 0;
-				}
-				if (std::isdigit(data[i + 1]) || (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
-					//std::cout << "DIGIT" << "\n";
-					buf.type = digit_int;
-					//std::cout << data[i] << data[i + 1] << data[i + 2] << "\n";
-					for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
-						if (data[j] == '.') {
-							buf.type = digit_double;
+					for (k = t + 1; data[k] != ConS; k++) {
+						if (data[k] != Quote) {
+							buf.title.push_back(data[k]);
 						}
-						buf.content.push_back(data[j]);
+					}
+					//std::cout << t << "," << i << "\n";
+					buf.Father_idx = 0;
+					buf.layer = 1;
+					if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' && data[i + 4] == 'l') {
+						buf.content = "null";
+						buf.type = null;
+
+						map.emplace_back(buf);
+						buf.clear();
+					}
+					if (data[i + 1] == 't' && data[i + 2] == 'r' && data[i + 3] == 'u' && data[i + 4] == 'e') {//bool true
+						buf.content = "true";
+						buf.type = bool_t;
+						map.emplace_back(buf);
+						buf.clear();
+					}
+					if (data[i + 1] == 'f' && data[i + 2] == 'a' && data[i + 3] == 'l' && data[i + 4] == 's' && data[i + 5] == 'e') { //bool false
+						buf.content = "false";
+						buf.type = bool_t;
+						map.emplace_back(buf);
+						buf.clear();
+					}
+					if (data[i + 1] == Quote) {//str
+						//std::cout << "STR" << "\n";
+						buf.type = str;
+
+						//for (j = i + 1; data[j] not_eq ConE && data[j] not_eq LayerE; j++) {
+						//	buf.content.push_back(data[j]);
+						//}
+
+						//-------buf.content.push_back(Quote);
+						for (j = i + 2; (data[j + 1] not_eq ConE || data[j] not_eq Quote) && (data[j + 1] not_eq LayerE || data[j] not_eq Quote); j++) {
+							//", or "}
+
+							buf.content.push_back(data[j]);
+						}
+						//-------buf.content.push_back(Quote);
+
+						map.emplace_back(buf);
+						buf.clear();
+						//std::cout << data[j] << "  ssssssss\n";
+						i = j - 1;
+						j = 0;
+					}
+					if (std::isdigit(data[i + 1]) || (data[i + 1] == '-' && std::isdigit(data[i + 2]))) {//digit_all
+						//std::cout << "DIGIT" << "\n";
+						buf.type = digit_int;
+						//std::cout << data[i] << data[i + 1] << data[i + 2] << "\n";
+						for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
+							if (data[j] == '.') {
+								buf.type = digit_double;
+							}
+							buf.content.push_back(data[j]);
+						}
+
+						map.emplace_back(buf);
+						buf.clear();
+						i = j - 1;
+						j = 0;
+					}
+					/////////////////////////////////////////////////////////////////////////////////
+					if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
+						buf.type = dimension_void;
+						buf.content = "[]";
+
+						map.emplace_back(buf);
+						buf.clear();
+						i = i + 2;
+					}
+					if (data[i + 1] == LayerS && data[i + 2] == LayerE) {//void list
+						buf.type = pair_list_void;
+						buf.content = "{}";
+
+						map.emplace_back(buf);
+						buf.clear();
+						i = i + 2;
 					}
 
-					map.emplace_back(buf);
-					buf.clear();
-					i = j - 1;
-					j = 0;
-				}
-				/////////////////////////////////////////////////////////////////////////////////
-				if (data[i + 1] == FieldS && data[i + 2] == FieldE) {//void list
-					buf.type = dimension_void;
-					buf.content = "[]";
-
-					map.emplace_back(buf);
-					buf.clear();
-					i = i + 2;
-				}
-				if (data[i + 1] == LayerS && data[i + 2] == LayerE) {//void list
-					buf.type = pair_list_void;
-					buf.content = "{}";
-
-					map.emplace_back(buf);
-					buf.clear();
-					i = i + 2;
-				}
-
-				if (data[i + 1] == FieldS) { //Dimension List
-					buf.type = dimension_list;
+					if (data[i + 1] == FieldS) { //Dimension List
+						buf.type = dimension_list;
 #define Main_Dimension
-					map.emplace_back(buf);
-					j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, 1);
-					//std::cout << "Dimen:" << data[i + 1] << "\n";
+						map.emplace_back(buf);
+						j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, 1);
+						//std::cout << "Dimen:" << data[i + 1] << "\n";
 
-					buf.clear();
-					i = j;
-				}
+						buf.clear();
+						i = j;
+					}
 
-				/////////////////////////////////////////////////////////////////////////////
-				if (data[i + 1] == LayerS) { //pair_list {}   Object
-					buf.type = pair_list;
+					/////////////////////////////////////////////////////////////////////////////
+					if (data[i + 1] == LayerS) { //pair_list {}   Object
+						buf.type = pair_list;
 
 
 #define Main_Pair
-					map.emplace_back(buf);
-					j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, 1);
+						map.emplace_back(buf);
+						j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1, 1);
 
-					buf.clear();
-					i = j - 1;
-					//std::cout << "                                       " << data[i] << "\n";
-					j = 0;
+						buf.clear();
+						i = j - 1;
+						//std::cout << "                                       " << data[i] << "\n";
+						j = 0;
+					}
 				}
 			}
+			return 1;
 		}
-		return 1;
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	//int JSON_Serialize_Child(json_acc_str_np::json_pool_str& map, std::string& result, int current_root = 0);
+		//int JSON_Serialize_Child(json_np::json_map& map, std::string& result, int current_root = 0);
 
-	int JSON_Serialize_Child(json_pool_str& map, std::string& result, int current_root = 0) {
+		int JSON_Serialize_Child(json_map& map, std::string& result, int current_root = 0) {
 
-		if (map.at(current_root).type not_eq notype && map.at(current_root).type not_eq dimension_list && map.at(current_root).type not_eq pair_list) {
-			if (map.at(current_root).type not_eq str) {
-				result.push_back('"');
-				result.append(map.at(current_root).title);
-				result.push_back('"');
+			if (map.at(current_root).type not_eq notype && map.at(current_root).type not_eq dimension_list && map.at(current_root).type not_eq pair_list) {
+				if (map.at(current_root).type not_eq str) {
+					result.push_back('"');
+					result.append(map.at(current_root).title);
+					result.push_back('"');
 
-				result.push_back(':');
+					result.push_back(':');
 
-				result.append(map.at(current_root).content);
+					result.append(map.at(current_root).content);
+					result.push_back(',');
+				}
+				if (map.at(current_root).type == str) {
+					result.push_back('"');
+					result.append(map.at(current_root).title);
+					result.push_back('"');
+
+					result.push_back(':');
+
+					result.push_back('"');
+					result.append(map.at(current_root).content);
+					result.push_back('"');
+					result.push_back(',');
+				}
+
+			}
+			if (map.at(current_root).type == dimension_list) {
+				int tmp_idx_dm = 0;
+				if (!map.at(current_root).title.empty()) {
+					result.append("\"");
+					result.append(map.at(current_root).title);
+					result.push_back('"');
+				}
+
+
+				if (map.at(map.at(current_root).Father_idx).type == dimension_list) { //if its father type is dimension,it might broke json syntax
+					result.append("[");
+				}
+				if (map.at(map.at(current_root).Father_idx).type != dimension_list) {
+					result.append(":[");
+				}
+				for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
+					tmp_idx_dm = map.at(current_root).Child_idx.at(i);
+					if (map.at(tmp_idx_dm).type not_eq dimension_list && map.at(tmp_idx_dm).type not_eq pair_list && map.at(tmp_idx_dm).type not_eq notype) {
+						if (map.at(tmp_idx_dm).type == str) {
+							result.push_back('"');
+							result.append(map.at(tmp_idx_dm).content);
+							result.push_back('"');
+						}
+						if (map.at(tmp_idx_dm).type not_eq str) {
+							result.append(map.at(tmp_idx_dm).content);
+						}
+						if (i != map.at(current_root).Child_idx.size() - 1) {
+							result.push_back(',');
+						}
+					}
+					if (map.at(tmp_idx_dm).type == dimension_list) {
+
+						JSON_Serialize_Child(map, result, tmp_idx_dm);
+						if (i != map.at(current_root).Child_idx.size() - 1) {
+							result.push_back(',');
+						}
+					}
+					if (map.at(tmp_idx_dm).type == pair_list) {
+						JSON_Serialize_Child(map, result, tmp_idx_dm);
+					}
+					//if (i != map.at(current_root).Child_idx.size() - 1) {
+					//	result.push_back(',');
+					//}
+				}
+				if (result.back() == ',') {
+					result.pop_back();
+				}
+				result.append("]");
+				if (map.at(current_root).Father_idx == 0) {
+					result.push_back(',');
+				}
+			}
+			if (map.at(current_root).type == pair_list) {
+				int tmp_idx_pl = 0;
+
+				if (!map.at(current_root).title.empty()) {
+					result.append("\"");
+					//result.push_back('"');
+					result.append(map.at(current_root).title);
+					result.push_back('"');
+				}
+
+				if (!map.at(current_root).title.empty()) {
+					result.append(":");
+				}
+				result.append("{");
+				int i = 0;
+				for (; i < (int)map.at(current_root).Child_idx.size(); i++) {
+					tmp_idx_pl = map.at(current_root).Child_idx.at(i);
+					if (map.at(tmp_idx_pl).type not_eq dimension_list && map.at(tmp_idx_pl).type not_eq pair_list && map.at(tmp_idx_pl).type not_eq notype) {
+						//result.pop_back();
+						if (map.at(tmp_idx_pl).type not_eq str) {
+							result.push_back('"');
+							result.append(map.at(tmp_idx_pl).title);
+							result.push_back('"');
+
+							result.push_back(':');
+
+							result.append(map.at(tmp_idx_pl).content);
+							result.push_back(',');
+						}
+						if (map.at(tmp_idx_pl).type == str) {
+							result.push_back('"');
+							result.append(map.at(tmp_idx_pl).title);
+							result.push_back('"');
+
+							result.push_back(':');
+
+							result.push_back('"');
+							result.append(map.at(tmp_idx_pl).content);
+							result.push_back('"');
+							result.push_back(',');
+						}
+					}
+					if (map.at(tmp_idx_pl).type == pair_list) {
+						JSON_Serialize_Child(map, result, tmp_idx_pl);
+						//result.append("PairList");
+					}
+					if (map.at(tmp_idx_pl).type == dimension_list) {
+						JSON_Serialize_Child(map, result, tmp_idx_pl);
+						if (tmp_idx_pl != map.at(current_root).Child_idx.size() - 1) {
+							result.push_back(',');
+						}
+					}
+				}
+				if (result.back() == ',') {
+					result.pop_back();
+				}
+				result.push_back('}');
 				result.push_back(',');
 			}
-			if (map.at(current_root).type == str) {
-				result.push_back('"');
-				result.append(map.at(current_root).title);
-				result.push_back('"');
 
-				result.push_back(':');
 
-				result.push_back('"');
-				result.append(map.at(current_root).content);
-				result.push_back('"');
-				result.push_back(',');
-			}
 
+			//result.pop_back();
+
+			return 1;
 		}
-		if (map.at(current_root).type == dimension_list) {
-			int tmp_idx_dm = 0;
-			if (!map.at(current_root).title.empty()) {
-				result.append("\"");
-				result.append(map.at(current_root).title);
-				result.push_back('"');
-			}
-
-
-			if (map.at(map.at(current_root).Father_idx).type == dimension_list) { //if its father type is dimension,it might broke json syntax
-				result.append("[");
-			}
-			if (map.at(map.at(current_root).Father_idx).type != dimension_list) {
-				result.append(":[");
-			}
-			for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
-				tmp_idx_dm = map.at(current_root).Child_idx.at(i);
-				if (map.at(tmp_idx_dm).type not_eq dimension_list && map.at(tmp_idx_dm).type not_eq pair_list && map.at(tmp_idx_dm).type not_eq notype) {
-					if (map.at(tmp_idx_dm).type == str) {
-						result.push_back('"');
-						result.append(map.at(tmp_idx_dm).content);
-						result.push_back('"');
-					}
-					if (map.at(tmp_idx_dm).type not_eq str) {
-						result.append(map.at(tmp_idx_dm).content);
-					}
-					if (i != map.at(current_root).Child_idx.size() - 1) {
-						result.push_back(',');
-					}
-				}
-				if (map.at(tmp_idx_dm).type == dimension_list) {
-
-					JSON_Serialize_Child(map, result, tmp_idx_dm);
-					if (i != map.at(current_root).Child_idx.size() - 1) {
-						result.push_back(',');
-					}
-				}
-				if (map.at(tmp_idx_dm).type == pair_list) {
-					JSON_Serialize_Child(map, result, tmp_idx_dm);
-				}
-				//if (i != map.at(current_root).Child_idx.size() - 1) {
-				//	result.push_back(',');
-				//}
-			}
-			if (result.back() == ',') {
-				result.pop_back();
-			}
-			result.append("]");
-			if (map.at(current_root).Father_idx == 0) {
-				result.push_back(',');
-			}
-		}
-		if (map.at(current_root).type == pair_list) {
-			int tmp_idx_pl = 0;
-
-			if (!map.at(current_root).title.empty()) {
-				result.append("\"");
-				//result.push_back('"');
-				result.append(map.at(current_root).title);
-				result.push_back('"');
-			}
-
-			if (!map.at(current_root).title.empty()) {
-				result.append(":");
-			}
-			result.append("{");
-			int i = 0;
-			for (; i < (int)map.at(current_root).Child_idx.size(); i++) {
-				tmp_idx_pl = map.at(current_root).Child_idx.at(i);
-				if (map.at(tmp_idx_pl).type not_eq dimension_list && map.at(tmp_idx_pl).type not_eq pair_list && map.at(tmp_idx_pl).type not_eq notype) {
-					//result.pop_back();
-					if (map.at(tmp_idx_pl).type not_eq str) {
-						result.push_back('"');
-						result.append(map.at(tmp_idx_pl).title);
-						result.push_back('"');
-
-						result.push_back(':');
-
-						result.append(map.at(tmp_idx_pl).content);
-						result.push_back(',');
-					}
-					if (map.at(tmp_idx_pl).type == str) {
-						result.push_back('"');
-						result.append(map.at(tmp_idx_pl).title);
-						result.push_back('"');
-
-						result.push_back(':');
-
-						result.push_back('"');
-						result.append(map.at(tmp_idx_pl).content);
-						result.push_back('"');
-						result.push_back(',');
-					}
-				}
-				if (map.at(tmp_idx_pl).type == pair_list) {
-					JSON_Serialize_Child(map, result, tmp_idx_pl);
-					//result.append("PairList");
-				}
-				if (map.at(tmp_idx_pl).type == dimension_list) {
-					JSON_Serialize_Child(map, result, tmp_idx_pl);
-					if (tmp_idx_pl != map.at(current_root).Child_idx.size() - 1) {
-						result.push_back(',');
-					}
+		int JSON_Serialize_Pool(json_map& map, std::string& result, int current_root = 0) {
+			result.push_back('{');
+			int target_idx = 0;
+			for (int i = 0; i < map.size(); i++) {
+				if (map.at(i).Father_idx == 0) {
+					target_idx = i;
+					// << i << "\n";
+					JSON_Serialize_Child(map, result, i);
 				}
 			}
 			if (result.back() == ',') {
 				result.pop_back();
 			}
 			result.push_back('}');
-			result.push_back(',');
+			return 1;
 		}
+	  public:
+		void parse(std::string& data) {
+			JSON_Parse_Pool(*this, std::move(data));
+		}
+		std::string serialize() {
+			std::string buf;
+			JSON_Serialize_Pool(*this, buf, 0);
+			return buf;
+		}
+	};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-		//result.pop_back();
-
-		return 1;
+	void Debug_Print(std::string& data, int begin_idx, int end_idx) {
+		for (int i = begin_idx; i <= end_idx; i++) {
+			std::cout << data[i];
+		}
 	}
-	int JSON_Serialize_Pool(json_pool_str& map, std::string& result, int current_root = 0) {
-		result.push_back('{');
-		int target_idx = 0;
-		for (int i = 0; i < map.size(); i++) {
-			if (map.at(i).Father_idx == 0) {
-				target_idx = i;
-				// << i << "\n";
-				JSON_Serialize_Child(map, result, i);
-			}
-		}
-		if (result.back() == ',') {
-			result.pop_back();
-		}
-		result.push_back('}');
-		return 1;
-	}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
 }
-using json_pool = json_acc_layer_np::json_pool_str;
-using json = json_acc_layer_np::json_acc_str;
+using json_map = json_acc_layer_np::json_map;
+using json = json_acc_layer_np::json;

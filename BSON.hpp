@@ -1,4 +1,4 @@
-#include "JSON.hpp"
+#include "json.hpp"
 enum bson_data_type {
 	str,
 	integer,
@@ -12,9 +12,9 @@ enum bson_data_type {
 };
 using d64 = long double;
 using data_type = json_acc_layer_np::data_type;
-using json_pool = json_acc_layer_np::json_pool_str;
-using json = json_acc_layer_np::json_acc_str;
-void jsonmap_to_bsonmap(json_pool& map) {
+using json_map = json_acc_layer_np::json_map;
+using json = json_acc_layer_np::json;
+void jsonmap_to_bsonmap(json_map& map) {
 	for (json x : map) {
 		switch (x.type) {
 			case data_type::str:
@@ -55,7 +55,7 @@ void BSON_Serialize_BMap() {
 }
 
 
-void BSON_Serialize_JMap(json_pool& map) {
+void BSON_Serialize_JMap(json_map& map) {
 	jsonmap_to_bsonmap(map);
 	int sign = 0;
 
