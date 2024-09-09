@@ -27,6 +27,7 @@
 #define FieldS '['
 #define FieldE ']'
 #define ConS ':'
+
 namespace json_acc_layer_np {
 //用string来类型擦除，返回variant还原类型
 
@@ -1152,3 +1153,5 @@ namespace json_acc_layer_np {
 
 
 }
+using json_pool = json_acc_layer_np::json_pool_str;
+using json = json_acc_layer_np::json_acc_str;

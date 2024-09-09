@@ -77,6 +77,19 @@ SyncProduct = 1
 
 
 [Unit2]
+FileName = BSON.hpp
+CompileCpp = 0
+Folder = 头文件
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
+
+[Unit3]
 FileName = JSON_IO.hpp
 CompileCpp = 0
 Folder = 头文件
@@ -89,7 +102,7 @@ FileEncoding = PROJECT
 RealEncoding = UTF-8
 
 
-[Unit3]
+[Unit4]
 FileName = main.cpp
 CompileCpp = 1
 Folder = 源文件
@@ -99,24 +112,11 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = ASCII
-
-
-[Unit4]
-FileName = JSON.hpp
-CompileCpp = 0
-Folder = 头文件
-Compile = 0
-Link = 0
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
 RealEncoding = UTF-8
 
 
 [Unit5]
-FileName = BSON.hpp
+FileName = JSON.hpp
 CompileCpp = 0
 Folder = 头文件
 Compile = 0
