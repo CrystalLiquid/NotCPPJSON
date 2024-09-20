@@ -116,7 +116,7 @@ void int64_serial(std::string&final_data,json& node){
 }
 void bool_serial(std::string&final_data,json& node){
 	int8_t signed_bytes = bson_data_type::bool_t;
-	int8_t unsigned_bytes = 10;
+	uint8_t unsigned_bytes = 10;
 	if (node.content == "true") {
 		unsigned_bytes = 1;
 	}
@@ -145,8 +145,6 @@ void str_serial(std::string&final_data,json& node){
 #include <utility>
 void BSON_Serialize_JMap(json_map& map, std::string&& buf) {
 	jsonmap_to_bsonmap(map);
-	int8_t signed_bytes = 0;
-	uint8_t unsigned_bytes = 0;
 	int32_t final_document_len = 0;
 	int32_t head_size = 0;
 	for (json& x : map) {
