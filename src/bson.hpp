@@ -61,19 +61,19 @@ void jsonmap_to_bsonmap(json_map& map) {
       case data_type::digit_double:
         x.type = bson_data_type::d64_t;
         break;
-      case data_type::pair_list:
+      case data_type::object_list:
         x.type = bson_data_type::object;
         break;
-      case data_type::pair_list_void:
+      case data_type::object_void:
         x.type = bson_data_type::object_void;
         break;
       case data_type::bool_t:
         x.type = bson_data_type::bool_t;
         break;
-      case data_type::dimension_void:
+      case data_type::array_void:
         x.type = bson_data_type::array_void;
         break;
-      case data_type::dimension_list:
+      case data_type::array_list:
         x.type = bson_data_type::array;
         break;
       default:

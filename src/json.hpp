@@ -35,11 +35,11 @@ enum data_type {
   digit_int = 5,
   null = 6,
   digit_double = 7,
-  pair_list = 8,
-  pair_list_void = 12,
+  object_list = 8,
+  object_void = 12,
   bool_t = 9,
-  dimension_void = 10,
-  dimension_list = 11,
+  array_void = 10,
+  array_list = 11,
   error = -1,
   notype = 0,
   invalid_opttype = -124
@@ -81,16 +81,16 @@ struct json {
       case digit_double:
         return std::stod(this->value);
         break;
-      case dimension_list:
+      case array_list:
         return this->Child_idx;
         break;
-      case pair_list:
+      case object_list:
         return this->Child_idx;
         break;
-      case dimension_void:
+      case array_void:
         return std::string("[]");
         break;
-      case pair_list_void:
+      case object_void:
         return std::string("{}");
         break;
       case bool_t:
@@ -219,10 +219,10 @@ struct json_map : public std::vector<json> {
           return str;
         }
         if (std::get<std::string>(val) == "[]") {
-          return dimension_void;
+          return array_void;
         }
         if (std::get<std::string>(val) == "{}") {
-          return pair_list_void;
+          return object_void;
         }
         break;
       case 2:
@@ -298,11 +298,11 @@ struct json_map : public std::vector<json> {
         buf.value = std::to_string(std::get<double>(val));
         break;
 
-      case dimension_void:
+      case array_void:
         buf.value = "[]";
         break;
 
-      case pair_list_void:
+      case object_void:
         buf.value = "{}";
         break;
 
@@ -346,11 +346,11 @@ struct json_map : public std::vector<json> {
         buf.value = std::to_string(std::get<double>(val));
         break;
 
-      case dimension_void:
+      case array_void:
         buf.value = "[]";
         break;
 
-      case pair_list_void:
+      case object_void:
         buf.value = "{}";
         break;
 
@@ -373,7 +373,7 @@ struct json_map : public std::vector<json> {
   void add_dimension_aschild(std::string&& key,
                              std::initializer_list<json> list, int layer = -1) {
     int grandfather_idx = getidx_by_name_layer(key, layer - 1);
-    json buf = {key, "", dimension_list, layer, grandfather_idx, {}};
+    json buf = {key, "", array_list, layer, grandfather_idx, {}};
     this->emplace_back(buf);
     int father_idx = this->size() - 1;
     int tmp_child_idx = 0;
@@ -387,7 +387,7 @@ struct json_map : public std::vector<json> {
   void add_pairlist_aschild(std::string&& key, std::initializer_list<json> list,
                             int layer = -1) {
     int grandfather_idx = getidx_by_name_layer(key, layer - 1);
-    json buf = {key, "", pair_list, layer, grandfather_idx, {}};
+    json buf = {key, "", object_list, layer, grandfather_idx, {}};
     this->emplace_back(buf);
     int father_idx = this->size() - 1;
     int tmp_child_idx = 0;
@@ -400,7 +400,7 @@ struct json_map : public std::vector<json> {
   }
   void add_dimension_atback(std::string&& key,
                             std::initializer_list<json> list) {
-    json buf = {key, "", dimension_list, 0, 0, {}};
+    json buf = {key, "", array_list, 0, 0, {}};
     this->emplace_back(buf);
     int father_idx = this->size() - 1;
     int tmp_child_idx = 0;
@@ -413,7 +413,7 @@ struct json_map : public std::vector<json> {
   }
   void add_pairlist_atback(std::string&& key,
                            std::initializer_list<json> list) {
-    json buf = {key, "", pair_list, 0, 0, {}};
+    json buf = {key, "", object_list, 0, 0, {}};
     this->emplace_back(buf);
     int father_idx = this->size() - 1;
     int tmp_child_idx = 0;
@@ -430,7 +430,7 @@ struct json_map : public std::vector<json> {
   void set_dimension(std::string&& key, std::initializer_list<json> list,
                      int layer = -1) {
     int father_idx = getidx_by_name_layer(key, layer);
-    this->at(father_idx).type = dimension_list;
+    this->at(father_idx).type = array_list;
     this->at(father_idx).value.clear();
     int i = 1;
     for (json x : list) {
@@ -443,7 +443,7 @@ struct json_map : public std::vector<json> {
   void set_pairlist(std::string&& key, std::initializer_list<json> list,
                     int layer = -1) {
     int father_idx = getidx_by_name_layer(key, layer);
-    this->at(father_idx).type = pair_list;
+    this->at(father_idx).type = object_list;
     this->at(father_idx).value.clear();
     int i = 1;
     for (json x : list) {
@@ -477,25 +477,25 @@ struct json_map : public std::vector<json> {
         this->at(idx).value.clear();
         break;
 
-      case dimension_list:
+      case array_list:
         begin_i = this->at(idx).Child_idx.front();
         end_i = this->at(idx).Child_idx.back();
         this->at(idx).Child_idx.clear();
         this->erase(this->begin() + begin_i, this->begin() + end_i);
         break;
 
-      case pair_list:
+      case object_list:
         begin_i = this->at(idx).Child_idx.front();
         end_i = this->at(idx).Child_idx.back();
         this->at(idx).Child_idx.clear();
         this->erase(this->begin() + begin_i, this->begin() + end_i);
         break;
 
-      case dimension_void:
+      case array_void:
         this->at(idx).value.clear();
         break;
 
-      case pair_list_void:
+      case object_void:
         this->at(idx).value.clear();
         break;
 
@@ -531,11 +531,11 @@ struct json_map : public std::vector<json> {
         this->at(idx).value = std::to_string(std::get<double>(val));
         break;
 
-      case dimension_void:
+      case array_void:
         this->at(idx).value = "[]";
         break;
 
-      case pair_list_void:
+      case object_void:
         this->at(idx).value = "{}";
         break;
 
@@ -647,7 +647,7 @@ struct json_map : public std::vector<json> {
         }
         //////////////////////////////////////////////////////////////////
         if (data[i + 1] == FieldS && data[i + 2] == FieldE) {  // void list
-          buf.type = dimension_void;
+          buf.type = array_void;
           buf.value = "[]";
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
@@ -657,8 +657,8 @@ struct json_map : public std::vector<json> {
         }
         if (data[i + 1] == LayerS &&
             data[i + 2] ==
-                LayerE) {  // pair_list_VOID {}   Object accelerate parsing
-          buf.type = pair_list_void;
+                LayerE) {  // object_void {}   Object accelerate parsing
+          buf.type = object_void;
 
           buf.value = "{}";
           map.emplace_back(buf);
@@ -669,7 +669,7 @@ struct json_map : public std::vector<json> {
         }
         ///////////////////////
         if (data[i + 1] == FieldS) {  // Dimension List array
-          buf.type = dimension_list;
+          buf.type = array_list;
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
           j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1,
@@ -680,8 +680,8 @@ struct json_map : public std::vector<json> {
         }
         /////////////////////////////////////////////////////////////////
 
-        if (data[i + 1] == LayerS) {  // pair_list {}   Object
-          buf.type = pair_list;
+        if (data[i + 1] == LayerS) {  // object_list {}   Object
+          buf.type = object_list;
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
           j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1,
@@ -781,7 +781,7 @@ struct json_map : public std::vector<json> {
 
         /////////////////////////////////////////////////////////////////////////////////
         if (data[i + 1] == FieldS && data[i + 2] == FieldE) {  // void list
-          buf.type = dimension_void;
+          buf.type = array_void;
           buf.value = "[]";
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
@@ -790,7 +790,7 @@ struct json_map : public std::vector<json> {
         }
 
         if (data[i + 1] == FieldS) {  // Dimension List
-          buf.type = dimension_list;
+          buf.type = array_list;
 
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
@@ -805,8 +805,8 @@ struct json_map : public std::vector<json> {
         /////////////////////////////////////////////////////////////////////////////
 
         if (data[i + 1] == LayerS &&
-            data[i + 2] == LayerE) {  // pair_list_VOID {}   Object
-          buf.type = pair_list_void;
+            data[i + 2] == LayerE) {  // object_void {}   Object
+          buf.type = object_void;
 
           buf.value = "{}";
           map.emplace_back(buf);
@@ -816,8 +816,8 @@ struct json_map : public std::vector<json> {
           i = i + 2;
         }
 
-        if (data[i + 1] == LayerS) {  // pair_list {} Object///////////////////
-          buf.type = pair_list;
+        if (data[i + 1] == LayerS) {  // object_list {} Object///////////////////
+          buf.type = object_list;
 
           map.emplace_back(buf);
           map[current_root_idx].Child_idx.emplace_back(map.size() - 1);
@@ -903,7 +903,7 @@ struct json_map : public std::vector<json> {
         }
         /////////////////////////////////////////////////////////////////////////////////
         if (data[i + 1] == FieldS && data[i + 2] == FieldE) {  // void list
-          buf.type = dimension_void;
+          buf.type = array_void;
           buf.value = "[]";
 
           map.emplace_back(buf);
@@ -911,7 +911,7 @@ struct json_map : public std::vector<json> {
           i = i + 2;
         }
         if (data[i + 1] == LayerS && data[i + 2] == LayerE) {  // void list
-          buf.type = pair_list_void;
+          buf.type = object_void;
           buf.value = "{}";
 
           map.emplace_back(buf);
@@ -920,7 +920,7 @@ struct json_map : public std::vector<json> {
         }
 
         if (data[i + 1] == FieldS) {  // Dimension List
-          buf.type = dimension_list;
+          buf.type = array_list;
 #define Main_Dimension
           map.emplace_back(buf);
           j = DimensionArray_Expect_Pool(data, map, map.size() - 1, i + 1, 1);
@@ -931,8 +931,8 @@ struct json_map : public std::vector<json> {
         }
 
         /////////////////////////////////////////////////////////////////////////////
-        if (data[i + 1] == LayerS) {  // pair_list {}   Object
-          buf.type = pair_list;
+        if (data[i + 1] == LayerS) {  // object_list {}   Object
+          buf.type = object_list;
 
 #define Main_Pair
           map.emplace_back(buf);
@@ -954,8 +954,8 @@ struct json_map : public std::vector<json> {
   int JSON_Serialize_Child(json_map& map, std::string& result,
                            int current_root = 0) {
     if (map.at(current_root).type != notype &&
-        map.at(current_root).type != dimension_list &&
-        map.at(current_root).type != pair_list) {
+        map.at(current_root).type != array_list &&
+        map.at(current_root).type != object_list) {
       if (map.at(current_root).type != str) {
         result.push_back('"');
         result.append(map.at(current_root).key);
@@ -979,7 +979,7 @@ struct json_map : public std::vector<json> {
         result.push_back(',');
       }
     }
-    if (map.at(current_root).type == dimension_list) {
+    if (map.at(current_root).type == array_list) {
       int tmp_idx_dm = 0;
       if (!map.at(current_root).key.empty()) {
         result.append("\"");
@@ -988,17 +988,17 @@ struct json_map : public std::vector<json> {
       }
 
       if (map.at(map.at(current_root).Father_idx).type ==
-          dimension_list) {  // if its father type is dimension,it might broke
+          array_list) {  // if its father type is dimension,it might broke
                              // json syntax
         result.append("[");
       }
-      if (map.at(map.at(current_root).Father_idx).type != dimension_list) {
+      if (map.at(map.at(current_root).Father_idx).type != array_list) {
         result.append(":[");
       }
       for (int i = 0; i < map.at(current_root).Child_idx.size(); i++) {
         tmp_idx_dm = map.at(current_root).Child_idx.at(i);
-        if (map.at(tmp_idx_dm).type != dimension_list &&
-            map.at(tmp_idx_dm).type != pair_list &&
+        if (map.at(tmp_idx_dm).type != array_list &&
+            map.at(tmp_idx_dm).type != object_list &&
             map.at(tmp_idx_dm).type != notype) {
           if (map.at(tmp_idx_dm).type == str) {
             result.push_back('"');
@@ -1012,13 +1012,13 @@ struct json_map : public std::vector<json> {
             result.push_back(',');
           }
         }
-        if (map.at(tmp_idx_dm).type == dimension_list) {
+        if (map.at(tmp_idx_dm).type == array_list) {
           JSON_Serialize_Child(map, result, tmp_idx_dm);
           if (i != map.at(current_root).Child_idx.size() - 1) {
             result.push_back(',');
           }
         }
-        if (map.at(tmp_idx_dm).type == pair_list) {
+        if (map.at(tmp_idx_dm).type == object_list) {
           JSON_Serialize_Child(map, result, tmp_idx_dm);
         }
       }
@@ -1030,7 +1030,7 @@ struct json_map : public std::vector<json> {
         result.push_back(',');
       }
     }
-    if (map.at(current_root).type == pair_list) {
+    if (map.at(current_root).type == object_list) {
       int tmp_idx_pl = 0;
 
       if (!map.at(current_root).key.empty()) {
@@ -1047,8 +1047,8 @@ struct json_map : public std::vector<json> {
       int i = 0;
       for (; i < (int)map.at(current_root).Child_idx.size(); i++) {
         tmp_idx_pl = map.at(current_root).Child_idx.at(i);
-        if (map.at(tmp_idx_pl).type != dimension_list &&
-            map.at(tmp_idx_pl).type != pair_list &&
+        if (map.at(tmp_idx_pl).type != array_list &&
+            map.at(tmp_idx_pl).type != object_list &&
             map.at(tmp_idx_pl).type != notype) {
           // result.pop_back();
           if (map.at(tmp_idx_pl).type != str) {
@@ -1074,11 +1074,11 @@ struct json_map : public std::vector<json> {
             result.push_back(',');
           }
         }
-        if (map.at(tmp_idx_pl).type == pair_list) {
+        if (map.at(tmp_idx_pl).type == object_list) {
           JSON_Serialize_Child(map, result, tmp_idx_pl);
           // result.append("PairList");
         }
-        if (map.at(tmp_idx_pl).type == dimension_list) {
+        if (map.at(tmp_idx_pl).type == array_list) {
           JSON_Serialize_Child(map, result, tmp_idx_pl);
           if (tmp_idx_pl != map.at(current_root).Child_idx.size() - 1) {
             result.push_back(',');
