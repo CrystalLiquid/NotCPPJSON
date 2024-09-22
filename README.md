@@ -3,6 +3,10 @@
 NotJSON是一个HeaderOnly的以解析速度为最高导向的JSON解析库，并且使用tag + string类型擦除+BIT树达到内存和解析效率最大化
 后续有新思路还会更新更多解析函数
 ### 用法
+#### 解析
+通过调用json_map.parse(json)传入储存标准JSON内容的字符串完成解析
+#### 序列化
+通过调用json_map.serialize()来获得一个字符串返回值
 #### 添加
 ##### 添加新的树
 您需要手动构造一个root空节点来保证您的JSON是标准JSON文件
