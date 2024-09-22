@@ -610,12 +610,8 @@ struct json_map : public std::vector<json> {
           buf.clear();
         }
         if (data[i + 1] == Quote) {  // str
-          // std::cout << "STR" << "\n";
           buf.type = str;
-          // for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++) {
-          //	buf.value.push_back(data[j]);
-          // }
-          //--------buf.value.push_back(Quote);
+
           for (j = i + 2; (data[j + 1] != ConE || data[j] != Quote) &&
                           (data[j + 1] != LayerE || data[j] != Quote);
                ++j) {
@@ -846,8 +842,6 @@ struct json_map : public std::vector<json> {
     int t = 0;
 
     for (int i = 0; i < (int)(data.length() - 1); ++i) {
-      // #pragma Debug
-      // std::cout << data[i];
       if (data[i] == ConS) {
         /// title
         for (t = i; data[t] != ConE && data[t] != LayerS; t--) {
@@ -857,7 +851,6 @@ struct json_map : public std::vector<json> {
             buf.key.push_back(data[k]);
           }
         }
-        // std::cout << t << "," << i << "\n";
         buf.Father_idx = 0;
         buf.layer = 1;
         if (data[i + 1] == 'n' && data[i + 2] == 'u' && data[i + 3] == 'l' &&
@@ -957,9 +950,6 @@ struct json_map : public std::vector<json> {
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  // int JSON_Serialize_Child(json_np::json_map& map, std::string& result, int
-  // current_root = 0);
 
   int JSON_Serialize_Child(json_map& map, std::string& result,
                            int current_root = 0) {
