@@ -1,8 +1,9 @@
 add_rules("mode.debug", "mode.release")
-
+set_config("sdk", "D:/RedPanda-CPP/w64devkit/")
 target("cppjson")
     set_kind("binary")
     add_files("src/*.cpp")
+    
     set_languages("c17", "c++2b")
     set_optimize("fastest")
 --
