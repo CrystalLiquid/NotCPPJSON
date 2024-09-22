@@ -13,7 +13,7 @@ NotJSON是一个HeaderOnly的以解析速度为最高导向的JSON解析库，�
 	3.64位整型数 \
 	4.空object \
 	5.空array \
-使用add_val_aschild(父节点key，节点key，节点value，节点所在层)来构造普通节点
+使用add_val_aschild(父节点key，节点key，节点value，节点所在层)来构造普通节点 \
 使用add_val_atback(节点key，节点value)来默认添加到第1层
 ##### 添加列表类型
 列表类型有：\
