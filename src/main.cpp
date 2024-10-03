@@ -1,10 +1,9 @@
 #include <chrono>
 #include <iostream>
 
-#include "bson.hpp"
+// s#include "bson.hpp"
 #include "json.hpp"
 #include "json_io.hpp"
-
 
 #pragma once
 #ifndef __MAIN_
@@ -15,21 +14,21 @@ using std::chrono::milliseconds;
   case x:      \
     return #x; \
     break;
-std::string penum(int e) {
+std::string penum(data_type e) {
   switch (e) {
-    STR(json_acc_layer_np::temp_digit)
-    STR(json_acc_layer_np::str)
-    STR(json_acc_layer_np::digit_int)
-    STR(json_acc_layer_np::null)
-    STR(json_acc_layer_np::digit_double)
-    STR(json_acc_layer_np::object_list)
-    STR(json_acc_layer_np::object_void)
-    STR(json_acc_layer_np::bool_t)
-    STR(json_acc_layer_np::array_void)
-    STR(json_acc_layer_np::array_list)
-    STR(json_acc_layer_np::error)
-    STR(json_acc_layer_np::notype)
-    STR(json_acc_layer_np::invalid_opttype)
+    STR(json_acc_layer_np::data_type::temp_digit)
+    STR(json_acc_layer_np::data_type::str)
+    STR(json_acc_layer_np::data_type::digit_int)
+    STR(json_acc_layer_np::data_type::null)
+    STR(json_acc_layer_np::data_type::digit_double)
+    STR(json_acc_layer_np::data_type::object_list)
+    STR(json_acc_layer_np::data_type::object_void)
+    STR(json_acc_layer_np::data_type::bool_t)
+    STR(json_acc_layer_np::data_type::array_void)
+    STR(json_acc_layer_np::data_type::array_list)
+    STR(json_acc_layer_np::data_type::error)
+    STR(json_acc_layer_np::data_type::notype)
+    STR(json_acc_layer_np::data_type::invalid_opttype)
     default:
       // TODO
       break;
@@ -38,12 +37,12 @@ std::string penum(int e) {
 }
 int main() {
   // const char* path = "5.json";
-  const char* path = "citm_catalog.json";
+  // const char* path = "citm_catalog.json";
   // const char* path = "3.json";
   // const char* path = "4.json";
   // const char* path = "canada.json";
   // const char* path = "twitter.json";
-  // const char* path = "2.json";
+  const char* path = "2.json";
   std::string data;
   HP_IO::JSON_IO_FILE FILE;
   json_map map;
@@ -59,7 +58,7 @@ int main() {
   std::cout << "JSONParse Finish\n";
   milliseconds Parse_Interval =
       std::chrono::duration_cast<milliseconds>(Etime - Stime);
-
+  std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 #ifdef PRINT_MAP
   for (int i = (int)map.size() - 1; i > 0; i--) {
     std::cout << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title
@@ -67,10 +66,24 @@ int main() {
               << "\n";
   }
 #endif
-  std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
+
+  /////////////////////////////usage////////////////////////////////
+  map["systembit"][64];//add
+  map["key_new"]["wtf"];
+  map["half-systembit"][32];
+  //std::cout<<"Long list\n";
+  //map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
+  //std::cout << "Del Element\n";
+  map ^ "subtitle";  // delete
+
+  std::cout << map.get_idx("2test_num_list") << "\n";  // get idx through func
+  std::cout << (map("subTopicIds").key) << "\n";       // get idx through op()
+  std::cout << (int)(map("subTopicIds").type) << "\n";
+  /////////////////////////////usage////////////////////////////////
 
   std::cout << "DataSize:" << data.size() << "\n";
   std::cout << "MapSize:" << map.size() << "\n";
+
   LP_BASIC_IO::IO_Write(map.serialize(), "1.json");
 
   return 0;

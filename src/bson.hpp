@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <tuple>
 
 #include "json.hpp"
@@ -44,7 +45,6 @@ using d64 = double;
 using data_type = json_acc_layer_np::data_type;
 using json_map = json_acc_layer_np::json_map;
 using json = json_acc_layer_np::json;
-template <typename... Args>
 
 void jsonmap_to_bsonmap(json_map& map) {
   for (json x : map) {
@@ -145,7 +145,39 @@ void array(std::string& final_data, json& node, json_map& map) {
   int32_t head_size = 0;
   head_size = sizeof(signed_bytes) + node.value.size();
   for (int i : node.Child_idx) {
-	head_size += map[i].key.size();
+    head_size += map[i].key.size();
+    switch (map[i].type) {
+      case bson_data_type::null:
+
+        break;
+      case bson_data_type::integer:
+
+        break;
+      case bson_data_type::d64_t:
+
+        break;
+      case bson_data_type::bool_t:
+
+        break;
+      case bson_data_type::str:
+
+        break;
+      case bson_data_type::array:
+
+        break;
+      case bson_data_type::object:
+
+        break;
+      case bson_data_type::array_void:
+
+        break;
+      case bson_data_type::object_void:
+
+        break;
+      default:
+        // TODO
+        break;
+    }
   }
 }
 void object(std::string& final_data, json& node, json_map& map) {}
@@ -155,9 +187,14 @@ void BSON_Serialize_JMap(json_map& map, std::string&& buf) {
   jsonmap_to_bsonmap(map);
   int32_t final_document_len = 0;
   int32_t head_size = 0;
+  int32_t tmp_child_i = 0;
   for (json& x : map) {
+    buf.append("\"");
+    buf.append(std::to_string(tmp_child_i));
+    buf.append("\":");
     switch (x.type) {
       case bson_data_type::null:
+
         bson_basic::null_serial(buf, x);
         break;
       case bson_data_type::integer:
@@ -189,5 +226,6 @@ void BSON_Serialize_JMap(json_map& map, std::string&& buf) {
         // TODO
         break;
     }
+    ++tmp_child_i;
   }
 }
