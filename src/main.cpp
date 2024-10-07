@@ -72,13 +72,22 @@ int main() {
   map["key_new"]["wtf"];
   map["half-systembit"][32];
   // std::cout<<"Long list\n";
-  // map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
+  
+  //map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
+  //map["Long_list2"]({json{}("",2),json{}("",3),json{}("",6)});
   // std::cout << "Del Element\n";
   map ^ "2test_num_list";  // delete
-  //std::cout << map.get_idxl1("2test_num_list") << "\n";
-  //for (auto x : map) {
-  //  std::cout<<x.key<<"\n";
-  //}
+  // std::cout << map.get_idxl1("2test_num_list") << "\n";
+  int i = 0;
+  for (auto x : map) {
+    std::cout << "key:" << x.key << " | ";
+    std::cout << "val:" << x.value << " | ";
+    std::cout << "idx:" << i << " | ";
+    std::cout << "father:" << x.Father_idx << " | ";
+    std::cout << "\n";
+    ++i;
+    // std::cout<<"csize:" <<x.Child_idx.size()<<" | ";
+  }
   // std::cout << (map("subTopicIds").key) << "\n";       // get idx through
   // op() std::cout << (int)(map("subTopicIds").type) << "\n";
   /////////////////////////////usage////////////////////////////////

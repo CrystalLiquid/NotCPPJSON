@@ -390,10 +390,8 @@ struct json_map : public std::vector<json> {
   }
 
  private:  ////////////////////////////////////////delete
-  /// private////////////////////////////////////
-
-
- public:  // delete func//
+           /// private////////////////////////////////////
+ public:   // delete func//
   void delete_noChild(int idx) {
     if (this->at(idx).Child_idx.empty()) {
       // std::cout<<this->size()<<"\n";
@@ -420,23 +418,25 @@ struct json_map : public std::vector<json> {
       std::cerr << "Incorrect Type | delete_hasChild\n";
       throw this;
     }
-    int del_obj = this->at(idx).Child_idx.size();
+    int size = this->at(idx).Child_idx.size();
     int child_begin = this->at(idx).Child_idx.front();
     int child_end = this->at(idx).Child_idx.back();
     std::vector<int> idx_between_range_toDel;
     if (!this->at(idx).Child_idx.empty()) {
       /////////////////////////////////////del-child////////////////
-      for (int i = child_begin; i <= child_end; ++i) {
+      for (int i = child_begin; i <= child_end;) {
         if (this->at(i).Child_idx.empty()) {
           delete_noChild(i);
+          //--i;
           --child_end;
         }
         if (!this->at(i).Child_idx.empty()) {
           delete_hasChild(i);
         }
       }
+
       ////////////////////////////////////////del-info-in-fa and
-      ///del-self/////////////
+      /// del-self/////////////
       for (int i = 0; i < this->at(this->at(idx).Father_idx).Child_idx.size();
            ++i) {
         if (this->at(this->at(idx).Father_idx).Child_idx.at(i) == idx) {
@@ -446,6 +446,15 @@ struct json_map : public std::vector<json> {
         }
       }
       this->erase(this->begin() + idx);
+
+      for (int k = idx; k < this->size(); ++k) {
+        for (auto x : this->at(k).Child_idx) {
+          if (x > idx) {
+          }
+        }
+        if (this->at(k).Father_idx > idx) {
+        }
+      }
     }
   }
 
@@ -572,20 +581,63 @@ struct json_map : public std::vector<json> {
     json_map* map;
     size_t father_idx;
     ///////////at_back//////////////////////////////////////////
-    void operator[](std::initializer_list<json> list) {
+    void operator[](
+        std::initializer_list<json>
+            list) {  // side to op[key],pass nodes to form a childtree
       this->map->check_repeat_atback(this->key);
-      json buf = {this->key, "", data_type::object_list, 1, 0, {}};
-      this->map->emplace_back(buf);
-      int father_idx = this->map->size() - 1;
-      int tmp_child_idx = 0;
-      for (json x : list) {
-        this->map->emplace_back(x);
-        this->map->back().Father_idx = father_idx;
-        tmp_child_idx = (int)(this->map->size() - 1);
-        this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+      if (list.size() == 0) {
+        json buf = {this->key, "{}", data_type::object_void, 1, 0, {}};
+        this->map->emplace_back(buf);
+      } else {
+        bool is_array = true;
+        for (json x : list) {
+          is_array = is_array && x.key.empty();
+        }
+        if (is_array) {
+          std::cerr << "Not Valid Object | at back op[] list\n";
+          throw this;
+        }
+        json buf = {this->key, "", data_type::object_list, 1, 0, {}};
+        this->map->emplace_back(buf);
+        int father_idx = this->map->size() - 1;
+        int tmp_child_idx = 0;
+        for (json x : list) {
+          this->map->emplace_back(x);
+          this->map->back().Father_idx = father_idx;
+          tmp_child_idx = (int)(this->map->size() - 1);
+          this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+        }
       }
     }
-    void operator[](input_val v) {
+    void operator()(std::initializer_list<json> list) {
+      this->map->check_repeat_atback(this->key);
+      if (list.size() == 0) {
+        json buf = {this->key, "[]", data_type::array_void, 1, 0, {}};
+        this->map->emplace_back(buf);
+      } else {
+        bool is_array = true;
+        for (json x : list) {
+          is_array = is_array && x.key.empty();
+        }
+        if (is_array) {
+          json buf = {this->key, "", data_type::array_list, 1, 0, {}};
+          this->map->emplace_back(buf);
+          int father_idx = this->map->size() - 1;
+          int tmp_child_idx = 0;
+          for (json x : list) {
+            this->map->emplace_back(x);
+            this->map->back().Father_idx = father_idx;
+            tmp_child_idx = (int)(this->map->size() - 1);
+            this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+          }
+        } else {
+          std::cerr << "Not Valid Array | at back op() list\n";
+          throw this;
+        }
+      }
+    }
+    void operator[](
+        input_val v) {  // side to op[key],to pass value to add a node to layer1
       json buf;
       this->map->check_repeat_atback(this->key);
       buf.key = this->key;
@@ -724,24 +776,31 @@ struct json_map : public std::vector<json> {
     }
     //////////////////////as_child////////////////////////////
   };
-
+  // helpers to extend functionality of op[],because before C++23 no one is able
+  // to make passing params decent using only one op[]
   comp_as operator[](int father_idx_v) {
     comp_as buf;
     buf.map = this;
-    buf.father_idx = father_idx_v;
-    this->check_repeat(this->at(father_idx_v).key,
-                       this->at(father_idx_v).layer);
+    buf.father_idx = father_idx_v;  // passing information of course
+    this->check_repeat(
+        this->at(father_idx_v).key,
+        this->at(father_idx_v).layer);  // since this is a as child function,we
+                                        // shall check the fathers' key
+    // stdmove make it an NVRO,remember?
     return std::move(buf);
   }
   comp operator[](std::string k) {
     comp buf;
-    this->check_repeat_atback(k);
-    buf.key = k;
-    buf.map = this;
+    this->check_repeat_atback(
+        k);          // push at back,so we just make a check on the key u pass
+    buf.key = k;     // passing infos
+    buf.map = this;  // nested struct,so u need to pass a ptr
     return std::move(buf);
   }
 
-  void operator^(std::string key_toDel) {
+  void operator^(
+      std::string key_toDel) {  // function to delete,only check layer1 because
+                                // it doesn't accept a second param
     int idx = this->get_idxl1(key_toDel);
     switch (this->at(idx).type) {
       case data_type::array_list:
@@ -760,7 +819,10 @@ struct json_map : public std::vector<json> {
   }
 
  public:
-  constexpr json& operator[](size_t idx) { return this->at(idx); }
+  constexpr json& operator[](size_t idx) {
+    return this->at(idx);
+  }  // constexpr is the correct way to do it
+     // and of course if u delete it,u will get a overload error
 
  private:
   int PairList_Expect_Pool(std::string& data, json_map& map,

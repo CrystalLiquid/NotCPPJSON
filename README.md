@@ -21,14 +21,13 @@ json.get_val()通过tag得知当前的类型，并且合理地返回一个合法
 	3.64位整型数 \
 	4.空object \
 	5.空array \
-使用add_val_aschild(父节点key，节点key，节点value，节点所在层)来构造普通节点 \
-使用add_val_atback(节点key，节点value)来默认添加到第1层
+使用`[节点key][节点value]`来默认添加到第1层 \
+使用`[父节点index](节点key,节点value)`来添加到某个列表下 
 ##### 添加列表类型
 列表类型有：\
 	1.非空object \
 	2.非空array	\
-使用add_dimension/pairlist_atchild(节点key，节点value)来默认添加到第1层 \
-使用set_dimension/pairlist_aschild(父节点key，节点key，节点value，节点所在层)来添加一个array/object父节点和多个子节点
+使用`[节点key](json{}(节点key,节点value))`来默认添加到第1层 \
+使用`[父节点index](json{}(节点key,节点value))`多个子节点到父列表
 #### 更改
-通过set_xx(节点key，更改内容，节点层数)来更改类型 \
-使用set_dimension/pairlist_aschild(父节点key，节点key，节点value，节点所在层)来改变一个节点为array/object节点
+正在施工中。。。。。
