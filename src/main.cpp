@@ -68,17 +68,19 @@ int main() {
 #endif
 
   /////////////////////////////usage////////////////////////////////
-  map["systembit"][64];//add
+  map["systembit"][64];  // add
   map["key_new"]["wtf"];
   map["half-systembit"][32];
-  //std::cout<<"Long list\n";
-  //map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
-  //std::cout << "Del Element\n";
-  map ^ "subtitle";  // delete
-
-  std::cout << map.get_idx("2test_num_list") << "\n";  // get idx through func
-  std::cout << (map("subTopicIds").key) << "\n";       // get idx through op()
-  std::cout << (int)(map("subTopicIds").type) << "\n";
+  // std::cout<<"Long list\n";
+  // map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
+  // std::cout << "Del Element\n";
+  map ^ "2test_num_list";  // delete
+  //std::cout << map.get_idxl1("2test_num_list") << "\n";
+  //for (auto x : map) {
+  //  std::cout<<x.key<<"\n";
+  //}
+  // std::cout << (map("subTopicIds").key) << "\n";       // get idx through
+  // op() std::cout << (int)(map("subTopicIds").type) << "\n";
   /////////////////////////////usage////////////////////////////////
 
   std::cout << "DataSize:" << data.size() << "\n";

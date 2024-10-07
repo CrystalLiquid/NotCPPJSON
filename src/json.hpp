@@ -53,7 +53,7 @@ enum class data_type : int32_t {
   invalid_opttype = -124
 };
 
-enum search_t { directly = 1, dfs = 2, bfs = 3 };
+enum class search_t : int { directly = 1, dfs = 2, bfs = 3 };
 
 using i64t = long long;
 using child_slice = std::vector<int>;
@@ -217,33 +217,101 @@ struct json_map : public std::vector<json> {
   }
   ///////////////////////////////////////check_repeat/////////////////////////////////////////////////
  public:
-  void check_repeat(std::string& key_name) {
+  void check_repeat_atback(std::string& key_name) {
+    std::vector<json*> list;
     if (!key_name.empty()) {
       for (json& x : *this) {
-        if (x.key == key_name) {
+        if (x.key == key_name && x.layer == 0) {
           std::cerr << "Repeated Key!\n";
           throw x;
         }
       }
     }
   }
+  void check_repeat(std::string& key_name, int layerv) {
+    if (layerv == -1) {
+      throw this;
+    }
+    std::vector<json*> list;
+    if (!key_name.empty()) {
+      for (json& x : *this) {
+        if (x.key == key_name) {
+          list.emplace_back(&x);
+        }
+        if (x.key == key_name && x.layer == layerv) {
+          std::cerr << "Repeated Key To Add!\n";
+        }
+      }
+
+      if (list.size() > 2) {
+        for (auto x : list) {
+          if (x->layer == layerv) {
+            std::cerr << "Repeated Key To Add!\n";
+            throw list;
+          }
+        }
+      }
+      if (list.size() == 2) {
+        if (list[0]->layer == list[1]->layer) {
+          std::cerr << "Repeated Key!\n";
+
+          throw list;
+        } else {
+          for (auto x : list) {
+            if (x->layer == layerv) {
+              std::cerr << "Repeated Key To Add!\n";
+              throw list;
+            }
+          }
+        }
+      }
+      if (list.size() == 1) {
+        if (layerv == list[0]->layer) {
+          std::cerr << "Repeated Key To Add!\n";
+          throw list;
+        }
+      }
+    }
+  }
 
  public:
-  int get_idx(std::string keyv) {
+  int get_idxl1(std::string keyv) {
     if (keyv.empty()) {
-      std::cerr << "Shall Not Be Empty!\n";
+      std::cerr << "Shall Not Be Empty! | get_idxl1\n";
+      throw this;
+    }
+    int target_idx = -1;
+    for (int i = 0; i < this->size() - 1;) {
+      // std::cout<<this->at(i).key<<" | "<<this->at(i).value<<"  ^  "<<i<<"\n";
+      if (this->at(i).key != keyv || this->at(i).layer != 0) {
+        ++i;
+      }
+      if (this->at(i).key == keyv && this->at(i).layer == 1) {
+        target_idx = i;
+        if (target_idx >= this->size() - 1) {
+          std::cerr << "Error Search Index | get_idxl1\n";
+          throw this;
+        }
+        break;
+      }
+    }
+    return target_idx;
+  }
+  int get_idxl(std::string keyv, int layerv) {
+    if (keyv.empty()) {
+      std::cerr << "Shall Not Be Empty! | get_idxl\n";
       throw this;
     }
     int target_idx = 0;
     for (int i = 0; i < this->size() - 1;) {
       // std::cout<<this->at(i).key<<" | "<<this->at(i).value<<"  ^  "<<i<<"\n";
-      if (this->at(i).key != keyv) {
+      if (this->at(i).key != keyv || this->at(i).layer != layerv) {
         ++i;
       }
-      if (this->at(i).key == keyv) {
+      if (this->at(i).key == keyv && this->at(i).layer == layerv) {
         target_idx = i;
         if (target_idx >= this->size() - 1) {
-          std::cerr << "Error Search Index\n";
+          std::cerr << "Error Search Index | get_idxl\n";
           throw this;
         }
         break;
@@ -254,7 +322,8 @@ struct json_map : public std::vector<json> {
 
  private:  ///////////////////////////////////////////get
            /// value////////////////////////////////////
-  json& getval_by_name(std::string key, int search_type = search_t::directly,
+  json& getval_by_name(std::string key,
+                       search_t search_type = search_t::directly,
                        int layer = -1) {
     int target_idx = 0;
     if (search_type == search_t::directly) {
@@ -315,70 +384,75 @@ struct json_map : public std::vector<json> {
     throw "error reachable!";
   }
 
+ private:
+  bool is_between(int begin, int end, int target) {
+    return (target > begin && target < end) ? true : false;
+  }
+
  private:  ////////////////////////////////////////delete
   /// private////////////////////////////////////
 
-  void delete_idx_old(int current_idx) {
-    for (int i = 0;
-         i < (int)this->at(this->at(current_idx).Father_idx).Child_idx.size();
-         ++i) {
-      if (this->at(this->at(current_idx).Father_idx).Child_idx.at(i) ==
-          current_idx) {
-        this->at(this->at(current_idx).Father_idx)
-            .Child_idx.erase(
-                this->at(this->at(current_idx).Father_idx).Child_idx.begin() +
-                i);
-      }
-    }
-    if (!this->at(current_idx).Child_idx.empty()) {
-      for (int i; i < this->at(current_idx).Child_idx.size(); ++i) {
-        delete_idx(this->at(current_idx).Child_idx.at(i));
-      }
-      this->erase(this->begin() + this->at(current_idx).Child_idx.front(),
-                  this->begin() + this->at(current_idx).Child_idx.back());
-      this->erase(this->begin() + current_idx);
-    }
-    if (this->at(current_idx).Child_idx.empty()) {
-      this->erase(this->begin() + current_idx);
-    }
-  };
 
  public:  // delete func//
-  void delete_idx(int idx) {
-    std::cout << "TO_DEL_IDX:" << idx << " | " << this->at(idx).key << " | "<<this->at(idx).Child_idx.size()<< "\n";
+  void delete_noChild(int idx) {
     if (this->at(idx).Child_idx.empty()) {
-      //std::cout<<this->size()<<"\n";
-      //std::cout<<idx<<"\n";
-      this->erase(this->begin()+idx);
+      // std::cout<<this->size()<<"\n";
+      // std::cout<<idx<<"\n";
+      for (int i = 0; i < this->at(this->at(idx).Father_idx).Child_idx.size();
+           ++i) {
+        if (this->at(this->at(idx).Father_idx).Child_idx.at(i) == idx) {
+          this->at(this->at(idx).Father_idx)
+              .Child_idx.erase(
+                  (this->at(this->at(idx).Father_idx).Child_idx).begin() + i);
+        }
+      }
+
+      this->erase(this->begin() + idx);
+      return;
+    } else {
+      std::cerr << "Incorrect Type | delete_noChild"
+                << "\n";
+      throw this;
     }
-    struct info{
-      int head{0};
-      int begin{0};
-      int end{0};
-      int offset{0};
-    };
-    std::vector<info> infos;
-    int std_idx = idx, father_idx = this->at(idx).Father_idx;
-    while (!this->at(std_idx).Child_idx.empty()) {
-      std::cout<<std_idx<<"\n";
-      std_idx = this->at(std_idx).Child_idx.at(0);
-      father_idx = this->at(std_idx).Father_idx;
-    }
-    while (std_idx != idx) {
-      infos.emplace_back(info{std_idx,this->at(std_idx).Child_idx.front(),this->at(std_idx).Child_idx.back()});
-      std_idx = this->at(std_idx).Father_idx;
-    }
-    int offset=0;
-    for (int k=infos.size()-2;k>=0;--k) {
-      std::cout<<infos[k].head<<"\n";
-      offset += infos[k+1].begin - infos[k+1].end +1;
-    }
-    
   }
+  void delete_hasChild(int idx) {
+    if (this->at(idx).Child_idx.empty()) {
+      std::cerr << "Incorrect Type | delete_hasChild\n";
+    }
+    int del_obj = this->at(idx).Child_idx.size();
+    int child_begin = this->at(idx).Child_idx.front();
+    int child_end = this->at(idx).Child_idx.back();
+    std::vector<int> idx_between_range_toDel;
+    if (!this->at(idx).Child_idx.empty()) {
+      /////////////////////////////////////del-child////////////////
+      for (int i = child_begin; i <= child_end; ++i) {
+        if (this->at(i).Child_idx.empty()) {
+          delete_noChild(i);
+          --child_end;
+        }
+        if (!this->at(i).Child_idx.empty()) {
+          delete_hasChild(i);
+        }
+      }
+      ////////////////////////////////////////del-info-in-fa and
+      ///del-self/////////////
+      for (int i = 0; i < this->at(this->at(idx).Father_idx).Child_idx.size();
+           ++i) {
+        if (this->at(this->at(idx).Father_idx).Child_idx.at(i) == idx) {
+          this->at(this->at(idx).Father_idx)
+              .Child_idx.erase(
+                  this->at(this->at(idx).Father_idx).Child_idx.begin() + i);
+        }
+      }
+      this->erase(this->begin() + idx);
+    }
+  }
+
+ public:
   void set_val(std::string&& key,
                std::variant<i64t, std::string, double, bool, std::monostate>
                    val = std::monostate{}) {
-    int idx = get_idx(key);
+    int idx = get_idxl1(key);
     data_type vtype = variant_return_type(val);
     int begin_i = -1;
     int end_i = -1;
@@ -490,7 +564,7 @@ struct json_map : public std::vector<json> {
      }
    }
   */
-  json& operator()(std::string key) { return this->at(get_idx(key)); }
+  json& operator()(std::string key) { return this->at(get_idxl1(key)); }
   struct comp {
     std::string key;
     int layer;
@@ -498,8 +572,8 @@ struct json_map : public std::vector<json> {
     size_t father_idx;
     ///////////at_back//////////////////////////////////////////
     void operator[](std::initializer_list<json> list) {
-      this->map->check_repeat(this->key);
-      json buf = {this->key, "", data_type::object_list, 0, 0, {}};
+      this->map->check_repeat_atback(this->key);
+      json buf = {this->key, "", data_type::object_list, 1, 0, {}};
       this->map->emplace_back(buf);
       int father_idx = this->map->size() - 1;
       int tmp_child_idx = 0;
@@ -512,7 +586,7 @@ struct json_map : public std::vector<json> {
     }
     void operator[](input_val v) {
       json buf;
-      this->map->check_repeat(this->key);
+      this->map->check_repeat_atback(this->key);
       buf.key = this->key;
       switch (v.index()) {
         case 0:
@@ -568,7 +642,14 @@ struct json_map : public std::vector<json> {
           }
           break;
         case data_type::object_list:
-
+          for (auto x : list) {
+            if (x.key.empty()) {
+              std::cerr << "Object Child Shouldn't Be Empty\n";
+              throw this;
+            }
+            this->map->check_repeat(x.key,
+                                    this->map->at(this->father_idx).layer + 1);
+          }
           break;
         default:
           std::cerr << "Error Type of Op() asChild lists\n";
@@ -590,7 +671,7 @@ struct json_map : public std::vector<json> {
             std::cerr << "Key Void!\n";
             throw this;
           }
-          this->map->check_repeat(k);
+          this->map->check_repeat(k, this->map->at(father_idx).layer + 1);
           break;
         default:
           std::cerr << "Error Type of Op() asChild kv\n";
@@ -647,18 +728,34 @@ struct json_map : public std::vector<json> {
     comp_as buf;
     buf.map = this;
     buf.father_idx = father_idx_v;
+    this->check_repeat(this->at(father_idx_v).key,
+                       this->at(father_idx_v).layer);
     return std::move(buf);
   }
   comp operator[](std::string k) {
     comp buf;
-    this->check_repeat(k);
+    this->check_repeat_atback(k);
     buf.key = k;
     buf.map = this;
     return std::move(buf);
   }
 
   void operator^(std::string key_toDel) {
-    this->delete_idx(this->get_idx(key_toDel));
+    int idx = this->get_idxl1(key_toDel);
+    switch (this->at(idx).type) {
+      case data_type::array_list:
+        delete_hasChild(idx);
+        return;
+        break;
+      case data_type::object_list:
+        delete_hasChild(idx);
+        return;
+        break;
+      default:
+        delete_noChild(idx);
+        return;
+        break;
+    }
   }
 
  public:
