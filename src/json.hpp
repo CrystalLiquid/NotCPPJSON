@@ -418,6 +418,7 @@ struct json_map : public std::vector<json> {
   void delete_hasChild(int idx) {
     if (this->at(idx).Child_idx.empty()) {
       std::cerr << "Incorrect Type | delete_hasChild\n";
+      throw this;
     }
     int del_obj = this->at(idx).Child_idx.size();
     int child_begin = this->at(idx).Child_idx.front();
