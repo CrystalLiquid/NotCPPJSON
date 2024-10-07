@@ -421,7 +421,7 @@ struct json_map : public std::vector<json> {
     int size = this->at(idx).Child_idx.size();
     int child_begin = this->at(idx).Child_idx.front();
     int child_end = this->at(idx).Child_idx.back();
-    std::vector<int> idx_between_range_toDel;
+
     if (!this->at(idx).Child_idx.empty()) {
       /////////////////////////////////////del-child////////////////
       for (int i = child_begin; i <= child_end;) {
@@ -448,11 +448,13 @@ struct json_map : public std::vector<json> {
       this->erase(this->begin() + idx);
 
       for (int k = idx; k < this->size(); ++k) {
-        for (auto x : this->at(k).Child_idx) {
-          if (x > idx) {
+        for (int f= 0 ;f< this->at(k).Child_idx.size();++f) {
+          if (this->at(k).Child_idx.at(f) > idx) {
+            this->at(k).Child_idx.at(f)-=size+1;
           }
         }
         if (this->at(k).Father_idx > idx) {
+          this->at(k).Father_idx -= size+1;
         }
       }
     }

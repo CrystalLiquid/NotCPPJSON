@@ -83,7 +83,11 @@ int main() {
     std::cout << "key:" << x.key << " | ";
     std::cout << "val:" << x.value << " | ";
     std::cout << "idx:" << i << " | ";
-    std::cout << "father:" << x.Father_idx << " | ";
+    std::cout << "\n      ";
+    for (auto x : x.Child_idx) {
+      std::cout<<x<<" | ";
+    }
+    std::cout << "\n";
     std::cout << "\n";
     ++i;
     // std::cout<<"csize:" <<x.Child_idx.size()<<" | ";
