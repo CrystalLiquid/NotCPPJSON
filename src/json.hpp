@@ -798,6 +798,33 @@ struct json_map : public std::vector<json> {
     return std::move(buf);
   }
 
+  struct comp_delete{
+    int layer{-1};
+    json_map* map;
+    void operator^(std::string fathers_key){
+      int idx = this->map->get_idxl(fathers_key,this->layer);
+      switch (this->map->at(idx).type) {
+      case data_type::array_list:
+        this->map->delete_hasChild(idx);
+        return;
+        break;
+      case data_type::object_list:
+        this->map->delete_hasChild(idx);
+        return;
+        break;
+      default:
+        this->map->delete_noChild(idx);
+        return;
+        break;
+    }
+    }
+  };
+  comp_delete operator^(int layerv){
+    comp_delete buf;
+    buf.layer = layerv;
+    buf.map = this;
+    return std::move(buf);
+  }
   void operator^(
       std::string key_toDel) {  // function to delete,only check layer1 because
                                 // it doesn't accept a second param
