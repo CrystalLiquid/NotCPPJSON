@@ -73,12 +73,14 @@ int main() {
   map["half-systembit"][32];
   // std::cout<<"Long list\n";
   
-  //map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
-  //map["Long_list2"]({json{}("",2),json{}("",3),json{}("",6)});
+  map["Long_list"][{json{}("aaa","bbb"),json{}("aaacc","bbdddb")}];
+  map["Long_list2"]({json{}("",2),json{}("",3),json{}("",6)});
   // std::cout << "Del Element\n";
-  map ^ "2test_num_list";  // delete
+  //std::cout<<(map.find("subTopicIds")-0).key<<"\n";
+  map.find("138586341")(0).delete_which();  // delete
   // std::cout << map.get_idxl1("2test_num_list") << "\n";
-  int i = 0;
+  //int i = 0;
+  /*
   for (auto x : map) {
     std::cout << "key:" << x.key << " | ";
     std::cout << "val:" << x.value << " | ";
@@ -92,6 +94,8 @@ int main() {
     ++i;
     // std::cout<<"csize:" <<x.Child_idx.size()<<" | ";
   }
+  */
+  
   // std::cout << (map("subTopicIds").key) << "\n";       // get idx through
   // op() std::cout << (int)(map("subTopicIds").type) << "\n";
   /////////////////////////////usage////////////////////////////////

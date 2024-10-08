@@ -53,8 +53,6 @@ enum class data_type : int32_t {
   invalid_opttype = -124
 };
 
-enum class search_t : int { directly = 1, dfs = 2, bfs = 3 };
-
 using i64t = long long;
 using child_slice = std::vector<int>;
 
@@ -165,60 +163,106 @@ struct json {
 struct json_map : public std::vector<json> {
   using input_val =
       std::variant<long long, std::string, double, bool, std::monostate>;
-
- private:  ///////////////////////////////////////////searching
-           /// algorithm/////////////////////////////////////
-  int f_bfs_(int root_idx, const json_map& pmap, std::string& key,
-             int layer) {  // 广度 递归遍历 通过私有函数实现
-    int temp_child_idx = 0;
-    int target_idx = -200;
-    for (int i = 0; i < (int)(pmap).at(root_idx).Child_idx.size(); i++) {
-      temp_child_idx = (pmap).at(root_idx).Child_idx.at(i);
-      if ((pmap).at(temp_child_idx).key == key &&
-          (pmap).at(temp_child_idx).layer == layer) {
-        target_idx = temp_child_idx;
-        break;
-      }
-      target_idx = f_bfs_(temp_child_idx, pmap, key, layer);
-      if (target_idx != -200) {
-        break;
-      }
-    }
-    return target_idx;
-  };
-  int f_dfs_c_(int current_idx, const json_map& pmap, std::string& key,
-               int layer) {
-    int current_opt_idx = current_idx;
-    int current_father = 0;
-    int target_idx = -200;
-    int child = 0;
-    while (target_idx == -200) {
-      while (child < (int)pmap.at(current_father)
-                         .Child_idx.size()) {  // TODO forward to child
-        current_father = current_opt_idx;
-        current_opt_idx = pmap.at(current_opt_idx).Child_idx.at(child);
-        if (pmap.at(current_opt_idx).key != key) {
-          target_idx = current_opt_idx;
-          break;
+  struct slice : public std::vector<int> {
+    struct comp_result {
+      json_map* map;
+      slice* sl;
+      int which_from_op{-1};
+      data_type typeof_which() { return map->at(sl->at(which_from_op)).type; }
+      void print_typeof() {
+        switch (map->at(sl->at(which_from_op)).type) {
+          case data_type::notype:
+            std::cout << "no_type";
+            break;
+          case data_type::str:
+            std::cout << "str";
+            break;
+          case data_type::digit_int:
+            std::cout << "digit_int";
+            break;
+          case data_type::digit_double:
+            std::cout << "digit_double";
+            break;
+          case data_type::array_list:
+            std::cout << "array";
+            break;
+          case data_type::object_list:
+            std::cout << "object";
+            break;
+          case data_type::array_void:
+            std::cout << "array_void";
+            break;
+          case data_type::object_void:
+            std::cout << "object_void";
+            break;
+          case data_type::bool_t:
+            std::cout << "bool";
+            break;
+          case data_type::null:
+            std::cout << "null";
+            break;
+          default:
+            // TODO
+            break;
         }
       }
-      child++;
-      if ((int)pmap.at(current_father).Child_idx.size() - 1 >
-          child) {  // back to father
-        current_opt_idx = current_father;
-        current_father = pmap.at(current_opt_idx).Father_idx;
+      void delete_which() {
+        switch (map->at(sl->at(which_from_op)).type) {
+          case data_type::array_list:
+            map->delete_hasChild(sl->at(which_from_op));
+            return;
+            break;
+          case data_type::object_list:
+            map->delete_hasChild(sl->at(which_from_op));
+            return;
+            break;
+          default:
+            map->delete_noChild(sl->at(which_from_op));
+            return;
+            break;
+        }
       }
-      while ((int)pmap.at(current_father).Child_idx.size() - 1 < child) {
-        current_opt_idx = current_father;
-        current_father = pmap.at(current_opt_idx).Father_idx;
+    } sresult;
+    comp_result& operator()(const int which) {
+      this->sresult.sl = this;
+      this->sresult.which_from_op = which;
+      return this->sresult;
+    }
+  };
+
+ public:
+  slice find(std::string key_name) {
+    slice buf;
+    buf.sresult.map = this;
+    int i = 0;
+    if (!key_name.empty()) {
+      for (json& x : *this) {
+        if (x.key == key_name) {
+          buf.emplace_back(i);
+        }
+        ++i;
       }
     }
-    return target_idx;
+    return buf;
   }
   ///////////////////////////////////////check_repeat/////////////////////////////////////////////////
- public:
+ private:
+  /*
+  bool is_repeat(std::string& key_name, int layerv) {
+     if (!key_name.empty()) {
+       int i = 0;
+       for (json& x : *this) {
+         if (x.key == key_name && x.layer == layerv) {
+           return true;
+         }
+         ++i;
+       }
+     }
+     return false;
+   }
+  */
+
   void check_repeat_atback(std::string& key_name) {
-    std::vector<json*> list;
     if (!key_name.empty()) {
       for (json& x : *this) {
         if (x.key == key_name && x.layer == 0) {
@@ -322,31 +366,6 @@ struct json_map : public std::vector<json> {
 
  private:  ///////////////////////////////////////////get
            /// value////////////////////////////////////
-  json& getval_by_name(std::string key,
-                       search_t search_type = search_t::directly,
-                       int layer = -1) {
-    int target_idx = 0;
-    if (search_type == search_t::directly) {
-      int i = 0;
-      for (; i < this->size() - 1;) {
-        if (this->at(i).key != key) {
-          ++i;
-        }
-        if (this->at(i).key == key && this->at(i).layer == layer) {
-          target_idx = i;
-          break;
-        }
-      }
-    }
-    if (search_type == search_t::bfs) {
-      target_idx = f_bfs_(0, *this, key, layer);
-    }
-    if (search_type == search_t::dfs) {
-      target_idx = f_dfs_c_(0, *this, key, layer);
-    }
-    return this->at(target_idx);
-  }
-
  private:  ///////////////////////////////////////////return
            /// type/////////////////////////////////////
   data_type variant_return_type(
@@ -388,10 +407,9 @@ struct json_map : public std::vector<json> {
   bool is_between(int begin, int end, int target) {
     return (target > begin && target < end) ? true : false;
   }
-
- private:  ////////////////////////////////////////delete
-           /// private////////////////////////////////////
- public:   // delete func//
+  ////////////////////////////////////////delete
+  /// private////////////////////////////////////
+ private:  // delete func//
   void delete_noChild(int idx) {
     if (this->at(idx).Child_idx.empty()) {
       // std::cout<<this->size()<<"\n";
@@ -447,14 +465,18 @@ struct json_map : public std::vector<json> {
       }
       this->erase(this->begin() + idx);
 
-      for (int k = idx; k < this->size(); ++k) {
-        for (int f= 0 ;f< this->at(k).Child_idx.size();++f) {
+      int new_size = this->size();
+      new_size -= size+1;
+      std::cout<<"new_sz:"<<new_size<<"\n";
+      for (int k = idx; k < new_size; ++k) {
+        std::cout<<k<<"\n";
+        for (int f = 0; f < this->at(k).Child_idx.size(); ++f) {
           if (this->at(k).Child_idx.at(f) > idx) {
-            this->at(k).Child_idx.at(f)-=size+1;
+            this->at(k).Child_idx.at(f) -= size + 1;
           }
         }
         if (this->at(k).Father_idx > idx) {
-          this->at(k).Father_idx -= size+1;
+          this->at(k).Father_idx -= size + 1;
         }
       }
     }
@@ -578,51 +600,31 @@ struct json_map : public std::vector<json> {
   */
   json& operator()(std::string key) { return this->at(get_idxl1(key)); }
   struct comp {
+    slice result;
     std::string key;
     int layer;
+    bool is_set{false};
     json_map* map;
-    size_t father_idx;
     ///////////at_back//////////////////////////////////////////
     void operator[](
         std::initializer_list<json>
             list) {  // side to op[key],pass nodes to form a childtree
-      this->map->check_repeat_atback(this->key);
-      if (list.size() == 0) {
-        json buf = {this->key, "{}", data_type::object_void, 1, 0, {}};
-        this->map->emplace_back(buf);
+      if (this->is_set) {
+        this->map->delete_hasChild(this->map->get_idxl1(this->key));
       } else {
-        bool is_array = true;
-        for (json x : list) {
-          is_array = is_array && x.key.empty();
-        }
-        if (is_array) {
-          std::cerr << "Not Valid Object | at back op[] list\n";
-          throw this;
-        }
-        json buf = {this->key, "", data_type::object_list, 1, 0, {}};
-        this->map->emplace_back(buf);
-        int father_idx = this->map->size() - 1;
-        int tmp_child_idx = 0;
-        for (json x : list) {
-          this->map->emplace_back(x);
-          this->map->back().Father_idx = father_idx;
-          tmp_child_idx = (int)(this->map->size() - 1);
-          this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
-        }
-      }
-    }
-    void operator()(std::initializer_list<json> list) {
-      this->map->check_repeat_atback(this->key);
-      if (list.size() == 0) {
-        json buf = {this->key, "[]", data_type::array_void, 1, 0, {}};
-        this->map->emplace_back(buf);
-      } else {
-        bool is_array = true;
-        for (json x : list) {
-          is_array = is_array && x.key.empty();
-        }
-        if (is_array) {
-          json buf = {this->key, "", data_type::array_list, 1, 0, {}};
+        if (list.size() == 0) {
+          json buf = {this->key, "{}", data_type::object_void, 1, 0, {}};
+          this->map->emplace_back(buf);
+        } else {
+          bool is_array = true;
+          for (json x : list) {
+            is_array = is_array && x.key.empty();
+          }
+          if (is_array) {
+            std::cerr << "Not Valid Object | at back op[] list\n";
+            throw this;
+          }
+          json buf = {this->key, "", data_type::object_list, 1, 0, {}};
           this->map->emplace_back(buf);
           int father_idx = this->map->size() - 1;
           int tmp_child_idx = 0;
@@ -632,53 +634,119 @@ struct json_map : public std::vector<json> {
             tmp_child_idx = (int)(this->map->size() - 1);
             this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
           }
+        }
+      }
+    }
+    void operator()(std::initializer_list<json> list) {
+      if (this->is_set) {
+        this->map->delete_hasChild(this->map->get_idxl1(this->key));
+      } else {
+        if (list.size() == 0) {
+          json buf = {this->key, "[]", data_type::array_void, 1, 0, {}};
+          this->map->emplace_back(buf);
         } else {
-          std::cerr << "Not Valid Array | at back op() list\n";
-          throw this;
+          bool is_array = true;
+          for (json x : list) {
+            is_array = is_array && x.key.empty();
+          }
+          if (is_array) {
+            json buf = {this->key, "", data_type::array_list, 1, 0, {}};
+            this->map->emplace_back(buf);
+            int father_idx = this->map->size() - 1;
+            int tmp_child_idx = 0;
+            for (json x : list) {
+              this->map->emplace_back(x);
+              this->map->back().Father_idx = father_idx;
+              tmp_child_idx = (int)(this->map->size() - 1);
+              this->map->at(father_idx).Child_idx.emplace_back(tmp_child_idx);
+            }
+          } else {
+            std::cerr << "Not Valid Array | at back op() list\n";
+            throw this;
+          }
         }
       }
     }
     void operator[](
         input_val v) {  // side to op[key],to pass value to add a node to layer1
-      json buf;
-      this->map->check_repeat_atback(this->key);
-      buf.key = this->key;
-      switch (v.index()) {
-        case 0:
-          buf.type = json_acc_layer_np::data_type::digit_int;
-          buf.value = std::to_string(std::get<long long>(v));
-          break;
-        case 1:
-          if (std::get<std::string>(v) != "[]" &&
-              std::get<std::string>(v) != "{}") {
-            buf.type = json_acc_layer_np::data_type::str;
-          }
-          if (std::get<std::string>(v) == "[]") {
-            buf.type = json_acc_layer_np::data_type::array_void;
-          }
-          if (std::get<std::string>(v) == "{}") {
-            buf.type = json_acc_layer_np::data_type::object_void;
-          }
-          buf.value = std::get<std::string>(v);
-          break;
-        case 2:
-          buf.type = json_acc_layer_np::data_type::digit_double;
-          buf.value = std::to_string(std::get<double>(v));
-          break;
-        case 3:
-          buf.type = json_acc_layer_np::data_type::bool_t;
-          buf.value = std::to_string(std::get<bool>(v));
-          break;
-        case 4:
-          buf.type = json_acc_layer_np::data_type::notype;
-          break;
-        default:
-          std::cerr << "Error Type!\n";
-          throw("error idx!");
-          break;
+
+      if (this->is_set) {
+        int idx = this->map->get_idxl1(this->key);
+        json& buf = this->map->at(idx);
+        switch (v.index()) {
+          case 0:
+            buf.type = json_acc_layer_np::data_type::digit_int;
+            buf.value = std::to_string(std::get<long long>(v));
+            break;
+          case 1:
+            if (std::get<std::string>(v) != "[]" &&
+                std::get<std::string>(v) != "{}") {
+              buf.type = json_acc_layer_np::data_type::str;
+            }
+            if (std::get<std::string>(v) == "[]") {
+              buf.type = json_acc_layer_np::data_type::array_void;
+            }
+            if (std::get<std::string>(v) == "{}") {
+              buf.type = json_acc_layer_np::data_type::object_void;
+            }
+            buf.value = std::get<std::string>(v);
+            break;
+          case 2:
+            buf.type = json_acc_layer_np::data_type::digit_double;
+            buf.value = std::to_string(std::get<double>(v));
+            break;
+          case 3:
+            buf.type = json_acc_layer_np::data_type::bool_t;
+            buf.value = std::to_string(std::get<bool>(v));
+            break;
+          case 4:
+            buf.type = json_acc_layer_np::data_type::notype;
+            break;
+          default:
+            std::cerr << "Error Type!\n";
+            throw("error idx!");
+            break;
+        }
+      } else {
+        json buf;
+        buf.key = this->key;
+        switch (v.index()) {
+          case 0:
+            buf.type = json_acc_layer_np::data_type::digit_int;
+            buf.value = std::to_string(std::get<long long>(v));
+            break;
+          case 1:
+            if (std::get<std::string>(v) != "[]" &&
+                std::get<std::string>(v) != "{}") {
+              buf.type = json_acc_layer_np::data_type::str;
+            }
+            if (std::get<std::string>(v) == "[]") {
+              buf.type = json_acc_layer_np::data_type::array_void;
+            }
+            if (std::get<std::string>(v) == "{}") {
+              buf.type = json_acc_layer_np::data_type::object_void;
+            }
+            buf.value = std::get<std::string>(v);
+            break;
+          case 2:
+            buf.type = json_acc_layer_np::data_type::digit_double;
+            buf.value = std::to_string(std::get<double>(v));
+            break;
+          case 3:
+            buf.type = json_acc_layer_np::data_type::bool_t;
+            buf.value = std::to_string(std::get<bool>(v));
+            break;
+          case 4:
+            buf.type = json_acc_layer_np::data_type::notype;
+            break;
+          default:
+            std::cerr << "Error Type!\n";
+            throw("error idx!");
+            break;
+        }
+        buf.layer = 1;
+        map->emplace_back(buf);
       }
-      buf.layer = 0;
-      map->emplace_back(buf);
     }
     ///////////////////////at_back///////////////////////////
   };
@@ -793,40 +861,54 @@ struct json_map : public std::vector<json> {
   }
   comp operator[](std::string k) {
     comp buf;
-    this->check_repeat_atback(
-        k);          // push at back,so we just make a check on the key u pass
     buf.key = k;     // passing infos
     buf.map = this;  // nested struct,so u need to pass a ptr
+    buf.result = find(std::move(k));
+    if (buf.result.size() ==
+        0) {  // push at back,so we just make a check on the key u pass
+      buf.is_set = false;
+      return std::move(buf);
+    } else {
+      for (auto x : buf.result) {
+        if (this->at(x).layer == 1) {
+          buf.is_set = true;
+          break;
+        }
+      }
+      return std::move(buf);
+    }
     return std::move(buf);
   }
-
-  struct comp_delete{
+/*
+ struct comp_delete {
     int layer{-1};
     json_map* map;
-    void operator^(std::string fathers_key){
-      int idx = this->map->get_idxl(fathers_key,this->layer);
+
+    void operator^(std::string key) {
+      int idx = this->map->get_idxl(key, this->layer);
       switch (this->map->at(idx).type) {
-      case data_type::array_list:
-        this->map->delete_hasChild(idx);
-        return;
-        break;
-      case data_type::object_list:
-        this->map->delete_hasChild(idx);
-        return;
-        break;
-      default:
-        this->map->delete_noChild(idx);
-        return;
-        break;
-    }
+        case data_type::array_list:
+          this->map->delete_hasChild(idx);
+          return;
+          break;
+        case data_type::object_list:
+          this->map->delete_hasChild(idx);
+          return;
+          break;
+        default:
+          this->map->delete_noChild(idx);
+          return;
+          break;
+      }
     }
   };
-  comp_delete operator^(int layerv){
+  comp_delete operator-(int layerv) {
     comp_delete buf;
     buf.layer = layerv;
     buf.map = this;
     return std::move(buf);
   }
+
   void operator^(
       std::string key_toDel) {  // function to delete,only check layer1 because
                                 // it doesn't accept a second param
@@ -847,6 +929,9 @@ struct json_map : public std::vector<json> {
     }
   }
 
+
+*/
+ 
  public:
   constexpr json& operator[](size_t idx) {
     return this->at(idx);
@@ -1429,12 +1514,6 @@ struct json_map : public std::vector<json> {
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Debug_Print(std::string& data, int begin_idx, int end_idx) {
-  for (int i = begin_idx; i <= end_idx; i++) {
-    std::cout << data[i];
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void json_map::iter_parse(std::string& data) {
   struct iter_info {
@@ -1480,3 +1559,54 @@ void json_map::iter_parse(std::string& data) {
 using json_map = json_acc_layer_np::json_map;
 using json = json_acc_layer_np::json;
 using data_type = json_acc_layer_np::data_type;
+/*
+private:  ///////////////////////////////////////////searching
+           /// algorithm/////////////////////////////////////
+  int f_bfs_(int root_idx, const json_map& pmap, std::string& key,
+             int layer) {  // 广度 递归遍历 通过私有函数实现
+    int temp_child_idx = 0;
+    int target_idx = -200;
+    for (int i = 0; i < (int)(pmap).at(root_idx).Child_idx.size(); i++) {
+      temp_child_idx = (pmap).at(root_idx).Child_idx.at(i);
+      if ((pmap).at(temp_child_idx).key == key &&
+          (pmap).at(temp_child_idx).layer == layer) {
+        target_idx = temp_child_idx;
+        break;
+      }
+      target_idx = f_bfs_(temp_child_idx, pmap, key, layer);
+      if (target_idx != -200) {
+        break;
+      }
+    }
+    return target_idx;
+  };
+  int f_dfs_c_(int current_idx, const json_map& pmap, std::string& key,
+               int layer) {
+    int current_opt_idx = current_idx;
+    int current_father = 0;
+    int target_idx = -200;
+    int child = 0;
+    while (target_idx == -200) {
+      while (child < (int)pmap.at(current_father)
+                         .Child_idx.size()) {  // TODO forward to child
+        current_father = current_opt_idx;
+        current_opt_idx = pmap.at(current_opt_idx).Child_idx.at(child);
+        if (pmap.at(current_opt_idx).key != key) {
+          target_idx = current_opt_idx;
+          break;
+        }
+      }
+      child++;
+      if ((int)pmap.at(current_father).Child_idx.size() - 1 >
+          child) {  // back to father
+        current_opt_idx = current_father;
+        current_father = pmap.at(current_opt_idx).Father_idx;
+      }
+      while ((int)pmap.at(current_father).Child_idx.size() - 1 < child) {
+        current_opt_idx = current_father;
+        current_father = pmap.at(current_opt_idx).Father_idx;
+      }
+    }
+    return target_idx;
+  }
+*/
