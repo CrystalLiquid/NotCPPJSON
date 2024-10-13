@@ -59,13 +59,7 @@ int main() {
   milliseconds Parse_Interval =
       std::chrono::duration_cast<milliseconds>(Etime - Stime);
   std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
-#ifdef PRINT_MAP
-  for (int i = (int)map.size() - 1; i > 0; i--) {
-    std::cout << map.at(map.at(i).Father_idx).title << "|" << map.at(i).title
-              << ":" << map.at(i).content << "       " << map.at(i).layer
-              << "\n";
-  }
-#endif
+
 
   /////////////////////////////usage////////////////////////////////
   map["systembit"][64];  // add
@@ -77,10 +71,9 @@ int main() {
   map["Long_list2"]({json{}("",2),json{}("",3),json{}("",6)});
   // std::cout << "Del Element\n";
   //std::cout<<(map.find("subTopicIds")-0).key<<"\n";
-  map.find("138586341")(0).delete_which();  // delete
+  map.find("138586341")[0].list_of()[0].delete_which();  // delete
   // std::cout << map.get_idxl1("2test_num_list") << "\n";
-  //int i = 0;
-  /*
+  int i = 0;
   for (auto x : map) {
     std::cout << "key:" << x.key << " | ";
     std::cout << "val:" << x.value << " | ";
@@ -94,7 +87,7 @@ int main() {
     ++i;
     // std::cout<<"csize:" <<x.Child_idx.size()<<" | ";
   }
-  */
+  
   
   // std::cout << (map("subTopicIds").key) << "\n";       // get idx through
   // op() std::cout << (int)(map("subTopicIds").type) << "\n";
@@ -103,7 +96,7 @@ int main() {
   std::cout << "DataSize:" << data.size() << "\n";
   std::cout << "MapSize:" << map.size() << "\n";
 
-  LP_BASIC_IO::IO_Write(map.serialize(), "1.json");
+  LP_BASIC_IO::IO_Write(map.serialize(), "output.json");
 
   return 0;
 }
