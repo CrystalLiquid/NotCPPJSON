@@ -167,6 +167,21 @@ struct json_map : public std::vector<json>
             json_map* map;
             slice* sl;
             int which_from_op{-1};
+            void print_info()
+            {
+                auto& x = this->self();
+                std::cout << "key:" << x.key << " | ";
+                std::cout << "val:" << x.value << " | ";
+                std::cout << "fa_key:" << this->map->at(x.Father_idx).key << " | ";
+                std::cout << "idx:" << sl->at(which_from_op) << " | ";
+                std::cout << "\n      ";
+                for (auto x : x.Child_idx)
+                {
+                    std::cout << x << " | ";
+                }
+                // std::cout << "\n";
+                std::cout << "\n";
+            }
             slice list_of()
             {
                 slice buf;
@@ -310,6 +325,8 @@ struct json_map : public std::vector<json>
             }
             void delete_which()
             {
+                std::cout << "To_Del:" << sl->at(which_from_op) << "\n";
+                /*
                 switch (map->at(sl->at(which_from_op)).type)
                 {
                     case data_type::array_list:
@@ -325,6 +342,9 @@ struct json_map : public std::vector<json>
                         return;
                         break;
                 }
+                */
+                map->specific_delete_for_this(sl->at(which_from_op));
+                return;
             }
         } sresult;
 
@@ -552,23 +572,8 @@ private:
 private: // delete func//
     void specific_delete_for_this(int idx)
     { // must ensure the min one in front and max one in back
-    //std::cout<<"Del:"<<idx<<"\n";
-        auto fix_after_index = [this](int idx, int offset_size) {
-            for (int k = idx; k < this->size(); ++k)
-            {
-                if (this->at(k).Father_idx > idx)
-                {
-                    this->at(k).Father_idx -= offset_size;
-                }
-                for (int i = 0; i < this->at(k).Child_idx.size(); ++i)
-                {
-                    if (this->at(k).Child_idx.at(i) > idx)
-                    {
-                        this->at(k).Child_idx.at(i) -= offset_size;
-                    }
-                }
-            }
-        };
+        // std::cout<<"Del:"<<idx<<"\n";
+        
 
         int std_idx = idx;
         while (!this->at(std_idx).Child_idx.empty())
@@ -576,17 +581,45 @@ private: // delete func//
             std_idx = this->at(std_idx).Child_idx.back();
         }
         int to_del_size = std_idx - idx + 1;
+        std::cout << to_del_size << "\n";
         if (to_del_size == 1)
         {
+            auto father_idx = this->at(idx).Father_idx;
+            //std::cout << "before:" << this->at(idx).key << "\n";
+            for (int i = 0; i < this->at(father_idx).Child_idx.size(); ++i) {
+                if (this->at(father_idx).Child_idx.at(i)==idx) {
+                    this->at(father_idx).Child_idx.erase(this->at(father_idx).Child_idx.begin()+i);
+                    break;
+                }
+            }//del its info in father
             this->erase(this->begin() + idx);
+            //std::cout << "after:" << this->at(idx).key << "\n";
+            // fix_after_index(idx, 1);
+            for (int k = idx; k < this->size(); ++k)
+            {
+                if (this->at(k).Father_idx >= idx)
+                {
+                    //std::cout << "father\n";
+                    this->at(k).Father_idx -= 1;
+                }
+
+                for (int i = 0; i < this->at(k).Child_idx.size(); ++i)
+                {
+                    //std::cout << "child\n";
+                    if (this->at(k).Child_idx.at(i) >= idx)
+                    {
+                        this->at(k).Child_idx.at(i) -= 1;
+                    }
+                }
+            }
         }
         if (to_del_size > 1)
         {
             this->erase(this->begin() + idx, this->begin() + std_idx);
+            // fix_after_index(idx, to_del_size);
         }
-
-        fix_after_index(idx, to_del_size);
     }
+#ifdef NO_FIX_DEL
     void __nofix_delete_noChild(int idx)
     {
         if (this->at(idx).Child_idx.empty())
@@ -727,7 +760,7 @@ private: // delete func//
             this->erase(this->begin() + idx);
         }
     }
-
+#endif
 public:
     /*
       void operator+=(json&& buf) {
@@ -741,6 +774,7 @@ public:
        }
      }
     */
+
     json& operator()(std::string key) { return this->at(get_idxl1(key)); }
     struct comp
     {
@@ -749,7 +783,7 @@ public:
         int layer;
         bool is_set{false};
         json_map* map;
-        ///////////at_back//////////////////////////////////////////
+#ifdef NO_FIX_DEL
         void operator[](std::initializer_list<json> list)
         { // side to op[key],pass nodes to form a childtree
             if (this->is_set)
@@ -833,6 +867,9 @@ public:
                 }
             }
         }
+#endif
+        ///////////at_back//////////////////////////////////////////
+
         void operator[](input_val v)
         { // side to op[key],to pass value to add a node to layer1
 
