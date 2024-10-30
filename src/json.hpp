@@ -30,11 +30,8 @@ namespace json_acc_layer_np {
 struct json_map;
 struct json;
 #define function_define
-int PairList_Expect_Pool(std::string& data, json_map& map, int current_root_idx,
-                         int beginpos, int current_layer);
-int DimensionArray_Expect_Pool(std::string& data, json_map& map,
-                               int current_root_idx, int beginpos,
-                               int current_layer);
+int PairList_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
+int DimensionArray_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
 int JSON_Parse_Pool(json_map& map, std::string& data);
 int JSON_Serialize_Pool(json_map& map, std::string& result, int current_root);
 #define over_defining
@@ -149,6 +146,40 @@ public:
         }
         return std::monostate{};
     }
+    void offset_father(const int idx_largerThanThis, const int size)
+    {
+        if (this->Father_idx > idx_largerThanThis)
+        {
+            this->Father_idx += size;
+        }
+    }
+    void offset_child(const int idx_largerThanThis, const int size)
+    {
+        for (std::size_t i = 0; i < this->Child_idx.size(); ++i)
+        {
+            if (this->Child_idx.at(i) > idx_largerThanThis)
+            {
+                this->Child_idx.at(i) += size;
+            }
+        }
+    }
+    void offset_fatherEq(const int idx_largerThanThis, const int size)
+    {
+        if (this->Father_idx >= idx_largerThanThis)
+        {
+            this->Father_idx += size;
+        }
+    }
+    void offset_childEq(const int idx_largerThanThis, const int size)
+    {
+        for (std::size_t i = 0; i < this->Child_idx.size(); ++i)
+        {
+            if (this->Child_idx.at(i) >= idx_largerThanThis)
+            {
+                this->Child_idx.at(i) += size;
+            }
+        }
+    }
 };
 
 struct json_map : public std::vector<json>
@@ -182,7 +213,7 @@ struct json_map : public std::vector<json>
                 // std::cout << "\n";
                 std::cout << "\n";
             }
-            slice list_of()
+            slice list_of()//child_of_result
             {
                 slice buf;
                 buf.sresult.map = map;
@@ -572,52 +603,52 @@ private:
 private: // delete func//
     void specific_delete_for_this(int idx)
     { // must ensure the min one in front and max one in back
-        // std::cout<<"Del:"<<idx<<"\n";
-        
+        // 要按照树的方式从下面遍历到上面
 
-        int std_idx = idx;
-        while (!this->at(std_idx).Child_idx.empty())
+        if (this->at(idx).Child_idx.empty()) // 特化如果等于一个
         {
-            std_idx = this->at(std_idx).Child_idx.back();
-        }
-        int to_del_size = std_idx - idx + 1;
-        std::cout << to_del_size << "\n";
-        if (to_del_size == 1)
-        {
-            auto father_idx = this->at(idx).Father_idx;
-            //std::cout << "before:" << this->at(idx).key << "\n";
-            for (int i = 0; i < this->at(father_idx).Child_idx.size(); ++i) {
-                if (this->at(father_idx).Child_idx.at(i)==idx) {
-                    this->at(father_idx).Child_idx.erase(this->at(father_idx).Child_idx.begin()+i);
+            int std_idx = idx;
+            while (std_idx != 0)
+            {
+                this->at(std_idx).offset_child(idx, -1);
+                std_idx = this->at(std_idx).Father_idx;
+            }
+
+            auto father_idx = this->at(idx).Father_idx; // 获取父亲节点下标
+            // std::cout << "before:" << this->at(idx).key << "\n";
+            int i = 0;
+            for (; i < this->at(father_idx).Child_idx.size(); ++i)
+            {
+                if (this->at(father_idx).Child_idx.at(i) == idx)
+                {
+                    /*
+                    for (int k = i; k < this->at(father_idx).Child_idx.size(); ++k)
+                    { // 更新父节点的信息,因为父节点可能含有大于idx的下标的信息
+                        if (this->at(father_idx).Child_idx.at(k) > idx)
+                        {
+                            this->at(father_idx).Child_idx.at(k) -= 1;
+                            //std::cout << "This IS Clear Info In Father\n";
+                        }
+                    }
+                    */
+                    
+                    this->at(father_idx).Child_idx.erase(this->at(father_idx).Child_idx.begin() + i); // 删除父节点信息
                     break;
                 }
-            }//del its info in father
-            this->erase(this->begin() + idx);
-            //std::cout << "after:" << this->at(idx).key << "\n";
-            // fix_after_index(idx, 1);
+            }
+            
+            this->erase(this->begin() + idx);                                                 // 删除自己
+            //std::cout << "This IS Erased\n";
+
+            // 修复后面的下标列表
+            //std::cout << "This IS Fix Idx After Which\n";
             for (int k = idx; k < this->size(); ++k)
             {
-                if (this->at(k).Father_idx >= idx)
-                {
-                    //std::cout << "father\n";
-                    this->at(k).Father_idx -= 1;
-                }
-
-                for (int i = 0; i < this->at(k).Child_idx.size(); ++i)
-                {
-                    //std::cout << "child\n";
-                    if (this->at(k).Child_idx.at(i) >= idx)
-                    {
-                        this->at(k).Child_idx.at(i) -= 1;
-                    }
-                }
+                this->at(k).offset_father(idx, -1);
+                this->at(k).offset_child(idx, -1);
             }
-        }
-        if (to_del_size > 1)
-        {
-            this->erase(this->begin() + idx, this->begin() + std_idx);
-            // fix_after_index(idx, to_del_size);
-        }
+
+        } // del its info in father
     }
 #ifdef NO_FIX_DEL
     void __nofix_delete_noChild(int idx)
