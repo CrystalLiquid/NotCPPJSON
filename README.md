@@ -31,11 +31,20 @@ json.get_val()通过tag得知当前的类型，并且合理地返回一个合法
 	2.非空array	\
 使用`[节点key](json{}(节点key,节点value))`来默认添加到第1层 \
 使用`[父节点index](json{}(节点key,节点value))`多个子节点到父列表
-#### 删除
-您如果只需要删除第1层的节点
-只需要map ^ "节点key",它只接受一个参数,之后 \
-会通过helper来完成第二参数的录入,来完成嵌套节点内部节点的删除
-map - layer ^ "节点key"
-
-#### 更改
+#### Find API
+本JSON库通过FindAPI来搜索节点，以此避免需要输入层数 \
+通过find函数得到列表 \
+例子map.find("list")[0].print_info(); \
+find列表有以下api： \
+##### 快速查看
+print_info() \
+print_typeof() \
+##### 输出类型的enum数字
+typeof_which() \
+##### 删除
+delete_which() \
+##### 访问子列表
+list_of()[n] \
+##### 更改
+暂定为set_val(...)
 正在施工中。。。。。
