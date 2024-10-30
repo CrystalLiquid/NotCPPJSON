@@ -67,17 +67,18 @@ int main()
     map["systembit"][64]; // add
     map["key_new"]["wtf"];
     map["half-systembit"][32];
-    // std::cout<<"Long list\n";
+
 
     //map["Long_list"][{json{}("aaa", "bbb"), json{}("aaacc", "bbdddb")}];
     //map["Long_list2"]({json{}("", 2), json{}("", 3), json{}("", 6)});
-    // std::cout << "Del Element\n";
-    // std::cout<<(map.find("subTopicIds")-0).key<<"\n";
+
+
     //map.find("138586341")[0].list_of()[0].print_info();
-    map.find("138586341")[0].list_of()[0].delete_which();
-    //std::cout<<map.at(49).key<<"\n";
-    //map.find("138586341")[0].print_info();
-// std::cout << map.get_idxl1("2test_num_list") << "\n";
+    ///map.find("138586341")[0].list_of()[0].delete_which();
+    //map.find("name")[0].delete_which();
+    map.find("list")[0].print_info();
+    map.find("list")[0].delete_which();
+
 //#define PRINT
 #ifdef PRINT
     int i = 0;

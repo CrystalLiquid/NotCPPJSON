@@ -356,24 +356,6 @@ struct json_map : public std::vector<json>
             }
             void delete_which()
             {
-                std::cout << "To_Del:" << sl->at(which_from_op) << "\n";
-                /*
-                switch (map->at(sl->at(which_from_op)).type)
-                {
-                    case data_type::array_list:
-                        map->specific_delete_for_this(sl->at(which_from_op));
-                        return;
-                        break;
-                    case data_type::object_list:
-                        map->specific_delete_for_this(sl->at(which_from_op));
-                        return;
-                        break;
-                    default:
-                        map->specific_delete_for_this(sl->at(which_from_op));
-                        return;
-                        break;
-                }
-                */
                 map->specific_delete_for_this(sl->at(which_from_op));
                 return;
             }
@@ -648,7 +630,42 @@ private: // delete func//
                 this->at(k).offset_child(idx, -1);
             }
 
-        } // del its info in father
+        }
+        if (!this->at(idx).Child_idx.empty()) {
+            ////////统计要删除的个数//////
+            int std_idx = idx;
+            while (!this->at(std_idx).Child_idx.empty()) {
+                std_idx = this->at(std_idx).Child_idx.back();//找到最后一个，与本JSON库解析方式相关，不能用于用户调用push自定义的结构！
+            }
+            int del_size = std_idx - idx;
+            int go_up_idx = idx;
+            while (go_up_idx != 0)
+            {
+                this->at(go_up_idx).offset_child(idx, -del_size);
+                go_up_idx = this->at(go_up_idx).Father_idx;
+            }
+            int father_of = this->at(idx).Father_idx;//存一下父亲不然等下删了就没了
+            this->erase(this->begin()+idx, this->begin()+idx+del_size);
+
+
+            int i = 0;
+            for (; i < this->at(father_of).Child_idx.size(); ++i)
+            {
+                if (this->at(father_of).Child_idx.at(i) == idx)
+                {
+                    this->at(father_of).Child_idx.erase(this->at(father_of).Child_idx.begin() + i); // 删除父节点信息
+                    break;
+                }
+            }
+
+
+            // 修复后面的下标列表
+            for (int k = idx; k < this->size(); ++k)
+            {
+                this->at(k).offset_father(idx, -del_size);
+                this->at(k).offset_child(idx, -del_size);
+            }
+        }
     }
 #ifdef NO_FIX_DEL
     void __nofix_delete_noChild(int idx)
