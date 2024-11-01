@@ -76,8 +76,8 @@ int main()
     //map.find("138586341")[0].list_of()[0].print_info();
     ///map.find("138586341")[0].list_of()[0].delete_which();
     //map.find("name")[0].delete_which();
-    map.find("list")[0].print_info();
-    map.find("list")[0].delete_which();
+    //map.find("")[0].set_val()
+    map.find("uu")[0].print_info();
 
 //#define PRINT
 #ifdef PRINT

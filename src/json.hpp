@@ -14,7 +14,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
+#include "json_err.hpp"
 #pragma once
 
 #define LayerS '{'
@@ -213,7 +213,7 @@ struct json_map : public std::vector<json>
                 // std::cout << "\n";
                 std::cout << "\n";
             }
-            slice list_of()//child_of_result
+            slice list_of() // child_of_result
             {
                 slice buf;
                 buf.sresult.map = map;
@@ -251,8 +251,7 @@ struct json_map : public std::vector<json>
                         begin_i = map->at(idx).Child_idx.front();
                         end_i = map->at(idx).Child_idx.back();
                         map->at(idx).Child_idx.clear();
-                        map->erase(map->begin() + begin_i,
-                                   map->begin() + end_i);
+
                         break;
 
                     case data_type::object_list:
@@ -276,7 +275,7 @@ struct json_map : public std::vector<json>
                     case data_type::null: map->at(idx).value.clear(); break;
 
                     default:
-                        std::cerr << "Fatal Type To Clean!\n";
+                        error<err_set> this_e(__FUNCTION__, __LINE__, "ErrorType in DetectType in FindAPI");
                         return;
                         break;
                 }
@@ -318,7 +317,7 @@ struct json_map : public std::vector<json>
                     case data_type::null: map->at(idx).value = "null"; break;
 
                     default:
-                        std::cerr << "Fatal Type To Change!\n";
+                        error<err_set> this_e(__FUNCTION__, __LINE__, "ErrorType in ChangeVal in FindAPI");
                         return;
                         break;
                 }
@@ -359,6 +358,11 @@ struct json_map : public std::vector<json>
                 map->specific_delete_for_this(sl->at(which_from_op));
                 return;
             }
+            void delete_childof_which()
+            {
+                map->specific_delChild_for_this(sl->at(which_from_op));
+                return;
+            }
         } sresult;
 
         comp_result& operator[](const int which)
@@ -372,6 +376,9 @@ struct json_map : public std::vector<json>
 public:
     slice find(std::string key_name)
     {
+        if (key_name.empty()) {
+            error<err_find> this_e(__FUNCTION__,__LINE__,"Not Allow Void Key!");
+        }
         slice buf;
         buf.sresult.map = this;
 
@@ -386,6 +393,9 @@ public:
                 }
                 ++i;
             }
+        }
+        if (buf.size()==0) {
+            error<err_find> this_e(__FUNCTION__,__LINE__,"No Result!",false);
         }
         return buf;
     }
@@ -405,21 +415,6 @@ private:
        return false;
      }
     */
-
-    void check_repeat_atback(std::string& key_name)
-    {
-        if (!key_name.empty())
-        {
-            for (json& x : *this)
-            {
-                if (x.key == key_name && x.layer == 0)
-                {
-                    std::cerr << "Repeated Key!\n";
-                    throw x;
-                }
-            }
-        }
-    }
     void check_repeat(std::string& key_name, int layerv)
     {
         if (layerv == -1)
@@ -437,7 +432,7 @@ private:
                 }
                 if (x.key == key_name && x.layer == layerv)
                 {
-                    std::cerr << "Repeated Key To Add!\n";
+                    error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Repeated!", false);
                 }
             }
 
@@ -447,7 +442,7 @@ private:
                 {
                     if (x->layer == layerv)
                     {
-                        std::cerr << "Repeated Key To Add!\n";
+                        error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Repeated!", false);
                         throw list;
                     }
                 }
@@ -456,7 +451,7 @@ private:
             {
                 if (list[0]->layer == list[1]->layer)
                 {
-                    std::cerr << "Repeated Key!\n";
+                    error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Repeated!", false);
 
                     throw list;
                 }
@@ -466,7 +461,7 @@ private:
                     {
                         if (x->layer == layerv)
                         {
-                            std::cerr << "Repeated Key To Add!\n";
+                            error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Repeated!", false);
                             throw list;
                         }
                     }
@@ -476,7 +471,7 @@ private:
             {
                 if (layerv == list[0]->layer)
                 {
-                    std::cerr << "Repeated Key To Add!\n";
+                    error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Repeated!", false);
                     throw list;
                 }
             }
@@ -488,8 +483,7 @@ public:
     {
         if (keyv.empty())
         {
-            std::cerr << "Shall Not Be Empty! | get_idxl1\n";
-            throw this;
+            error<err_getidx> this_e(__FUNCTION__, __LINE__, "Empty KeyParam!");
         }
         int target_idx = -1;
         for (int i = 0; i < this->size() - 1;)
@@ -505,8 +499,7 @@ public:
                 target_idx = i;
                 if (target_idx >= this->size() - 1)
                 {
-                    std::cerr << "Error Search Index | get_idxl1\n";
-                    throw this;
+                    error<err_checkrepeat> this_e(__FUNCTION__, __LINE__, "Error Search IDX!");
                 }
                 break;
             }
@@ -517,7 +510,7 @@ public:
     {
         if (keyv.empty())
         {
-            std::cerr << "Shall Not Be Empty! | get_idxl\n";
+            error<err_getidx> this_e(__FUNCTION__, __LINE__, "Empty KeyParam!");
             throw this;
         }
         int target_idx = 0;
@@ -534,7 +527,7 @@ public:
                 target_idx = i;
                 if (target_idx >= this->size() - 1)
                 {
-                    std::cerr << "Error Search Index | get_idxl\n";
+                    error<err_getidx> this_e(__FUNCTION__, __LINE__, "Error Search IDX!");
                     throw this;
                 }
                 break;
@@ -570,9 +563,10 @@ private: ///////////////////////////////////////////return
             case 2: return data_type::digit_double; break;
             case 3: return data_type::bool_t; break;
             case 4: return data_type::notype; break;
-            default: throw("error idx!"); break;
+            default: error<err_variant> this_e(__FUNCTION__, __LINE__, "Error IDX!"); break;
         }
-        throw "error reachable!";
+
+        error<err_variant> this_e(__FUNCTION__, __LINE__, "Error Reachable!");
     }
 
 private:
@@ -583,7 +577,22 @@ private:
     ////////////////////////////////////////delete
     /// private////////////////////////////////////
 private: // delete func//
-    void specific_delete_for_this(int idx)
+    void specific_delChild_for_this(const int idx)
+    {
+        ////////统计要删除的个数//////
+        if (!this->at(idx).Child_idx.empty())
+        {
+            for (int x = 0; x < this->at(idx).Child_idx.size();)
+            {
+                this->specific_delete_for_this(this->at(idx).Child_idx.at(x));
+            }
+        }
+        else
+        {
+            error<err_delchild> this_e(__FUNCTION__, __LINE__, "Error Type To Del!");
+        }
+    }
+    void specific_delete_for_this(const int idx)
     { // must ensure the min one in front and max one in back
         // 要按照树的方式从下面遍历到上面
 
@@ -603,39 +612,27 @@ private: // delete func//
             {
                 if (this->at(father_idx).Child_idx.at(i) == idx)
                 {
-                    /*
-                    for (int k = i; k < this->at(father_idx).Child_idx.size(); ++k)
-                    { // 更新父节点的信息,因为父节点可能含有大于idx的下标的信息
-                        if (this->at(father_idx).Child_idx.at(k) > idx)
-                        {
-                            this->at(father_idx).Child_idx.at(k) -= 1;
-                            //std::cout << "This IS Clear Info In Father\n";
-                        }
-                    }
-                    */
-                    
                     this->at(father_idx).Child_idx.erase(this->at(father_idx).Child_idx.begin() + i); // 删除父节点信息
                     break;
                 }
             }
-            
-            this->erase(this->begin() + idx);                                                 // 删除自己
-            //std::cout << "This IS Erased\n";
 
+            this->erase(this->begin() + idx); // 删除自己
             // 修复后面的下标列表
-            //std::cout << "This IS Fix Idx After Which\n";
+
             for (int k = idx; k < this->size(); ++k)
             {
                 this->at(k).offset_father(idx, -1);
                 this->at(k).offset_child(idx, -1);
             }
-
         }
-        if (!this->at(idx).Child_idx.empty()) {
+        if (!this->at(idx).Child_idx.empty())
+        {
             ////////统计要删除的个数//////
             int std_idx = idx;
-            while (!this->at(std_idx).Child_idx.empty()) {
-                std_idx = this->at(std_idx).Child_idx.back();//找到最后一个，与本JSON库解析方式相关，不能用于用户调用push自定义的结构！
+            while (!this->at(std_idx).Child_idx.empty())
+            {
+                std_idx = this->at(std_idx).Child_idx.back(); // 找到最后一个，与本JSON库解析方式相关，不能用于用户调用push自定义的结构！
             }
             int del_size = std_idx - idx;
             int go_up_idx = idx;
@@ -644,9 +641,8 @@ private: // delete func//
                 this->at(go_up_idx).offset_child(idx, -del_size);
                 go_up_idx = this->at(go_up_idx).Father_idx;
             }
-            int father_of = this->at(idx).Father_idx;//存一下父亲不然等下删了就没了
-            this->erase(this->begin()+idx, this->begin()+idx+del_size);
-
+            int father_of = this->at(idx).Father_idx; // 存一下父亲不然等下删了就没了
+            this->erase(this->begin() + idx, this->begin() + idx + del_size);
 
             int i = 0;
             for (; i < this->at(father_of).Child_idx.size(); ++i)
@@ -658,7 +654,6 @@ private: // delete func//
                 }
             }
 
-
             // 修复后面的下标列表
             for (int k = idx; k < this->size(); ++k)
             {
@@ -667,6 +662,7 @@ private: // delete func//
             }
         }
     }
+#define NO_FIX_DEL
 #ifdef NO_FIX_DEL
     void __nofix_delete_noChild(int idx)
     {
@@ -693,16 +689,14 @@ private: // delete func//
         }
         else
         {
-            std::cerr << "Incorrect Type | delete_noChild"
-                      << "\n";
-            throw this;
+            error<err_nofix_del> this_e(__FUNCTION__, __LINE__, "Incorrect Type");
         }
     }
     void fix_delete_hasChild(int idx)
     {
         if (this->at(idx).Child_idx.empty())
         {
-            std::cerr << "Incorrect Type | delete_hasChild\n";
+            error<err_nofix_del> this_e(__FUNCTION__, __LINE__, "Incorrect Type");
             throw this;
         }
         ///////////////////////////////////////////////////
@@ -769,7 +763,7 @@ private: // delete func//
     {
         if (this->at(idx).Child_idx.empty())
         {
-            std::cerr << "Incorrect Type | delete_hasChild\n";
+            error<err_nofix_del> this_e(__FUNCTION__, __LINE__, "Incorrect Type");
             throw this;
         }
         int size = this->at(idx).Child_idx.size();
@@ -854,8 +848,7 @@ public:
                     }
                     if (is_array)
                     {
-                        std::cerr << "Not Valid Object | at back op[] list\n";
-                        throw this;
+                        error<err_op> this_e(__FUNCTION__, __LINE__, "Not Valid Object");
                     }
                     json buf = {this->key, "", data_type::object_list, 1, 0, {}};
                     this->map->emplace_back(buf);
@@ -909,8 +902,7 @@ public:
                     }
                     else
                     {
-                        std::cerr << "Not Valid Array | at back op() list\n";
-                        throw this;
+                        error<err_op> this_e(__FUNCTION__, __LINE__, "Not Valid Array");
                     }
                 }
             }
@@ -960,8 +952,7 @@ public:
                         buf.type = json_acc_layer_np::data_type::notype;
                         break;
                     default:
-                        std::cerr << "Error Type!\n";
-                        throw("error idx!");
+                        error<err_op> this_e(__FUNCTION__, __LINE__, "Error Type");
                         break;
                 }
             }
@@ -1004,8 +995,7 @@ public:
                         buf.type = json_acc_layer_np::data_type::notype;
                         break;
                     default:
-                        std::cerr << "Error Type!\n";
-                        throw("error idx!");
+                    error<err_op> this_e(__FUNCTION__, __LINE__, "Error Type!");
                         break;
                 }
                 buf.layer = 1;
@@ -1028,9 +1018,7 @@ public:
                     {
                         if (!x.key.empty())
                         {
-                            std::cerr
-                                << "Array Child Shouldn't Have Its Own Key\n";
-                            throw this;
+                            error<err_op> this_e(__FUNCTION__, __LINE__, "Array Child Shouldn't Have Its Own Key");
                         }
                     }
                     break;
@@ -1039,16 +1027,14 @@ public:
                     {
                         if (x.key.empty())
                         {
-                            std::cerr << "Object Child Shouldn't Be Empty\n";
-                            throw this;
+                            error<err_op> this_e(__FUNCTION__, __LINE__, "Object Child Shouldn't Be Empty");
                         }
                         this->map->check_repeat(
                             x.key, this->map->at(this->father_idx).layer + 1);
                     }
                     break;
                 default:
-                    std::cerr << "Error Type of Op() asChild lists\n";
-                    throw this;
+                error<err_op> this_e(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
         }
@@ -1060,22 +1046,19 @@ public:
                 case data_type::array_list:
                     if (!k.empty())
                     {
-                        std::cerr << "Array Child Shouldn't Have Its Own Key\n";
-                        throw this;
+                        error<err_op> this_e(__FUNCTION__, __LINE__, "Array Child Shouldn't Have Its Own Key");
                     }
                     break;
                 case data_type::object_list:
                     if (k.empty())
                     {
-                        std::cerr << "Key Void!\n";
-                        throw this;
+                        error<err_op> this_e(__FUNCTION__, __LINE__, "Key Void!");
                     }
                     this->map->check_repeat(
                         k, this->map->at(father_idx).layer + 1);
                     break;
                 default:
-                    std::cerr << "Error Type of Op() asChild kv\n";
-                    throw this;
+                    error<err_op> this_e(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
             data_type vtype = this->map->variant_return_type(val);
@@ -1107,8 +1090,7 @@ public:
                 case data_type::null: buf.value = "null"; break;
 
                 default:
-                    std::cerr << "Error Type\n";
-                    throw this;
+                    error<err_op> this_e(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
             this->map->emplace_back(buf);
