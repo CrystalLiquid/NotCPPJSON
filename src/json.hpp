@@ -9,6 +9,7 @@
 #include <iostream>
 #include <numeric>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <unordered_set>
 #include <utility>
@@ -184,11 +185,16 @@ public:
 };
 
 struct json_map : public std::vector<json>
-{
+{ // attention! the root doesnt conatin any info of its child,only the layer1 do
     using input_val =
         std::variant<long long, std::string, double, bool, std::monostate>;
     struct slice : public std::vector<int>
     {
+        void clear_sl()
+        {
+            this->clear();
+            this->sresult.clear();
+        }
         void print_size_of()
         {
             std::cout << this->size() << "\n";
@@ -196,9 +202,14 @@ struct json_map : public std::vector<json>
 
         struct comp_result
         {
-            json_map* map;
-            slice* sl;
+            json_map* map{nullptr};
+            slice* sl{nullptr};
             int which_from_op{-1};
+            void clear()
+            {
+                map = nullptr;
+                which_from_op = -1;
+            }
             void print_info()
             {
                 auto& x = this->self();
@@ -372,16 +383,17 @@ struct json_map : public std::vector<json>
             this->sresult.which_from_op = which;
             return this->sresult;
         }
-    };
+    } slice_list;
 
 public:
-    slice find(std::string key_name)
+    slice& find(std::string key_name)
     {
-        if (key_name.empty()) {
-            throw error<Err_Code::err_find>(__FUNCTION__,__LINE__,"Not Allow Void Key!");
+        if (key_name.empty())
+        {
+            throw error<Err_Code::err_find>(__FUNCTION__, __LINE__, "Not Allow Void Key!");
         }
-        slice buf;
-        buf.sresult.map = this;
+
+        this->slice_list.sresult.map = this;
 
         int i = 0;
         if (!key_name.empty())
@@ -390,17 +402,16 @@ public:
             {
                 if (x.key == key_name)
                 {
-                    buf.emplace_back(i);
-                    
+                    this->slice_list.emplace_back(i);
                 }
                 ++i;
             }
         }
-        //std::cout<<buf.back()<<"\n";
-        //if (buf.size()==0) {
-        //    throw error<Err_Code::err_find>(__FUNCTION__,__LINE__,"No Result!");
-        //}
-        return buf;
+        // std::cout<<buf.back()<<"\n";
+        // if (buf.size()==0) {
+        //     throw error<Err_Code::err_find>(__FUNCTION__,__LINE__,"No Result!");
+        // }
+        return this->slice_list;
     }
     ///////////////////////////////////////check_repeat/////////////////////////////////////////////////
 private:
@@ -445,8 +456,7 @@ private:
                 {
                     if (x->layer == layerv)
                     {
-                        throw error<Err_Code::err_checkrepeat> (__FUNCTION__, __LINE__, "Repeated!");
-                        
+                        throw error<Err_Code::err_checkrepeat>(__FUNCTION__, __LINE__, "Repeated!");
                     }
                 }
             }
@@ -454,8 +464,7 @@ private:
             {
                 if (list[0]->layer == list[1]->layer)
                 {
-                    throw error<Err_Code::err_checkrepeat> (__FUNCTION__, __LINE__, "Repeated!");
-
+                    throw error<Err_Code::err_checkrepeat>(__FUNCTION__, __LINE__, "Repeated!");
                 }
                 else
                 {
@@ -463,8 +472,7 @@ private:
                     {
                         if (x->layer == layerv)
                         {
-                            throw error<Err_Code::err_checkrepeat> (__FUNCTION__, __LINE__, "Repeated!");
-
+                            throw error<Err_Code::err_checkrepeat>(__FUNCTION__, __LINE__, "Repeated!");
                         }
                     }
                 }
@@ -473,8 +481,7 @@ private:
             {
                 if (layerv == list[0]->layer)
                 {
-                    throw error<Err_Code::err_checkrepeat> (__FUNCTION__, __LINE__, "Repeated!");
-
+                    throw error<Err_Code::err_checkrepeat>(__FUNCTION__, __LINE__, "Repeated!");
                 }
             }
         }
@@ -485,7 +492,7 @@ public:
     {
         if (keyv.empty())
         {
-            throw error<Err_Code::err_getidx> (__FUNCTION__, __LINE__, "Empty KeyParam!");
+            throw error<Err_Code::err_getidx>(__FUNCTION__, __LINE__, "Empty KeyParam!");
         }
         int target_idx = -1;
         for (int i = 0; i < this->size() - 1;)
@@ -501,7 +508,7 @@ public:
                 target_idx = i;
                 if (target_idx >= this->size() - 1)
                 {
-                    throw error<Err_Code::err_checkrepeat> (__FUNCTION__, __LINE__, "Error Search IDX!");
+                    throw error<Err_Code::err_checkrepeat>(__FUNCTION__, __LINE__, "Error Search IDX!");
                 }
                 break;
             }
@@ -512,7 +519,7 @@ public:
     {
         if (keyv.empty())
         {
-            throw error<Err_Code::err_getidx> (__FUNCTION__, __LINE__, "Empty KeyParam!");
+            throw error<Err_Code::err_getidx>(__FUNCTION__, __LINE__, "Empty KeyParam!");
             throw this;
         }
         int target_idx = 0;
@@ -529,7 +536,7 @@ public:
                 target_idx = i;
                 if (target_idx >= this->size() - 1)
                 {
-                    throw error<Err_Code::err_getidx> (__FUNCTION__, __LINE__, "Error Search IDX!");
+                    throw error<Err_Code::err_getidx>(__FUNCTION__, __LINE__, "Error Search IDX!");
                     throw this;
                 }
                 break;
@@ -565,10 +572,10 @@ private: ///////////////////////////////////////////return
             case 2: return data_type::digit_double; break;
             case 3: return data_type::bool_t; break;
             case 4: return data_type::notype; break;
-            default: throw error<Err_Code::err_variant> (__FUNCTION__, __LINE__, "Error IDX!"); break;
+            default: throw error<Err_Code::err_variant>(__FUNCTION__, __LINE__, "Error IDX!"); break;
         }
 
-        throw error<Err_Code::err_variant> (__FUNCTION__, __LINE__, "Error Reachable!");
+        throw error<Err_Code::err_variant>(__FUNCTION__, __LINE__, "Error Reachable!");
     }
 
 private:
@@ -591,15 +598,24 @@ private: // delete func//
         }
         else
         {
-            throw error<Err_Code::err_delchild> (__FUNCTION__, __LINE__, "Error Type To Del!");
+            throw error<Err_Code::err_delchild>(__FUNCTION__, __LINE__, "Error Type To Del!");
         }
     }
-    void specific_delete_for_this(const int idx)
-    { // must ensure the min one in front and max one in back
-        // 要按照树的方式从下面遍历到上面
-
+    void specific_delete_for_this(const int idx) // attention! the root doesnt conatin any info of its child,only the layer1 do
+    {                                            // must ensure the min one in front and max one in back
+                                                 // 要按照树的方式从下面遍历到上面
+                                                 // Currently,we cannot delete any kv that was not arrary or object in the end of the text
+        if (idx >= this->size())
+        {
+            throw error<Err_Code::err_delnode>(__FUNCTION__, __LINE__, "idx Error! Larger than size-1!");
+        }
         if (this->at(idx).Child_idx.empty()) // 特化如果等于一个
         {
+            if (idx == this->size() - 1 && this->at(idx).Father_idx == 0)
+            {
+                this->pop_back(); // 删除自己
+                return;
+            }
             int std_idx = idx;
             while (std_idx != 0)
             {
@@ -630,6 +646,7 @@ private: // delete func//
         }
         if (!this->at(idx).Child_idx.empty())
         {
+            std::cout << "not_empty\n";
             ////////统计要删除的个数//////
             int std_idx = idx;
             while (!this->at(std_idx).Child_idx.empty())
@@ -646,8 +663,7 @@ private: // delete func//
             int father_of = this->at(idx).Father_idx; // 存一下父亲不然等下删了就没了
             this->erase(this->begin() + idx, this->begin() + idx + del_size);
 
-            int i = 0;
-            for (; i < this->at(father_of).Child_idx.size(); ++i)
+            for (int i = 0; i < this->at(father_of).Child_idx.size(); ++i)
             {
                 if (this->at(father_of).Child_idx.at(i) == idx)
                 {
@@ -664,7 +680,7 @@ private: // delete func//
             }
         }
     }
-//#define NO_FIX_DEL
+// #define NO_FIX_DEL
 #ifdef NO_FIX_DEL
     void __nofix_delete_noChild(int idx)
     {
@@ -691,14 +707,14 @@ private: // delete func//
         }
         else
         {
-            throw error<Err_Code::err_nofix_del> (__FUNCTION__, __LINE__, "Incorrect Type");
+            throw error<Err_Code::err_nofix_del>(__FUNCTION__, __LINE__, "Incorrect Type");
         }
     }
     void fix_delete_hasChild(int idx)
     {
         if (this->at(idx).Child_idx.empty())
         {
-            throw error<Err_Code::err_nofix_del> (__FUNCTION__, __LINE__, "Incorrect Type");
+            throw error<Err_Code::err_nofix_del>(__FUNCTION__, __LINE__, "Incorrect Type");
             throw this;
         }
         ///////////////////////////////////////////////////
@@ -765,7 +781,7 @@ private: // delete func//
     {
         if (this->at(idx).Child_idx.empty())
         {
-            throw error<Err_Code::err_nofix_del> (__FUNCTION__, __LINE__, "Incorrect Type");
+            throw error<Err_Code::err_nofix_del>(__FUNCTION__, __LINE__, "Incorrect Type");
             throw this;
         }
         int size = this->at(idx).Child_idx.size();
@@ -827,7 +843,7 @@ public:
         int layer;
         bool is_set{false};
         json_map* map;
-        
+
 #ifdef NO_FIX_DEL
         void operator[](std::initializer_list<json> list)
         { // side to op[key],pass nodes to form a childtree
@@ -851,7 +867,7 @@ public:
                     }
                     if (is_array)
                     {
-                        throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Not Valid Object");
+                        throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Not Valid Object");
                     }
                     json buf = {this->key, "", data_type::object_list, 1, 0, {}};
                     this->map->emplace_back(buf);
@@ -905,7 +921,7 @@ public:
                     }
                     else
                     {
-                        throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Not Valid Array");
+                        throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Not Valid Array");
                     }
                 }
             }
@@ -955,7 +971,7 @@ public:
                         buf.type = json_acc_layer_np::data_type::notype;
                         break;
                     default:
-                        throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Error Type");
+                        throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Error Type");
                         break;
                 }
             }
@@ -998,7 +1014,7 @@ public:
                         buf.type = json_acc_layer_np::data_type::notype;
                         break;
                     default:
-                    throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Error Type!");
+                        throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Error Type!");
                         break;
                 }
                 buf.layer = 1;
@@ -1021,7 +1037,7 @@ public:
                     {
                         if (!x.key.empty())
                         {
-                            throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Array Child Shouldn't Have Its Own Key");
+                            throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Array Child Shouldn't Have Its Own Key");
                         }
                     }
                     break;
@@ -1030,14 +1046,14 @@ public:
                     {
                         if (x.key.empty())
                         {
-                            throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Object Child Shouldn't Be Empty");
+                            throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Object Child Shouldn't Be Empty");
                         }
                         this->map->check_repeat(
                             x.key, this->map->at(this->father_idx).layer + 1);
                     }
                     break;
                 default:
-                throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Error Type of Op()");
+                    throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
         }
@@ -1055,13 +1071,13 @@ public:
                 case data_type::object_list:
                     if (k.empty())
                     {
-                        throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Key Void!");
+                        throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Key Void!");
                     }
                     this->map->check_repeat(
                         k, this->map->at(father_idx).layer + 1);
                     break;
                 default:
-                    throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Error Type of Op()");
+                    throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
             data_type vtype = this->map->variant_return_type(val);
@@ -1093,7 +1109,7 @@ public:
                 case data_type::null: buf.value = "null"; break;
 
                 default:
-                    throw error<Err_Code::err_op> (__FUNCTION__, __LINE__, "Error Type of Op()");
+                    throw error<Err_Code::err_op>(__FUNCTION__, __LINE__, "Error Type of Op()");
                     break;
             }
             this->map->emplace_back(buf);
@@ -1199,7 +1215,7 @@ public:
       // and of course if u delete it,u will get a overload error
 
 private:
-    int PairList_Expect_Pool(std::string& data, json_map& map,
+    int PairList_Expect_Pool(std::string_view data, json_map& map,
                              size_t current_root_idx, int beginpos = 0,
                              int current_layer = -1)
     { ///////有问题，会跳读
@@ -1368,9 +1384,9 @@ private:
                   // will change to next "}" or "]"
     }
 
-    int DimensionArray_Expect_Pool(std::string& data, json_map& map,
+    int DimensionArray_Expect_Pool(std::string_view data, json_map& map,
                                    size_t current_root_idx, int beginpos = 0,
-                                   int current_layer = -1)
+                                   int current_layer = -1) noexcept
     {
         // std::cout << "IN_FUNC\n";
         json buf;
@@ -1528,7 +1544,7 @@ private:
         return i;
     }
 
-    int JSON_Parse_Pool(json_map& map, std::string&& data)
+    int JSON_Parse_Pool(json_map& map, std::string_view data) noexcept
     {
         json buf;
         int j = 0;
@@ -1667,7 +1683,7 @@ private:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     int JSON_Serialize_Child(json_map& map, std::string& result,
-                             int current_root = 0)
+                             int current_root = 0) noexcept
     {
         if (map.at(current_root).type != data_type::notype &&
             map.at(current_root).type != data_type::array_list &&
@@ -1865,7 +1881,7 @@ private:
     }
 
 public:
-    void parse(std::string& data) { JSON_Parse_Pool(*this, std::move(data)); }
+    void parse(std::string_view data) { JSON_Parse_Pool(*this, std::move(data)); }
     std::string serialize()
     {
         std::string buf;
@@ -1875,12 +1891,12 @@ public:
 
 private:
 public:
-    void iter_parse(std::string& data);
+    void iter_parse(std::string_view data);
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void json_map::iter_parse(std::string& data)
+void json_map::iter_parse(std::string_view data)
 {
     struct iter_info
     {
@@ -1888,14 +1904,23 @@ void json_map::iter_parse(std::string& data)
         {
             int begin{0};
             int end{0};
-        };
+        } k;
         struct val
         {
             int begin{0};
             int end{0};
-        };
+        } v;
         int layer_through{0};
         int field_through{0};
+        void clear()
+        {
+            k.begin = 0;
+            k.end = 0;
+            v.begin = 0;
+            v.end = 0;
+            layer_through = 0;
+            field_through = 0;
+        }
     };
     json buf;
     json_map& map = *this;
@@ -1904,15 +1929,27 @@ void json_map::iter_parse(std::string& data)
     std::vector<iter_info> infos;
     for (int i = 0; i < (int)(data.length() - 1); ++i)
     {
+        iter_info it;
         switch (data[i])
         {
-            case LayerS: break;
-            case LayerE: break;
-            case ConS: break;
-            case ConE: break;
-            case FieldS: break;
-            case FieldE: break;
-            case Quote: break;
+            case LayerS:
+                it.layer_through++;
+                break;
+            case LayerE:
+                it.layer_through--;
+                break;
+            case ConS:
+                break;
+            case ConE:
+                break;
+            case FieldS:
+                it.field_through++;
+                break;
+            case FieldE:
+                it.field_through--;
+                break;
+            case Quote:
+                break;
             default: break;
         }
     }

@@ -51,7 +51,7 @@ int main()
     json_map map;
     json root;
     map.emplace_back(root);
-    int path_idx = 0;
+
 
     FILE.READ(path, data);
     // std::cout << data << "\n\n\n\n";
@@ -64,9 +64,9 @@ int main()
     std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
 
     /////////////////////////////usage////////////////////////////////
-    map["systembit"][64]; // add
-    map["key_new"]["wtf"];
-    map["half-systembit"][32];
+    //--map["systembit"][64]; // add
+    //--map["key_new"]["wtf"];
+    //--map["half-systembit"][32];
 
 
     //map["Long_list"][{json{}("aaa", "bbb"), json{}("aaacc", "bbdddb")}];
@@ -77,8 +77,9 @@ int main()
     ///map.find("138586341")[0].list_of()[0].delete_which();
     //map.find("name")[0].delete_which();
     //map.find("")[0].set_val()
-    map.find("list")[0].print_info();
-    map.find("list")[0].delete_childof_which();
+    //map.find("half-systembit")[0].print_info();
+    map.find("Sx")[0].delete_which();
+    //map.find("half-systembit")[0].delete_which();
 //#define PRINT
 #ifdef PRINT
     int i = 0;
@@ -107,7 +108,7 @@ int main()
     std::cout << "MapSize:" << map.size() << "\n";
 
     LP_BASIC_IO::IO_Write(map.serialize(), "output.json");
-
+    std::cout << "Finish Serialize"<< "\n";
     return 0;
 }
 #endif
