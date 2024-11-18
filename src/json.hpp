@@ -32,12 +32,15 @@ namespace json_acc_layer_np {
 struct json_map;
 struct json;
 #define function_define
-int PairList_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
-int DimensionArray_Expect_Pool(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
-int JSON_Parse_Pool(json_map& map, std::string& data);
-int JSON_Serialize_Pool(json_map& map, std::string& result, int current_root);
+/*
+int object_parse(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
+int array_parse(std::string& data, json_map& map, int current_root_idx, int beginpos, int current_layer);
+int root_parse(json_map& map, std::string& data);
+int root_serialize(json_map& map, std::string& result, int current_root);
+*/
+
 #define over_defining
-enum class data_type : int32_t
+enum data_type : int32_t
 {
     temp_digit = -2,
     str = 1,
@@ -49,7 +52,7 @@ enum class data_type : int32_t
     bool_t = 9,
     array_void = 10,
     array_list = 11,
-    error = -1,
+    // error = -1,
     notype = 0,
     invalid_opttype = -124
 };
@@ -63,12 +66,12 @@ struct json
         std::variant<long long, std::string, double, bool, std::monostate>;
 
 public:
-    std::string key;                   // 32
-    std::string value;                 // 32
-    data_type type{data_type::notype}; // 4
-    int layer{-1};                     // 4
-    int Father_idx{0};                 // 4
-    std::vector<int> Child_idx;        // 24//total:64+8+24=96
+    std::string key;                 // 32
+    std::string value;               // 32
+    int32_t type{data_type::notype}; // 4
+    int layer{-1};                   // 4
+    int Father_idx{0};               // 4
+    std::vector<int> Child_idx;      // 24//total:64+8+24=96
     void clear()
     {
         key.clear();
@@ -334,7 +337,7 @@ struct json_map : public std::vector<json>
                         break;
                 }
             }
-            data_type typeof_which()
+            int32_t typeof_which()
             {
                 return map->at(sl->at(which_from_op)).type;
             }
@@ -931,7 +934,9 @@ public:
 
         void operator[](input_val v)
         { // side to op[key],to pass value to add a node to layer1
-
+           
+                
+            
             if (this->is_set)
             {
                 int idx = this->map->get_idxl1(this->key);
@@ -1131,7 +1136,10 @@ public:
     comp operator[](std::string k)
     {
         comp buf;
-        buf.key = k;    // passing infos
+        if(this->at(0).type==data_type::object_list){
+            buf.key = k;
+        }
+            // passing infos
         buf.map = this; // nested struct,so u need to pass a ptr
         buf.result = find(std::move(k));
         if (buf.result.size() == 0)
@@ -1215,9 +1223,9 @@ public:
       // and of course if u delete it,u will get a overload error
 
 private:
-    int PairList_Expect_Pool(std::string_view data, json_map& map,
-                             size_t current_root_idx, int beginpos = 0,
-                             int current_layer = -1)
+    int object_parse(std::string_view data, json_map& map,
+                     size_t current_root_idx, int beginpos = 0,
+                     int current_layer = -1)
     { ///////有问题，会跳读
         // std::cout << "\n";
         json buf;
@@ -1233,8 +1241,7 @@ private:
             {
                 buf.Father_idx = current_root_idx;
                 buf.layer = current_layer;
-                for (t = i; data[t] != ConE && data[t] != LayerS; t--)
-                    ;
+                for (t = i; data[t] != ConE && data[t] != LayerS; t--);
                 for (k = t; data[k] != ConS; k++)
                 {
                     if (data[k] != LayerS && data[k] != FieldS &&
@@ -1354,8 +1361,8 @@ private:
                     map.emplace_back(buf);
                     map[current_root_idx].Child_idx.emplace_back(map.size() -
                                                                  1);
-                    j = DimensionArray_Expect_Pool(data, map, map.size() - 1,
-                                                   i + 1, current_layer + 1);
+                    j = array_parse(data, map, map.size() - 1,
+                                    i + 1, current_layer + 1);
 
                     buf.clear();
                     i = j;
@@ -1368,8 +1375,8 @@ private:
                     map.emplace_back(buf);
                     map[current_root_idx].Child_idx.emplace_back(map.size() -
                                                                  1);
-                    j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1,
-                                             current_layer + 1);
+                    j = object_parse(data, map, map.size() - 1, i + 1,
+                                     current_layer + 1);
 
                     buf.clear();
                     i = j; // if it is j-1,it will result in catching last
@@ -1384,9 +1391,9 @@ private:
                   // will change to next "}" or "]"
     }
 
-    int DimensionArray_Expect_Pool(std::string_view data, json_map& map,
-                                   size_t current_root_idx, int beginpos = 0,
-                                   int current_layer = -1) noexcept
+    int array_parse(std::string_view data, json_map& map,
+                    size_t current_root_idx, int beginpos = 0,
+                    int current_layer = -1) noexcept
     {
         // std::cout << "IN_FUNC\n";
         json buf;
@@ -1500,8 +1507,8 @@ private:
                     map.emplace_back(buf);
                     map[current_root_idx].Child_idx.emplace_back(map.size() -
                                                                  1);
-                    j = DimensionArray_Expect_Pool(data, map, map.size() - 1,
-                                                   i + 1, current_layer + 1);
+                    j = array_parse(data, map, map.size() - 1,
+                                    i + 1, current_layer + 1);
 
                     buf.clear();
 
@@ -1530,8 +1537,8 @@ private:
                     map.emplace_back(buf);
                     map[current_root_idx].Child_idx.emplace_back(map.size() -
                                                                  1);
-                    j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1,
-                                             current_layer + 1);
+                    j = object_parse(data, map, map.size() - 1, i + 1,
+                                     current_layer + 1);
 
                     buf.clear();
 
@@ -1544,146 +1551,391 @@ private:
         return i;
     }
 
-    int JSON_Parse_Pool(json_map& map, std::string_view data) noexcept
+    int root_parse(json_map& map, std::string_view data) noexcept
     {
-        json buf;
-        int j = 0;
-        int k = 0;
-        int t = 0;
-
-        for (int i = 0; i < (int)(data.length() - 1); ++i)
+        if (data[0] == LayerS) // for normal type or what we called object type of json
         {
-            if (data[i] == ConS)
+            map.at(0).type = data_type::object_list;
+            json buf;
+            int j = 0;
+            int k = 0;
+            int t = 0;
+            for (int i = 0; i < (int)(data.length() - 1); ++i)
             {
-                /// title
-                for (t = i; data[t] != ConE && data[t] != LayerS; t--)
+                if (data[i] == ConS)
                 {
-                }
-                for (k = t + 1; data[k] != ConS; k++)
-                {
-                    if (data[k] != Quote)
+                    /// title
+                    for (t = i; data[t] != ConE && data[t] != LayerS; t--)
                     {
-                        buf.key.push_back(data[k]);
                     }
-                }
-                buf.Father_idx = 0;
-                buf.layer = 1;
-                if (data[i + 1] == 'n' && data[i + 2] == 'u' &&
-                    data[i + 3] == 'l' && data[i + 4] == 'l')
-                {
-                    buf.value = "null";
-                    buf.type = data_type::null;
-
-                    map.emplace_back(buf);
-                    buf.clear();
-                }
-                if (data[i + 1] == 't' && data[i + 2] == 'r' &&
-                    data[i + 3] == 'u' && data[i + 4] == 'e')
-                { // bool true
-                    buf.value = "true";
-                    buf.type = data_type::bool_t;
-                    map.emplace_back(buf);
-                    buf.clear();
-                }
-                if (data[i + 1] == 'f' && data[i + 2] == 'a' &&
-                    data[i + 3] == 'l' && data[i + 4] == 's' &&
-                    data[i + 5] == 'e')
-                { // bool false
-                    buf.value = "false";
-                    buf.type = data_type::bool_t;
-                    map.emplace_back(buf);
-                    buf.clear();
-                }
-                if (data[i + 1] == Quote)
-                { // str
-                    buf.type = data_type::str;
-                    for (j = i + 2; (data[j + 1] != ConE || data[j] != Quote) &&
-                                    (data[j + 1] != LayerE || data[j] != Quote);
-                         j++)
+                    for (k = t + 1; data[k] != ConS; k++)
                     {
-                        buf.value.push_back(data[j]);
-                    }
-                    map.emplace_back(buf);
-                    buf.clear();
-                    i = j - 1;
-                    j = 0;
-                }
-                if (std::isdigit(data[i + 1]) ||
-                    (data[i + 1] == '-' && std::isdigit(data[i + 2])))
-                { // digit_all
-                    buf.type = data_type::digit_int;
-                    for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++)
-                    {
-                        if (data[j] == '.')
+                        if (data[k] != Quote)
                         {
-                            buf.type = data_type::digit_double;
+                            buf.key.push_back(data[k]);
                         }
-                        buf.value.push_back(data[j]);
                     }
-                    map.emplace_back(buf);
-                    buf.clear();
-                    i = j - 1;
-                    j = 0;
-                }
-                /////////////////////////////////////////////////////////////////////////////////
-                if (data[i + 1] == FieldS && data[i + 2] == FieldE)
-                { // void list
-                    buf.type = data_type::array_void;
-                    buf.value = "[]";
+                    buf.Father_idx = 0;
+                    buf.layer = 1;
+                    if (data[i + 1] == 'n' && data[i + 2] == 'u' &&
+                        data[i + 3] == 'l' && data[i + 4] == 'l')
+                    {
+                        buf.value = "null";
+                        buf.type = data_type::null;
 
-                    map.emplace_back(buf);
-                    buf.clear();
-                    i = i + 2;
-                }
-                if (data[i + 1] == LayerS && data[i + 2] == LayerE)
-                { // void list
-                    buf.type = data_type::object_void;
-                    buf.value = "{}";
+                        map.emplace_back(buf);
+                        buf.clear();
+                    }
+                    if (data[i + 1] == 't' && data[i + 2] == 'r' &&
+                        data[i + 3] == 'u' && data[i + 4] == 'e')
+                    { // bool true
+                        buf.value = "true";
+                        buf.type = data_type::bool_t;
+                        map.emplace_back(buf);
+                        buf.clear();
+                    }
+                    if (data[i + 1] == 'f' && data[i + 2] == 'a' &&
+                        data[i + 3] == 'l' && data[i + 4] == 's' &&
+                        data[i + 5] == 'e')
+                    { // bool false
+                        buf.value = "false";
+                        buf.type = data_type::bool_t;
+                        map.emplace_back(buf);
+                        buf.clear();
+                    }
+                    if (data[i + 1] == Quote)
+                    { // str
+                        buf.type = data_type::str;
+                        for (j = i + 2; (data[j + 1] != ConE || data[j] != Quote) &&
+                                        (data[j + 1] != LayerE || data[j] != Quote);
+                             j++)
+                        {
+                            buf.value.push_back(data[j]);
+                        }
+                        map.emplace_back(buf);
+                        buf.clear();
+                        i = j - 1;
+                        j = 0;
+                    }
+                    if (std::isdigit(data[i + 1]) ||
+                        (data[i + 1] == '-' && std::isdigit(data[i + 2])))
+                    { // digit_all
+                        buf.type = data_type::digit_int;
+                        for (j = i + 1; data[j] != ConE && data[j] != LayerE; j++)
+                        {
+                            if (data[j] == '.')
+                            {
+                                buf.type = data_type::digit_double;
+                            }
+                            buf.value.push_back(data[j]);
+                        }
+                        map.emplace_back(buf);
+                        buf.clear();
+                        i = j - 1;
+                        j = 0;
+                    }
+                    /////////////////////////////////////////////////////////////////////////////////
+                    if (data[i + 1] == FieldS && data[i + 2] == FieldE)
+                    { // void list
+                        buf.type = data_type::array_void;
+                        buf.value = "[]";
 
-                    map.emplace_back(buf);
-                    buf.clear();
-                    i = i + 2;
-                }
+                        map.emplace_back(buf);
+                        buf.clear();
+                        i = i + 2;
+                    }
+                    if (data[i + 1] == LayerS && data[i + 2] == LayerE)
+                    { // void list
+                        buf.type = data_type::object_void;
+                        buf.value = "{}";
 
-                if (data[i + 1] == FieldS)
-                { // Dimension List
-                    buf.type = data_type::array_list;
+                        map.emplace_back(buf);
+                        buf.clear();
+                        i = i + 2;
+                    }
+
+                    if (data[i + 1] == FieldS)
+                    { // Dimension List
+                        buf.type = data_type::array_list;
 #define Main_Dimension
-                    map.emplace_back(buf);
-                    j = DimensionArray_Expect_Pool(data, map, map.size() - 1,
-                                                   i + 1, 1);
-                    // std::cout << "Dimen:" << data[i + 1] << "\n";
+                        map.emplace_back(buf);
+                        j = array_parse(data, map, map.size() - 1,
+                                        i + 1, 1);
+                        // std::cout << "Dimen:" << data[i + 1] << "\n";
 
-                    buf.clear();
-                    i = j;
-                }
+                        buf.clear();
+                        i = j;
+                    }
 
-                /////////////////////////////////////////////////////////////////////////////
-                if (data[i + 1] == LayerS)
-                { // object_list {}   Object
-                    buf.type = data_type::object_list;
+                    /////////////////////////////////////////////////////////////////////////////
+                    if (data[i + 1] == LayerS)
+                    { // object_list {}   Object
+                        buf.type = data_type::object_list;
 
 #define Main_Pair
-                    map.emplace_back(buf);
-                    j = PairList_Expect_Pool(data, map, map.size() - 1, i + 1,
-                                             1);
+                        map.emplace_back(buf);
+                        j = object_parse(data, map, map.size() - 1, i + 1,
+                                         1);
 
-                    buf.clear();
-                    i = j - 1;
-                    // std::cout << "                                       " <<
-                    // data[i]
-                    // << "\n";
-                    j = 0;
+                        buf.clear();
+                        i = j - 1;
+                        // std::cout << "                                       " <<
+                        // data[i]
+                        // << "\n";
+                        j = 0;
+                    }
                 }
             }
         }
+        if (data[0] == FieldS) // for thr array type of json
+        {
+            map.at(0).type = data_type::array_list;
+            json buf;
+            int j = 0;
+            int i = 0;
+
+            for (i = 0; data[i] != FieldE; ++i)
+            {
+                if (data[i] == FieldS || data[i] == ConE)
+                {
+                    buf.Father_idx = 0;
+                    buf.layer = 1;
+                    if (data[i + 1] == 'n' && data[i + 2] == 'u' &&
+                        data[i + 3] == 'l' && data[i + 4] == 'l')
+                    {
+                        buf.value = "null";
+                        buf.type = data_type::null;
+
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i += 4;
+                    }
+                    if (data[i + 1] == 't' && data[i + 2] == 'r' &&
+                        data[i + 3] == 'u' && data[i + 4] == 'e')
+                    { // bool true
+                        buf.value = "true";
+                        buf.type = data_type::bool_t;
+
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i += 4;
+                    }
+                    if (data[i + 1] == 'f' && data[i + 2] == 'a' &&
+                        data[i + 3] == 'l' && data[i + 4] == 's' &&
+                        data[i + 5] == 'e')
+                    { // bool false
+                        buf.value = "false";
+                        buf.type = data_type::bool_t;
+
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i += 5;
+                    }
+                    if (data[i + 1] == Quote)
+                    { // str
+                        buf.type = data_type::str;
+                        for (j = i + 2; (data[j + 1] != ConE || data[j] != Quote) &&
+                                        (data[j + 1] != FieldE || data[j] != Quote);
+                             ++j)
+                        {
+                            buf.value.push_back(data[j]);
+                        }
+
+                        map.emplace_back(buf);
+
+                        buf.clear();
+
+                        i = j - 1;
+                        j = 0;
+                    }
+                    if (std::isdigit(data[i + 1]) or
+                        (data[i + 1] == '-' && std::isdigit(data[i + 2])))
+                    { // digit_all
+                        /////////////////////////////////////////////////////////////
+                        buf.type = data_type::digit_int;
+                        for (j = i + 1; data[j] != ConE && data[j] != FieldE; j++)
+                        {
+                            if (data[j] == '.')
+                            {
+                                buf.type = data_type::digit_double;
+                            }
+                            buf.value.push_back(data[j]);
+                        }
+
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i = j - 1;
+                        j = 0;
+                    }
+
+                    /////////////////////////////////////////////////////////////////////////////////
+                    if (data[i + 1] == FieldS && data[i + 2] == FieldE)
+                    { // void list
+                        buf.type = data_type::array_void;
+                        buf.value = "[]";
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i = i + 2;
+                    }
+
+                    if (data[i + 1] == FieldS)
+                    { // Dimension List
+                        buf.type = data_type::array_list;
+
+                        map.emplace_back(buf);
+
+                        j = array_parse(data, map, map.size() - 1,
+                                        i + 1, 1);
+
+                        buf.clear();
+
+                        i = j;
+                    }
+
+                    /////////////////////////////////////////////////////////////////////////////
+
+                    if (data[i + 1] == LayerS && data[i + 2] == LayerE)
+                    { // object_void {}   Object
+                        buf.type = data_type::object_void;
+
+                        buf.value = "{}";
+                        map.emplace_back(buf);
+
+                        buf.clear();
+                        i = i + 2;
+                    }
+
+                    if (data[i + 1] == LayerS)
+                    { // object_list {} Object///////////////////
+                        buf.type = data_type::object_list;
+
+                        map.emplace_back(buf);
+
+                        j = object_parse(data, map, map.size() - 1, i + 1,
+                                         1);
+
+                        buf.clear();
+
+                        i = j - 1; // LayerE
+                        // std::cout<<data[i]<<data[i+1]<<"\n";
+                        j = 0;
+                    }
+                }
+            }
+        }
+
         return 1;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+private: // seperated serial func wont check the type of idx itself,it only check its child's type
+    void plaintype_serial(std::string& result, int idx)
+    {
 
-    int JSON_Serialize_Child(json_map& map, std::string& result,
-                             int current_root = 0) noexcept
+        if (this->at(idx).type != data_type::array_list && this->at(idx).type != data_type::object_list)
+        {
+            
+            if (!this->at(idx).key.empty())
+            {
+                result.push_back('"');
+                result.append(this->at(idx).key);
+                result.append("\":");
+            }
+
+            if (this->at(idx).type == data_type::str)
+            {
+                result.push_back('"');
+                result.append(this->at(idx).value);
+                result.push_back('"');
+            }
+            else
+            {
+                result.append(this->at(idx).value);
+            }
+        }
+        else
+        {
+            throw error<Err_Code::err_serial>(__FUNCTION__, __LINE__, "not a plain type");
+        }
+    }
+    
+    int object_serial(std::string& result, int idx, bool enable_key = true)
+    {
+        if (enable_key)
+        {
+            result.push_back('"');
+            result.append(this->at(idx).key);
+            result.append("\":");
+        }
+        result.append("{");
+        for (int cidx : this->at(idx).Child_idx)
+        {
+            if (this->at(cidx).type != data_type::array_list && this->at(cidx).type != data_type::object_list)
+            {
+                plaintype_serial(result, cidx);
+                result.push_back(',');
+            }
+            if (this->at(cidx).type == data_type::array_list)
+            {
+                array_serial(result, cidx);
+                result.push_back(',');
+            }
+            if (this->at(cidx).type == data_type::object_list)
+            {
+                object_serial(result, cidx);
+                result.push_back(',');
+            }
+        }
+        if (result.back() == ',')
+        {
+            result.pop_back();
+        }
+        result.push_back('}');
+        return this->at(idx).Child_idx.back();
+    }
+    
+    
+    int array_serial(std::string& result, int idx, bool enable_key = true)
+    {
+        if (enable_key)
+        {
+            result.push_back('"');
+            result.append(this->at(idx).key);
+            result.append("\":");
+        }
+        result.append("[");
+        for (int cidx : this->at(idx).Child_idx)
+        {
+            if (this->at(cidx).type != data_type::array_list && this->at(cidx).type != data_type::object_list)
+            {
+                plaintype_serial(result, cidx);
+                result.push_back(',');
+            }
+            if (this->at(cidx).type == data_type::array_list)
+            {
+                array_serial(result, cidx, false);
+                result.push_back(',');
+            }
+            if (this->at(cidx).type == data_type::object_list)
+            {
+                object_serial(result, cidx,false);
+                result.push_back(',');
+            }
+        }
+        if (result.back() == ',')
+        {
+            result.pop_back();
+        }
+        result.push_back(']');
+        return this->at(idx).Child_idx.back();
+    }
+
+    int object_serialize(json_map& map, std::string& result, int current_root = 0) noexcept
     {
         if (map.at(current_root).type != data_type::notype &&
             map.at(current_root).type != data_type::array_list &&
@@ -1760,7 +2012,7 @@ private:
                 }
                 if (map.at(tmp_idx_dm).type == data_type::array_list)
                 {
-                    JSON_Serialize_Child(map, result, tmp_idx_dm);
+                    object_serialize(map, result, tmp_idx_dm);
                     if (i != map.at(current_root).Child_idx.size() - 1)
                     {
                         result.push_back(',');
@@ -1768,7 +2020,7 @@ private:
                 }
                 if (map.at(tmp_idx_dm).type == data_type::object_list)
                 {
-                    JSON_Serialize_Child(map, result, tmp_idx_dm);
+                    object_serialize(map, result, tmp_idx_dm);
                 }
             }
             if (result.back() == ',')
@@ -1834,12 +2086,12 @@ private:
                 }
                 if (map.at(tmp_idx_pl).type == data_type::object_list)
                 {
-                    JSON_Serialize_Child(map, result, tmp_idx_pl);
+                    object_serialize(map, result, tmp_idx_pl);
                     // result.append("PairList");
                 }
                 if (map.at(tmp_idx_pl).type == data_type::array_list)
                 {
-                    JSON_Serialize_Child(map, result, tmp_idx_pl);
+                    object_serialize(map, result, tmp_idx_pl);
                     if (tmp_idx_pl != map.at(current_root).Child_idx.size() - 1)
                     {
                         result.push_back(',');
@@ -1858,34 +2110,77 @@ private:
 
         return 1;
     }
-    int JSON_Serialize_Pool(json_map& map, std::string& result,
-                            int current_root = 0)
+    int root_serialize(json_map& map, std::string& result)
     {
-        result.push_back('{');
-        int target_idx = 0;
-        for (int i = 0; i < map.size(); i++)
+        if (map.at(0).type == data_type::array_list) // for array json
         {
-            if (map.at(i).Father_idx == 0)
+            result.push_back('[');
+            // bool is_plain = false;
+            for (int i = 1; i < map.size(); ++i)
             {
-                target_idx = i;
-                // << i << "\n";
-                JSON_Serialize_Child(map, result, i);
+                if (this->at(i).type != data_type::array_list && this->at(i).type != data_type::object_list)
+                {
+                    plaintype_serial(result, i);
+                    result.push_back(',');
+                }
+                else
+                {
+                    if (this->at(i).type == data_type::object_list)
+                    {
+                        std::cout<<i<<"\n";
+                        i=object_serial(result, i,false);
+                        result.append(",");
+                        
+                    }
+                    if (this->at(i).type == data_type::array_list)
+                    {
+                        i=array_serial(result, i,false);
+                        result.push_back(',');
+                    }
+                }
             }
+            if (result.back() == ',')
+            {
+                result.pop_back();
+            }
+            result.push_back(']');
         }
-        if (result.back() == ',')
+        if (map.at(0).type == data_type::object_list)
         {
-            result.pop_back();
+            result.push_back('{');
+            int target_idx = 0;
+            for (int i = 1; i < map.size(); i++)
+            {
+                if (map.at(i).Father_idx == 0)
+                {
+                    target_idx = i;
+                    // << i << "\n";
+                    object_serialize(map, result, i);
+                }
+            }
+            if (result.back() == ',')
+            {
+                result.pop_back();
+            }
+            result.push_back('}');
         }
-        result.push_back('}');
+
         return 1;
     }
 
 public:
-    void parse(std::string_view data) { JSON_Parse_Pool(*this, std::move(data)); }
+    void parse(std::string_view data)
+    {
+        if (this->empty())
+        {
+            throw error<Err_Code::err_parse>(__FUNCTION__, __LINE__, "Not a valid json_map!You may just push a void root json node into the map!");
+        }
+        root_parse(*this, std::move(data));
+    }
     std::string serialize()
     {
         std::string buf;
-        JSON_Serialize_Pool(*this, buf, 0);
+        root_serialize(*this, buf);
         return buf;
     }
 

@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cstdint>
 #include <iostream>
 
 // s#include "bson.hpp"
@@ -14,7 +15,7 @@ using std::chrono::milliseconds;
     case x:        \
         return #x; \
         break;
-std::string penum(data_type e)
+std::string penum(int32_t e)
 {
     switch (e)
     {
@@ -28,7 +29,7 @@ std::string penum(data_type e)
         STR(json_acc_layer_np::data_type::bool_t)
         STR(json_acc_layer_np::data_type::array_void)
         STR(json_acc_layer_np::data_type::array_list)
-        STR(json_acc_layer_np::data_type::error)
+        //STR(json_acc_layer_np::data_type::error)
         STR(json_acc_layer_np::data_type::notype)
         STR(json_acc_layer_np::data_type::invalid_opttype)
         default:
@@ -44,17 +45,20 @@ int main()
     // const char* path = "3.json";
     // const char* path = "4.json";
     // const char* path = "canada.json";
-    // const char* path = "twitter.json";
-    const char* path = "2.json";
+    //const char* path = "med.json";
+    const char* path = "generated.json";
     std::string data;
     HP_IO::JSON_IO_FILE FILE;
     json_map map;
     json root;
     map.emplace_back(root);
 
-
+    high_resolution_clock::time_point ioStime = high_resolution_clock::now();
     FILE.READ(path, data);
-    // std::cout << data << "\n\n\n\n";
+    high_resolution_clock::time_point ioEtime = high_resolution_clock::now();
+    
+    //LP_BASIC_IO::IO_nospec_Read(data, path);
+    //std::cout << data << "\n\n";
     high_resolution_clock::time_point Stime = high_resolution_clock::now();
     map.parse(data);
     high_resolution_clock::time_point Etime = high_resolution_clock::now();
@@ -62,11 +66,13 @@ int main()
     milliseconds Parse_Interval =
         std::chrono::duration_cast<milliseconds>(Etime - Stime);
     std::cout << "ParseTime:" << Parse_Interval.count() << "ms" << std::endl;
-
+    milliseconds IO_Interval =
+        std::chrono::duration_cast<milliseconds>(ioEtime - ioStime);
+    std::cout << "IOTime:" << IO_Interval.count() << "ms" << std::endl;
     /////////////////////////////usage////////////////////////////////
     //--map["systembit"][64]; // add
     //--map["key_new"]["wtf"];
-    //--map["half-systembit"][32];
+    map["Sx"]["32"];
 
 
     //map["Long_list"][{json{}("aaa", "bbb"), json{}("aaacc", "bbdddb")}];
@@ -78,7 +84,7 @@ int main()
     //map.find("name")[0].delete_which();
     //map.find("")[0].set_val()
     //map.find("half-systembit")[0].print_info();
-    map.find("Sx")[0].delete_which();
+    //map.find("Sx")[0].delete_which();
     //map.find("half-systembit")[0].delete_which();
 //#define PRINT
 #ifdef PRINT
@@ -88,6 +94,7 @@ int main()
         std::cout << "key:" << x.key << " | ";
         std::cout << "val:" << x.value << " | ";
         std::cout << "idx:" << i << " | ";
+        std::cout << "type:" <<  penum(x.type)<<" | ";
         std::cout << "\n      ";
         for (auto x : x.Child_idx)
         {

@@ -10,7 +10,8 @@
 Attention! This Lib is Only Compatible With JSON!!!
 Extra Specification Might Not Be Implemented!!!
 @*/
-enum bson_data_type {
+enum bson_data_type : int32_t {
+  unset=-2000,
   str = 11,
   integer = 18,
   d64_t = 1,
@@ -45,7 +46,9 @@ using d64 = double;
 using data_type = json_acc_layer_np::data_type;
 using json_map = json_acc_layer_np::json_map;
 using json = json_acc_layer_np::json;
+struct bson_map : json_map{
 
+};
 void jsonmap_to_bsonmap(json_map& map) {
   for (json x : map) {
     switch (x.type) {
@@ -108,7 +111,7 @@ void int64_serial(std::string& final_data, json& node) {
   final_data.push_back(head_size);
   final_data.push_back(static_cast<char>(signed_bytes));
   final_data.append(node.key);
-  final_data.push_back(static_cast<char>(std::get<int64_t>(node.get_val())));
+  final_data.push_back(static_cast<char>(std::get<long long>(node.get_val())));
 }
 void bool_serial(std::string& final_data, json& node) {
   int8_t signed_bytes = bson_data_type::bool_t;
@@ -145,8 +148,8 @@ void array(std::string& final_data, json& node, json_map& map) {
   int32_t head_size = 0;
   head_size = sizeof(signed_bytes) + node.value.size();
   for (int i : node.Child_idx) {
-    head_size += map[i].key.size();
-    switch (map[i].type) {
+    head_size += map.at(i).key.size();
+    switch (map.at(i).type) {
       case bson_data_type::null:
 
         break;
