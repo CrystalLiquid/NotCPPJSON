@@ -2,37 +2,45 @@
 #include <cstddef>
 #include <cstdint>
 // #include <stdint.h>
+#include <string>
 #include <tuple>
 #include <limits>
 
 #include "json.hpp"
 
-enum class message_pack_type : int32_t
+enum class message_pack_type : int64_t
 {
-    int8,
-    int16,
-    int32,
-    int64,
-    uint8,
-    uint16,
-    uint32,
-    uint64,
-    nil_type,
-    boolean_true,
-    boolean_false,
-    float_type32,
-    float_type64,
-    str,
-    binary8,
-    binary16,
-    binary32,
-    array16,
-    array32,
-    map16,
-    map32,
-    map_void,
-    array_void,
-    invalid_t = -2000
+    int8=0xd0,
+    int16=0xd1,
+    int32=0xd2,
+    int64=0xd3,
+    /*
+    uint8=0xcc,
+    uint16=0xcd,
+    uint32=0xce,
+    uint64=0xcf,
+    */
+    nil_type=0xc0,
+    boolean_true=0xc3,
+    boolean_false=0xc2,
+    /*
+    float_type32=0xca,
+    */
+    float_type64=0xcb,
+    str8=0xd9,
+    str16=0xda,
+    str32=0xdb,
+    /*
+    binary8=0xc4,
+    binary16=0xc5,
+    binary32=0xc6,
+    */
+    array16=0xdc,
+    array32=0xdd,
+    map16=0xde,
+    map32=0xdf,
+    fix_str,
+    invalid_t=0xc1
 };
 using d64 = double;
 using data_type = json_acc_layer_np::data_type;
@@ -65,31 +73,50 @@ private:
             }
             return message_pack_type::int64;
         }
-        throw error<Err_Code::err_mp_int>(__FUNCTION__,__LINE__,"Not a valid IntVal!");
+        throw error<Err_Code::err_mp_int>(__FUNCTION__, __LINE__, "Not a valid IntVal!");
     }
     void root_serialize()
     {
     }
-    void plain_serialize(const int idx)
+    void plain_serialize(std::string& result,const int idx)
     {
-        
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
         {
             case json_acc_layer_np::data_type::digit_int:
                 finalt = minimal_inttype(std::get<json_acc_layer_np::i64t>(this->at(idx).get_val()));
-                switch (finalt) {
-                  case message_pack_type::int8:
-                  break;
-                  case message_pack_type::int16:
-                  break;
-                  case message_pack_type::int32:
-                  break;
-                  case message_pack_type::int64:
-                  break;
-                  default:
-                  throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__,__LINE__,"Not a valid Int!");
-                  break;
+
+                switch (finalt)
+                {
+                    case message_pack_type::int8: {
+                        int8_t int_val;
+                        int_val = std::stoi(this->at(idx).value);
+                        result.append(reinterpret_cast<char*>(&int_val));
+                    }
+
+                    break;
+                    case message_pack_type::int16: {
+                        int16_t int_val;
+                        int_val = std::stoi(this->at(idx).value);
+                        result.append(reinterpret_cast<char*>(&int_val));
+                    }
+
+                    break;
+                    case message_pack_type::int32: {
+                        int32_t int_val;
+                        int_val = std::stoi(this->at(idx).value);
+                        result.append(reinterpret_cast<char*>(&int_val));
+                    }
+                    break;
+                    case message_pack_type::int64: {
+                        int64_t int_val;
+                        int_val = std::stoi(this->at(idx).value);
+                        result.append(reinterpret_cast<char*>(&int_val));
+                    }
+                    break;
+                    default:
+                        throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__, __LINE__, "Not a valid Int!");
+                        break;
                 }
                 break;
             case json_acc_layer_np::data_type::null:
@@ -97,13 +124,17 @@ private:
 
                 byte nil_val;
                 nil_val = 0xc0;
+                result.append(reinterpret_cast<char*>(&nil_val));
+
                 break;
             case json_acc_layer_np::data_type::digit_double:
                 finalt = message_pack_type::float_type64;
-
+                float fl_val;
+                fl_val = std::stof(this->at(idx).value);
+                result.append(reinterpret_cast<char*>(&fl_val));
                 break;
             case json_acc_layer_np::data_type::str:
-                finalt = message_pack_type::str;
+                finalt = message_pack_type::fix_str;
                 break;
             case json_acc_layer_np::data_type::bool_t:
                 if (this->at(idx).value == "true")
@@ -116,8 +147,8 @@ private:
                 }
                 break;
             default:
-            throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__,__LINE__,"Not a valid type!");
-            break;
+                throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__, __LINE__, "Not a valid type!");
+                break;
         }
     }
     void object_serialize(const int idx)
