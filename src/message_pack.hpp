@@ -4,6 +4,7 @@
 // #include <stdint.h>
 #include <tuple>
 #include <limits>
+
 #include "json.hpp"
 
 enum class message_pack_type : int32_t
@@ -37,7 +38,7 @@ using d64 = double;
 using data_type = json_acc_layer_np::data_type;
 using json_map = json_acc_layer_np::json_map;
 using json = json_acc_layer_np::json;
-
+using byte = int8_t;
 struct messagepk : json_map
 {
 public:
@@ -64,24 +65,42 @@ private:
             }
             return message_pack_type::int64;
         }
-        throw nullptr;
+        throw error<Err_Code::err_mp_int>(__FUNCTION__,__LINE__,"Not a valid IntVal!");
     }
     void root_serialize()
     {
     }
     void plain_serialize(const int idx)
     {
+        
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
         {
             case json_acc_layer_np::data_type::digit_int:
                 finalt = minimal_inttype(std::get<json_acc_layer_np::i64t>(this->at(idx).get_val()));
+                switch (finalt) {
+                  case message_pack_type::int8:
+                  break;
+                  case message_pack_type::int16:
+                  break;
+                  case message_pack_type::int32:
+                  break;
+                  case message_pack_type::int64:
+                  break;
+                  default:
+                  throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__,__LINE__,"Not a valid Int!");
+                  break;
+                }
                 break;
             case json_acc_layer_np::data_type::null:
                 finalt = message_pack_type::nil_type;
+
+                byte nil_val;
+                nil_val = 0xc0;
                 break;
             case json_acc_layer_np::data_type::digit_double:
                 finalt = message_pack_type::float_type64;
+
                 break;
             case json_acc_layer_np::data_type::str:
                 finalt = message_pack_type::str;
@@ -96,6 +115,9 @@ private:
                     finalt = message_pack_type::boolean_false;
                 }
                 break;
+            default:
+            throw error<Err_Code::err_mp_serial_switch>(__FUNCTION__,__LINE__,"Not a valid type!");
+            break;
         }
     }
     void object_serialize(const int idx)

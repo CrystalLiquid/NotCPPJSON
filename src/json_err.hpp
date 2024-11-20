@@ -16,7 +16,9 @@ enum class Err_Code
     err_op,
     err_find,
     err_parse,
-    err_serial
+    err_serial,
+    err_mp_serial_switch,
+    err_mp_int
 };
 #define STR(x)     \
     case x:        \
@@ -39,6 +41,8 @@ inline constexpr auto penum_err(Err_Code e)
         STR(Err_Code::err_variant)
         STR(Err_Code::err_parse)
         STR(Err_Code::err_serial)
+        STR(Err_Code::err_mp_serial_switch)
+        STR(Err_Code::err_mp_int)
         default:
             // TODO
             break;
