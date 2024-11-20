@@ -86,6 +86,19 @@ private:
           case json_acc_layer_np::data_type::str:
             finalt = message_pack_type::str;
           break;
+          case json_acc_layer_np::data_type::bool_t:
+            if (this->at(idx).value=="true") {
+              finalt = message_pack_type::boolean_true;
+            }
+            if (this->at(idx).value=="false") {
+              finalt = message_pack_type::boolean_false;
+            }
+          break;
+          case json_acc_layer_np::data_type::array_void:
+          
+          break;
+          case json_acc_layer_np::data_type::object_void:
+          break;
         }
     }
     void object_serialize()
