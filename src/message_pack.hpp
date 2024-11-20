@@ -31,7 +31,7 @@ enum class message_pack_type : int32_t
     map32,
     map_void,
     array_void,
-    invalid_t=-2000
+    invalid_t = -2000
 };
 using d64 = double;
 using data_type = json_acc_layer_np::data_type;
@@ -74,38 +74,47 @@ private:
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
         {
-          case json_acc_layer_np::data_type::digit_int:
-            finalt = minimal_inttype(std::get<json_acc_layer_np::i64t>(this->at(idx).get_val()));
-          break;
-          case json_acc_layer_np::data_type::null:
-            finalt = message_pack_type::nil_type;
-          break;
-          case json_acc_layer_np::data_type::digit_double:
-            finalt = message_pack_type::float_type64;
-          break;
-          case json_acc_layer_np::data_type::str:
-            finalt = message_pack_type::str;
-          break;
-          case json_acc_layer_np::data_type::bool_t:
-            if (this->at(idx).value=="true") {
-              finalt = message_pack_type::boolean_true;
-            }
-            if (this->at(idx).value=="false") {
-              finalt = message_pack_type::boolean_false;
-            }
-          break;
-          case json_acc_layer_np::data_type::array_void:
-          
-          break;
-          case json_acc_layer_np::data_type::object_void:
-          break;
+            case json_acc_layer_np::data_type::digit_int:
+                finalt = minimal_inttype(std::get<json_acc_layer_np::i64t>(this->at(idx).get_val()));
+                break;
+            case json_acc_layer_np::data_type::null:
+                finalt = message_pack_type::nil_type;
+                break;
+            case json_acc_layer_np::data_type::digit_double:
+                finalt = message_pack_type::float_type64;
+                break;
+            case json_acc_layer_np::data_type::str:
+                finalt = message_pack_type::str;
+                break;
+            case json_acc_layer_np::data_type::bool_t:
+                if (this->at(idx).value == "true")
+                {
+                    finalt = message_pack_type::boolean_true;
+                }
+                if (this->at(idx).value == "false")
+                {
+                    finalt = message_pack_type::boolean_false;
+                }
+                break;
         }
     }
-    void object_serialize()
+    void object_serialize(const int idx)
     {
+        message_pack_type finalt = message_pack_type::invalid_t;
+        switch (this->at(idx).type)
+        {
+            case json_acc_layer_np::data_type::object_list: break;
+            case json_acc_layer_np::data_type::object_void: break;
+        }
     }
-    void array_serialize()
+    void array_serialize(const int idx)
     {
+        message_pack_type finalt = message_pack_type::invalid_t;
+        switch (this->at(idx).type)
+        {
+            case json_acc_layer_np::data_type::array_list: break;
+            case json_acc_layer_np::data_type::array_void: break;
+        }
     }
 };
 
