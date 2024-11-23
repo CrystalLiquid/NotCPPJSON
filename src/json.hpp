@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
@@ -16,6 +17,7 @@
 #include <variant>
 #include <vector>
 #include "json_err.hpp"
+#include "json_io.hpp"
 #pragma once
 
 #define LayerS '{'
@@ -934,9 +936,7 @@ public:
 
         void operator[](input_val v)
         { // side to op[key],to pass value to add a node to layer1
-           
-                
-            
+
             if (this->is_set)
             {
                 int idx = this->map->get_idxl1(this->key);
@@ -1136,10 +1136,11 @@ public:
     comp operator[](std::string k)
     {
         comp buf;
-        if(this->at(0).type==data_type::object_list){
+        if (this->at(0).type == data_type::object_list)
+        {
             buf.key = k;
         }
-            // passing infos
+        // passing infos
         buf.map = this; // nested struct,so u need to pass a ptr
         buf.result = find(std::move(k));
         if (buf.result.size() == 0)
@@ -1241,7 +1242,8 @@ private:
             {
                 buf.Father_idx = current_root_idx;
                 buf.layer = current_layer;
-                for (t = i; data[t] != ConE && data[t] != LayerS; t--);
+                for (t = i; data[t] != ConE && data[t] != LayerS; t--)
+                    ;
                 for (k = t; data[k] != ConS; k++)
                 {
                     if (data[k] != LayerS && data[k] != FieldS &&
@@ -1836,10 +1838,8 @@ private:
 private: // seperated serial func wont check the type of idx itself,it only check its child's type
     void plaintype_serial(std::string& result, int idx)
     {
-
         if (this->at(idx).type != data_type::array_list && this->at(idx).type != data_type::object_list)
         {
-            
             if (!this->at(idx).key.empty())
             {
                 result.push_back('"');
@@ -1863,7 +1863,7 @@ private: // seperated serial func wont check the type of idx itself,it only chec
             throw error<Err_Code::err_serial>(__FUNCTION__, __LINE__, "not a plain type");
         }
     }
-    
+
     int object_serial(std::string& result, int idx, bool enable_key = true)
     {
         if (enable_key)
@@ -1898,8 +1898,7 @@ private: // seperated serial func wont check the type of idx itself,it only chec
         result.push_back('}');
         return this->at(idx).Child_idx.back();
     }
-    
-    
+
     int array_serial(std::string& result, int idx, bool enable_key = true)
     {
         if (enable_key)
@@ -1923,7 +1922,7 @@ private: // seperated serial func wont check the type of idx itself,it only chec
             }
             if (this->at(cidx).type == data_type::object_list)
             {
-                object_serial(result, cidx,false);
+                object_serial(result, cidx, false);
                 result.push_back(',');
             }
         }
@@ -2127,14 +2126,13 @@ private: // seperated serial func wont check the type of idx itself,it only chec
                 {
                     if (this->at(i).type == data_type::object_list)
                     {
-                        std::cout<<i<<"\n";
-                        i=object_serial(result, i,false);
+                        std::cout << i << "\n";
+                        i = object_serial(result, i, false);
                         result.append(",");
-                        
                     }
                     if (this->at(i).type == data_type::array_list)
                     {
-                        i=array_serial(result, i,false);
+                        i = array_serial(result, i, false);
                         result.push_back(',');
                     }
                 }
@@ -2175,7 +2173,18 @@ public:
         {
             throw error<Err_Code::err_parse>(__FUNCTION__, __LINE__, "Not a valid json_map!You may just push a void root json node into the map!");
         }
+        if (data.at(0) != '{' || data.at(0) != '[')
+        {
+            throw error<Err_Code::err_parse>(__FUNCTION__, __LINE__, "you haven made a reasonable json");
+        }
         root_parse(*this, std::move(data));
+    }
+    void parse_fromfile(const char* path)
+    {
+        HP_IO::json_file file;
+        std::string data;
+        file.read_tocompact(path, data);
+        this->parse(data);
     }
     std::string serialize()
     {
@@ -2193,60 +2202,61 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void json_map::iter_parse(std::string_view data)
 {
-    struct iter_info
-    {
-        struct key
-        {
-            int begin{0};
-            int end{0};
-        } k;
-        struct val
-        {
-            int begin{0};
-            int end{0};
-        } v;
-        int layer_through{0};
-        int field_through{0};
-        void clear()
-        {
-            k.begin = 0;
-            k.end = 0;
-            v.begin = 0;
-            v.end = 0;
-            layer_through = 0;
-            field_through = 0;
-        }
-    };
     json buf;
     json_map& map = *this;
-    int layer = 0;
-    int object = 0;
-    std::vector<iter_info> infos;
-    for (int i = 0; i < (int)(data.length() - 1); ++i)
+    int reserve_size = 0;
+    for (int i = 0; i < (int)(data.size()); ++i)
     {
-        iter_info it;
-        switch (data[i])
+        if (data[i] == ConE)
         {
-            case LayerS:
-                it.layer_through++;
-                break;
-            case LayerE:
-                it.layer_through--;
-                break;
-            case ConS:
-                break;
-            case ConE:
-                break;
-            case FieldS:
-                it.field_through++;
-                break;
-            case FieldE:
-                it.field_through--;
-                break;
-            case Quote:
-                break;
-            default: break;
+            ++reserve_size;
         }
+    }
+    this->resize(reserve_size, json {
+     "","",data_type::notype,-1,-1   
+    });
+
+    std::atomic<int> actual_size;
+
+
+    auto get_slice = [](std::string_view sv, const int this_end) {
+        for (int i = this_end - 1; sv[i] != ConE;)
+        {
+        }
+    };
+
+    if (data[0] == '{')
+    {
+        for (int i = 0; i < (int)(data.size()); ++i)
+        {
+            if (data[i] == ConS)
+            {
+
+                if (data[i]==LayerS) {
+                    if (data[i+1]==LayerE) {
+                        
+
+                    }else{
+
+                    }
+
+
+                    Not_Into_LS:;
+                }
+                if (data[i]==FieldS) {
+                    if (data[i+1]==FieldE) {
+                        
+                        
+                    }else{
+
+                    }
+
+                }
+            }
+        }
+    }
+    if (data[0] == '[')
+    {
     }
 }
 

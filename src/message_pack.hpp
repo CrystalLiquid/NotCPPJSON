@@ -14,7 +14,7 @@ enum class message_pack_type : int64_t
     int16=0xd1,
     int32=0xd2,
     int64=0xd3,
-    /*
+    /*not supporting json :(
     uint8=0xcc,
     uint16=0xcd,
     uint32=0xce,
@@ -23,14 +23,14 @@ enum class message_pack_type : int64_t
     nil_type=0xc0,
     boolean_true=0xc3,
     boolean_false=0xc2,
-    /*
+    /*not supporting json :(
     float_type32=0xca,
     */
     float_type64=0xcb,
     str8=0xd9,
     str16=0xda,
     str32=0xdb,
-    /*
+    /*not supporting json X(
     binary8=0xc4,
     binary16=0xc5,
     binary32=0xc6,

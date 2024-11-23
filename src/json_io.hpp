@@ -1,3 +1,4 @@
+#include <execution>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -93,28 +94,28 @@ namespace HP_IO {
 #define WR_R 1
 #define WR_W 2
 #define WR_IDLE 0
-struct JSON_IO
+struct json_io
 {
 protected:
-    int FILE_SZ{0};
-    int FILE_N{0};
-    bool W_R{WR_IDLE};
-    int SIGNAL{SIGNAL_IDLE_READY};
+    int file_sz{0};
+    int file_n{0};
+    bool w_r{WR_IDLE};
+    int signal{SIGNAL_IDLE_READY};
 
 protected:
 public:
-    int READ()
+    int read()
     {
         printf("IOR_NO_SPECIFIC_BEHAVE\n");
         return 0;
     };
-    int WRITE()
+    int write()
     {
         printf("IOW_NO_SPECIFIC_BEHAVE\n");
         return 0;
     };
 };
-struct JSON_IO_FILE : public JSON_IO
+struct json_file : public json_io
 {
 public:
     std::ifstream fp;
@@ -123,7 +124,24 @@ private:
     std::istreambuf_iterator<char> buf_it;
 
 public:
-    void READ(const char *path, std::string &data)
+    void read_nospace(const char *path, std::string &data)
+    {
+        fp.open(path, std::ios::in);
+        if (!fp.is_open())
+        {
+            return;
+        }
+        data.assign(std::istreambuf_iterator<char>(fp), std::istreambuf_iterator<char>()); // 构造了一个流迭代器
+                                                                                           // 分配器由流迭代器管理
+                                                                                           // using streambuf to accelerate the process of
+                                                                                           // assign and cloning data
+
+        data.erase(std::remove_if(data.begin(), data.end(), [](char &c) { // UCRT Clang
+                       return std::isspace<char>(c, std::locale::classic());
+                   }),
+                   data.end()); // 后处理的
+    }
+    void read_tocompact(const char *path, std::string &data)
     {
         fp.open(path, std::ios::in);
         if (!fp.is_open())
@@ -140,46 +158,54 @@ public:
                    }),
                    data.end()); // 后处理的
 
+        auto del_between = [](std::string &data, int beginpos, char c) {
+            int i = 0;
+            for (i = beginpos; data[i] != c; ++i)
+                ;
+            data.erase(beginpos + 1, i - beginpos - 1);
+            return beginpos + 1;
+        };
+        for (int i = 0; i < data.size(); ++i)
+        {
+            if (data[i] == '{')
+            {
+                del_between(data, i, '"');
+            }
+            if (data[i] == ',')
+            {
+                int k = i + 1;
+                for (; data[k] == ' '; ++k)
+                    ;
+                data.erase(i + 1, k - i - 1);
+            }
+            if (data[i] == '[' || data[i] == '}' || data[i] == ']' || data[i] == ':')
+            {
+                int k = i + 1;
+                for (; data[k] == ' '; ++k)
+                    ;
+                data.erase(i + 1, k - i - 1);
+            }
 
-		auto del_between = [](std::string&data,int beginpos,char c){
-			int i =0;
-			for (i= beginpos; data[i]!=c; ++i);
-			data.erase(beginpos+1,i-beginpos-1);
-			return beginpos+1;
-		};
-        for (int i = 0; i < data.size(); ++i)
-        {
-            if (data[i]=='{') {
-				del_between(data, i, '"');
-			}
-            if (data[i] == ',')
+            if (data[i] == '}' || data[i] == ']')
             {
-                int k = i + 1;
-                for (; data[k] == ' '; ++k);
-                data.erase(i + 1, k - i - 1);
+                int r = i - 1;
+                for (; data[r] == ' '; --r)
+                    ;
+                data.erase(r + 1, i - r - 1);
             }
-            if (data[i] == '['|| data[i] == '}'|| data[i] == ']'||data[i]==':')
-            {
-                int k=i+1;
-				for (; data[k]==' ';++k);
-                data.erase(i+1, k-i-1);
-            }
-            
-            if (data[i]=='}'||data[i]==']') {
-				int r =i-1;
-				for (; data[r]==' ';--r);
-				data.erase(r+1,i-r-1);
-			}
         }
+
         for (int i = 0; i < data.size(); ++i)
         {
             if (data[i] == ',')
             {
                 int k = i + 1;
-                for (; data[k] == ' '; ++k);
+                for (; data[k] == ' '; ++k)
+                    ;
                 data.erase(i + 1, k - i - 1);
             }
         }
+
         // erase all uncompact JSON tokens to raise compatibility
 
         // below is the compatible version of erasing with different compiler,DO NOT DELETE THEM
@@ -189,7 +215,56 @@ public:
         //		return '\n';
         //	}), data.end());
     }
-    void WRITE(const char *path, std::string &data)
+    void to_compact(std::string& data){
+        auto del_between = [](std::string &data, int beginpos, char c) {
+            int i = 0;
+            for (i = beginpos; data[i] != c; ++i)
+                ;
+            data.erase(beginpos + 1, i - beginpos - 1);
+            return beginpos + 1;
+        };
+        for (int i = 0; i < data.size(); ++i)
+        {
+            if (data[i] == '{')
+            {
+                del_between(data, i, '"');
+            }
+            if (data[i] == ',')
+            {
+                int k = i + 1;
+                for (; data[k] == ' '; ++k)
+                    ;
+                data.erase(i + 1, k - i - 1);
+            }
+            if (data[i] == '[' || data[i] == '}' || data[i] == ']' || data[i] == ':')
+            {
+                int k = i + 1;
+                for (; data[k] == ' '; ++k)
+                    ;
+                data.erase(i + 1, k - i - 1);
+            }
+
+            if (data[i] == '}' || data[i] == ']')
+            {
+                int r = i - 1;
+                for (; data[r] == ' '; --r)
+                    ;
+                data.erase(r + 1, i - r - 1);
+            }
+        }
+
+        for (int i = 0; i < data.size(); ++i)
+        {
+            if (data[i] == ',')
+            {
+                int k = i + 1;
+                for (; data[k] == ' '; ++k)
+                    ;
+                data.erase(i + 1, k - i - 1);
+            }
+        }
+    }
+    void write(const char *path, std::string &data)
     {
         fp.open(path, std::ios::out);
         if (!fp.is_open())
@@ -197,13 +272,9 @@ public:
             return;
         }
     }
-    std::istreambuf_iterator<char> &VDF_STREAMBUF_IT()
-    {
-        buf_it = fp;
-        return buf_it;
-    }
+
 };
-struct JSON_IO_MFILE : public JSON_IO
+struct json_mtfile : public json_io
 {
 };
 

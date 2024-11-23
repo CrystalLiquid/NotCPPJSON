@@ -10,11 +10,11 @@ using std::chrono::milliseconds;
 int main() {
   const char* path = "2.json";
   std::string data;
-  HP_IO::JSON_IO_FILE FILE;
+  HP_IO::json_file FILE;
   json_map map;
   json root;
   map.emplace_back(root);
-  FILE.READ(path, data);
+  FILE.read(path, data);
   map.parse(data);
 
   high_resolution_clock::time_point Stime = high_resolution_clock::now();
