@@ -47,7 +47,7 @@ inline constexpr auto penum_err(Err_Code e)
             // TODO
             break;
     }
-    return "------------------";
+    return "Err";
 }
 
 template <Err_Code C>

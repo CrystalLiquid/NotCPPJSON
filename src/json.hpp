@@ -1,18 +1,17 @@
-#include <algorithm>
+
 #include <atomic>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <execution>
+
 #include <initializer_list>
 #include <iostream>
-#include <numeric>
+
 #include <string>
 #include <string_view>
-#include <system_error>
-#include <unordered_set>
+
 #include <utility>
 #include <variant>
 #include <vector>
@@ -2200,19 +2199,20 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void json_map::iter_parse(std::string_view data)
+inline void json_map::iter_parse(std::string_view data)//you must inline a member function that defines in header file
 {
     json buf;
     json_map& map = *this;
-    int reserve_size = 0;
+    int reserve_without_array_size = 0;
     for (int i = 0; i < (int)(data.size()); ++i)
     {
         if (data[i] == ConE)
         {
-            ++reserve_size;
+            ++reserve_without_array_size;
         }
+
     }
-    this->resize(reserve_size, json {
+    this->resize(reserve_without_array_size, json {
      "","",data_type::notype,-1,-1   
     });
 

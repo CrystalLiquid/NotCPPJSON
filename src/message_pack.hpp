@@ -97,6 +97,7 @@ private:
                     break;
                     case message_pack_type::int16: {
                         int16_t int_val;
+                        result.push_back(static_cast<char>(message_pack_type::int16));
                         int_val = std::stoi(this->at(idx).value);
                         result.append(reinterpret_cast<char*>(&int_val));
                     }
