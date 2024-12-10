@@ -75,10 +75,10 @@ private:
         }
         throw error<Err_Code::err_mp_int>(__FUNCTION__, __LINE__, "Not a valid IntVal!");
     }
-    void root_serialize()
+    void root_serialize_fromjson()
     {
     }
-    void plain_serialize(std::string& result,const int idx)
+    void plain_serialize_fromjson(std::string& result,const int idx)
     {
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
@@ -152,7 +152,7 @@ private:
                 break;
         }
     }
-    void object_serialize(const int idx)
+    void object_serialize_fromjson(const int idx)
     {
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
@@ -161,7 +161,7 @@ private:
             case json_acc_layer_np::data_type::object_void: break;
         }
     }
-    void array_serialize(const int idx)
+    void array_serialize_fromjson(const int idx)
     {
         message_pack_type finalt = message_pack_type::invalid_t;
         switch (this->at(idx).type)
